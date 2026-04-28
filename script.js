@@ -6,13 +6,14 @@ import {
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAAVLhBhm3fDGoU1llgqDosX0klwDPW3Qs",
+cconst firebaseConfig = {
+  apiKey: "AIzaSyAAVLhBhm3fDGoU1llgqDosXOklwDPW3Qs",
   authDomain: "warteschlange-bb76f.firebaseapp.com",
   projectId: "warteschlange-bb76f",
-  storageBucket: "warteschlange-bb76f.appspot.com",
+  storageBucket: "warteschlange-bb76f.firebasestorage.app",
   messagingSenderId: "1057635637589",
-  appId: "1:1057635637589:web:2a91840733d32ed31d77dc"
+  appId: "1:1057635637589:web:075ea792b57bd09a1d77dc",
+  measurementId: "G-EES6Z7MF1E"
 };
 
 const app = initializeApp(firebaseConfig);
