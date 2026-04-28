@@ -77,7 +77,15 @@ onSnapshot(warteschlangeRef, (snapshot) => {
   });
 
   spieler.sort((a, b) => a.zeit - b.zeit);
+const maxPlaetze = 32;
+const belegte = Math.min(spieler.length, maxPlaetze);
+const wartend = Math.max(spieler.length - maxPlaetze, 0);
 
+document.getElementById("belegt").textContent = belegte + " / " + maxPlaetze;
+document.getElementById("wartend").textContent = wartend;
+
+document.getElementById("barBelegt").style.width = (belegte / maxPlaetze * 100) + "%";
+document.getElementById("barWartend").style.width = (wartend / maxPlaetze * 100) + "%";
   const anzahlAnzeige = document.getElementById("anzahl");
   if (anzahlAnzeige) {
     anzahlAnzeige.textContent = spieler.length;
