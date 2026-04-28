@@ -55,8 +55,7 @@ onSnapshot(warteschlangeRef, (snapshot) => {
   });
 
   spieler.sort((a, b) => a.zeit - b.zeit);
-
-  const anzahlAnzeige = document.getElementById("anzahl");
+const anzahlAnzeige = document.getElementById("anzahl");
 if (anzahlAnzeige) {
   anzahlAnzeige.textContent = spieler.length;
 }
@@ -83,3 +82,5 @@ if (istAdmin) {
 } else {
   liste.innerHTML = "<li>Namen sind nur für die Turnierleitung sichtbar.</li>";
 }
+
+});
