@@ -3,7 +3,11 @@ import {
   getFirestore,
   collection,
   addDoc,
-  const istAdmin = new URLSearchParams(window.location.search).get("admin") === "1";
+  onSnapshot
+  deleteDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+ const istAdmin = new URLSearchParams(window.location.search).get("admin") === "1";
 
 onSnapshot(warteschlangeRef, (snapshot) => {
   const liste = document.getElementById("warteschlange");
@@ -42,9 +46,6 @@ onSnapshot(warteschlangeRef, (snapshot) => {
     liste.appendChild(eintrag);
   });
 });
-  deleteDoc,
-  doc
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDtQ3pECcZEIloI4QTV5G-7_QcoRvVGHL4",
