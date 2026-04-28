@@ -18,7 +18,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
 const warteschlangeRef = collection(db, "warteschlange");
 
 window.anmelden = async function () {
