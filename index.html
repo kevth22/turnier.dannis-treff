@@ -2,29 +2,76 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Pfingst-Dart-Turnier</title>
+  <title>Dannis Treff Dart Turnier</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="container">
-    <h1>Pfingst-Dart-Turnier</h1>
-    <h2>24.05.2026</h2>
+<header>
+  <div class="logo">🎯 DANNIS TREFF</div>
+  <nav>
+    <a href="#">Turniere</a>
+    <a href="#">Rangliste</a>
+    <a href="#">Regeln</a>
+    <a href="#">Kontakt</a>
+  </nav>
+</header>
 
-    <div class="card">
-      <h3>Zur Warteschlange anmelden</h3>
+<main class="hero">
 
-      <input type="text" id="spielerName" placeholder="Dein Name">
+  <section class="info">
+    <p class="red">DART TURNIER</p>
+    <h1>DANNIS TREFF<br>SERIE 2026</h1>
+    <h2>Melde dich an und sei dabei!</h2>
 
-      <button onclick="anmelden()">Eintragen</button>
+    <p>📅 Spieltag 1: 24.05.2026</p>
+    <p>📍 Dannis Treff</p>
+    <p>👥 Max. 32 Teilnehmer</p>
+    <p>💶 Startgeld: 7,00 €</p>
+  </section>
+
+  <section class="anmeldung">
+    <h2>👥 Jetzt anmelden</h2>
+
+    <input type="text" id="spielerName" placeholder="Dein Name">
+
+    <button onclick="anmelden()">Anmeldung absenden</button>
+
+    <p class="hinweis">Dein Platz wird live in der Warteschlange angezeigt.</p>
+  </section>
+
+</main>
+
+<section class="stand">
+  <h2>Aktueller Stand</h2>
+
+  <div class="karten">
+    <div class="karte">
+      <h3>Warteschlange</h3>
+      <p id="anzahl">0</p>
     </div>
 
-    <div class="liste">
-      <h3>Aktuelle Warteschlange</h3>
-      <ol id="warteschlange"></ol>
+    <div class="karte">
+      <h3>Max. Plätze</h3>
+      <p>32</p>
+    </div>
+
+    <div class="karte">
+      <h3>Startgeld</h3>
+      <p>7,00 €</p>
     </div>
   </div>
+</section>
 
-  <script type="module" src="script.js"></script>
+<section class="liste">
+  <h2>Aktuelle Warteschlange</h2>
+  <ol id="warteschlange"></ol>
+</section>
+
+<footer>
+  Dannis Treff Dart Turnier 2026
+</footer>
+
+<script type="module" src="script.js"></script>
 </body>
 </html>
