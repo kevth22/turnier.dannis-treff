@@ -21,13 +21,13 @@ body {
 }
 
 .logo {
-  height: 55px;
-  weight: 70px;
+  height: 70px;
+  weight: 95px;
 }
 
 .logo-text {
   color: white;
-  font-size: 55px;
+  font-size: 110px;
   font-weight: 600;
   letter-spacing: 1px;
 }
