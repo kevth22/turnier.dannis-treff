@@ -6,7 +6,8 @@ import {
   addDoc,
   onSnapshot,
   deleteDoc,
-  doc
+  doc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -57,7 +58,8 @@ if (existiert) {
 
 await addDoc(warteschlangeRef, {
   name: name,
-  zeit: Date.now()
+  zeit: Date.now(),
+  bezahlt: false
 });
 
   nameFeld.value = "";
@@ -78,8 +80,11 @@ onSnapshot(warteschlangeRef, (snapshot) => {
 
   spieler.sort((a, b) => a.zeit - b.zeit);
 const maxPlaetze = 32;
-const belegte = Math.min(spieler.length, maxPlaetze);
-const wartend = Math.max(spieler.length - maxPlaetze, 0);
+const bezahlteSpieler = spieler.filter((person) => person.bezahlt === true);
+const wartendeSpieler = spieler.filter((person) => person.bezahlt !== true);
+
+const belegte = Math.min(bezahlteSpieler.length, maxPlaetze);
+const wartend = wartendeSpieler.length;
 
 document.getElementById("belegt").textContent = belegte + " / " + maxPlaetze;
 document.getElementById("wartend").textContent = wartend;
@@ -108,6 +113,20 @@ document.getElementById("barWartend").style.width = (wartend / maxPlaetze * 100)
       };
 
       eintrag.appendChild(button);
+const bezahltButton = document.createElement("button");
+bezahltButton.textContent = person.bezahlt ? "Bezahlt ✓" : "Als bezahlt setzen";
+bezahltButton.style.marginLeft = "10px";
+bezahltButton.style.width = "auto";
+bezahltButton.style.padding = "6px 10px";
+bezahltButton.style.fontSize = "14px";
+
+bezahltButton.onclick = async function () {
+  await updateDoc(doc(db, "warteschlange", person.id), {
+    bezahlt: true
+  });
+};
+
+eintrag.appendChild(bezahltButton);
       liste.appendChild(eintrag);
     });
   } else {
