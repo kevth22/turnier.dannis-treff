@@ -42,27 +42,6 @@ window.anmelden = async function () {
   nameFeld.value = "";
 };
 
-
-
-onSnapshot(warteschlangeRef, (snapshot) => {
-  const liste = document.getElementById("warteschlange");
-  liste.innerHTML = "";
-
-  const spieler = [];
-
-  snapshot.forEach((doc) => {
-    spieler.push(doc.data());
-  });
-
-  spieler.sort((a, b) => a.zeit - b.zeit);
-
-  spieler.forEach((person) => {
-    const eintrag = document.createElement("li");
-    eintrag.textContent = person.name;
-    liste.appendChild(eintrag);
-  });
-});
-
 onSnapshot(warteschlangeRef, (snapshot) => {
   const liste = document.getElementById("warteschlange");
   liste.innerHTML = "";
