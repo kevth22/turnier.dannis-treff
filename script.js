@@ -29,14 +29,7 @@ window.anmelden = async function () {
     alert("Bitte gib deinen Namen ein.");
     return;
   }
-const existiert = document.querySelectorAll("#warteschlange li");
 
-for (let i = 0; i < existiert.length; i++) {
-  if (existiert[i].textContent.toLowerCase() === name.toLowerCase()) {
-    alert("Name bereits in der Liste!");
-    return;
-  }
-}
   await addDoc(warteschlangeRef, {
     name: name,
     zeit: Date.now()
