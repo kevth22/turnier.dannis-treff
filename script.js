@@ -34,10 +34,31 @@ window.anmelden = async function () {
     return;
   }
 
-  await addDoc(warteschlangeRef, {
-    name: name,
-    zeit: Date.now()
+ const existiert = await new Promise((resolve) => {
+  onSnapshot(warteschlangeRef, (snapshot) => {
+    let gefunden = false;
+
+    snapshot.forEach((dokument) => {
+      const spieler = dokument.data();
+
+      if (spieler.name.toLowerCase() === name.toLowerCase()) {
+        gefunden = true;
+      }
+    });
+
+    resolve(gefunden);
   });
+});
+
+if (existiert) {
+  alert("Dieser Name steht bereits in der Warteschlange.");
+  return;
+}
+
+await addDoc(warteschlangeRef, {
+  name: name,
+  zeit: Date.now()
+});
 
   nameFeld.value = "";
 };
