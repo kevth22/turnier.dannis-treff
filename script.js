@@ -4,6 +4,7 @@ import {
   getFirestore,
   collection,
   addDoc,
+  onSnapshot,
   deleteDoc,
   doc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -55,34 +56,32 @@ onSnapshot(warteschlangeRef, (snapshot) => {
   });
 
   spieler.sort((a, b) => a.zeit - b.zeit);
-const anzahlAnzeige = document.getElementById("anzahl");
-if (anzahlAnzeige) {
-  anzahlAnzeige.textContent = spieler.length;
-}
 
-if (istAdmin) {
-  spieler.forEach((person) => {
-    const eintrag = document.createElement("li");
-    eintrag.textContent = person.name;
+  const anzahlAnzeige = document.getElementById("anzahl");
+  if (anzahlAnzeige) {
+    anzahlAnzeige.textContent = spieler.length;
+  }
 
-    const button = document.createElement("button");
-    button.textContent = "Löschen";
-    button.style.marginLeft = "10px";
-    button.style.width = "auto";
-    button.style.padding = "6px 10px";
-    button.style.fontSize = "14px";
+  if (istAdmin) {
+    spieler.forEach((person) => {
+      const eintrag = document.createElement("li");
+      eintrag.textContent = person.name;
 
-    button.onclick = async function () {
-      await deleteDoc(doc(db, "warteschlange", person.id));
-    };
+      const button = document.createElement("button");
+      button.textContent = "Löschen";
+      button.style.marginLeft = "10px";
+      button.style.width = "auto";
+      button.style.padding = "6px 10px";
+      button.style.fontSize = "14px";
 
-    eintrag.appendChild(button);
-    liste.appendChild(eintrag);
-  });
-} else {
-  liste.innerHTML = "<li>Namen sind nur für die Turnierleitung sichtbar.</li>";
-}
+      button.onclick = async function () {
+        await deleteDoc(doc(db, "warteschlange", person.id));
+      };
 
+      eintrag.appendChild(button);
+      liste.appendChild(eintrag);
+    });
+  } else {
+    liste.innerHTML = "<li>Namen sind nur für die Turnierleitung sichtbar.</li>";
+  }
 });
-});
-}
