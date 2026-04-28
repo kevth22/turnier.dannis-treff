@@ -56,25 +56,30 @@ onSnapshot(warteschlangeRef, (snapshot) => {
 
   spieler.sort((a, b) => a.zeit - b.zeit);
 
+  const anzahlAnzeige = document.getElementById("anzahl");
+if (anzahlAnzeige) {
+  anzahlAnzeige.textContent = spieler.length;
+}
+
+if (istAdmin) {
   spieler.forEach((person) => {
     const eintrag = document.createElement("li");
     eintrag.textContent = person.name;
 
-    if (istAdmin) {
-      const button = document.createElement("button");
-      button.textContent = "Löschen";
-      button.style.marginLeft = "10px";
-      button.style.width = "auto";
-      button.style.padding = "6px 10px";
-      button.style.fontSize = "14px";
+    const button = document.createElement("button");
+    button.textContent = "Löschen";
+    button.style.marginLeft = "10px";
+    button.style.width = "auto";
+    button.style.padding = "6px 10px";
+    button.style.fontSize = "14px";
 
-      button.onclick = async function () {
-        await deleteDoc(doc(db, "warteschlange", person.id));
-      };
+    button.onclick = async function () {
+      await deleteDoc(doc(db, "warteschlange", person.id));
+    };
 
-      eintrag.appendChild(button);
-    }
-
+    eintrag.appendChild(button);
     liste.appendChild(eintrag);
   });
-});
+} else {
+  liste.innerHTML = "<li>Namen sind nur für die Turnierleitung sichtbar.</li>";
+}
