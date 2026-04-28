@@ -33,6 +33,7 @@ window.anmelden = async function () {
     name: name,
     zeit: Date.now()
   });
+alert("in Firebase gespeichert!");
 
   nameFeld.value = "";
 };
