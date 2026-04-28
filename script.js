@@ -10,7 +10,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDtQ3pECcZEIloI4QTV5G-7_QcoRvVGHL4",
+  apiKey: "AIzaSyDtQ3pECcZETIoI4QTV5G-7_QcoRvVGHL4",
   authDomain: "dannistreffturnier.firebaseapp.com",
   projectId: "dannistreffturnier",
   storageBucket: "dannistreffturnier.firebasestorage.app",
@@ -19,7 +19,28 @@ const firebaseConfig = {
   measurementId: "G-QEL7FSWMLG"
 };
 
- const istAdmin = new URLSearchParams(window.location.search).get("admin") === "1";
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const warteschlangeRef = collection(db, "warteschlange");
+
+const istAdmin = new URLSearchParams(window.location.search).get("admin") === "1";
+
+window.anmelden = async function () {
+  const nameFeld = document.getElementById("spielerName");
+  const name = nameFeld.value.trim();
+
+  if (name === "") {
+    alert("Bitte gib deinen Namen ein.");
+    return;
+  }
+
+  await addDoc(warteschlangeRef, {
+    name: name,
+    zeit: Date.now()
+  });
+
+  nameFeld.value = "";
+};
 
 onSnapshot(warteschlangeRef, (snapshot) => {
   const liste = document.getElementById("warteschlange");
@@ -58,29 +79,6 @@ onSnapshot(warteschlangeRef, (snapshot) => {
     liste.appendChild(eintrag);
   });
 });
-
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const warteschlangeRef = collection(db, "warteschlange");
-
-window.anmelden = async function () {
-  const nameFeld = document.getElementById("spielerName");
-  const name = nameFeld.value.trim();
-
-  if (name === "") {
-    alert("Bitte gib deinen Namen ein.");
-    return;
-  }
-
-  await addDoc(warteschlangeRef, {
-    name: name,
-    zeit: Date.now()
-  });
-alert("in Firebase gespeichert!");
-
-  nameFeld.value = "";
-};
 
 onSnapshot(warteschlangeRef, (snapshot) => {
   const liste = document.getElementById("warteschlange");
