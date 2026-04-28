@@ -3,7 +3,7 @@ import {
   getFirestore,
   collection,
   addDoc,
-  onSnapshot
+  onSnapshot,
   deleteDoc,
   doc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
