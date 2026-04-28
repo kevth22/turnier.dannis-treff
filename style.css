@@ -14,10 +14,23 @@ body {
   border-bottom: 2px solid red;
 }
 
+.logo-box {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Abstand zwischen Logo & Text */
+}
+
 .logo {
   height: 45px;
-  width: 50px;
 }
+
+.logo-text {
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
 
 .menu a {
   color: white;
