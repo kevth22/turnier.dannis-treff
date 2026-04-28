@@ -79,7 +79,7 @@ onSnapshot(warteschlangeRef, (snapshot) => {
   });
 
   spieler.sort((a, b) => a.zeit - b.zeit);
-const maxPlaetze = 32;
+const maxPlaetze = 64;
 const bezahlteSpieler = spieler.filter((person) => person.bezahlt === true);
 const wartendeSpieler = spieler.filter((person) => person.bezahlt !== true);
 
