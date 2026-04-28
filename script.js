@@ -6,14 +6,14 @@ import {
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-cconst firebaseConfig = {
-  apiKey: "AIzaSyAAVLhBhm3fDGoU1llgqDosXOklwDPW3Qs",
-  authDomain: "warteschlange-bb76f.firebaseapp.com",
-  projectId: "warteschlange-bb76f",
-  storageBucket: "warteschlange-bb76f.firebasestorage.app",
-  messagingSenderId: "1057635637589",
-  appId: "1:1057635637589:web:075ea792b57bd09a1d77dc",
-  measurementId: "G-EES6Z7MF1E"
+const firebaseConfig = {
+  apiKey: "AIzaSyDtQ3pECcZEIloI4QTV5G-7_QcoRvVGHL4",
+  authDomain: "dannistreffturnier.firebaseapp.com",
+  projectId: "dannistreffturnier",
+  storageBucket: "dannistreffturnier.firebasestorage.app",
+  messagingSenderId: "829873084116",
+  appId: "1:829873084116:web:683bbf1ea3e58f1a4ecd41",
+  measurementId: "G-QEL7FSWMLG"
 };
 
 const app = initializeApp(firebaseConfig);
