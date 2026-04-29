@@ -1,0 +1,34 @@
+#   
+<!DOCTYPE html>  
+<html lang="de">  
+<head>  
+  <meta charset="UTF-8">  
+  <title>Impressum</title>  
+</head>  
+<body>  
+  
+<h1>Impressum</h1>  
+  
+<p>  
+Angaben gemäß § 5 TMG  
+</p>  
+  
+<p>  
+Dannis Treff<br>  
+Emil-Zimmermann-Allee 10<br>  
+458xx Gelsenkirchen  
+</p>  
+  
+<p>  
+Vertreten durch:<br>  
+[Daniela Roth]  
+</p>  
+  
+<p>  
+Kontakt:Daniela Roth<br>  
+Telefon: 0163 7428994<br>  
+E-Mail: dannis-treff@t-online.de  
+</p>  
+  
+</body>  
+</html>  
