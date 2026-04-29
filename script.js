@@ -186,12 +186,13 @@ window.adminLogin = function () {
   const passwort = prompt("Admin Passwort:");
 
   if (passwort === "22.08.2002.Kr") {
-    document.getElementById("adminBereich").style.display = "block";
+    sessionStorage.setItem("admin", "true");
+    location.reload();
   } else {
     alert("Falsches Passwort");
-  
   }
-}
+};
+
 function spielerFreigeben() {
   alert("Hier kannst du später Spieler aus Warteschlange übernehmen");
 }
