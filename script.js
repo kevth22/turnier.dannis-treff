@@ -96,7 +96,13 @@ await addDoc(warteschlangeRef, {
   zeit: Date.now(),  
   bezahlt: false  
 });  
-  
+const msg = document.getElementById("successMessage");
+msg.style.display = "block";
+
+// nur einmal anzeigen + danach verstecken
+setTimeout(() => {
+  msg.style.display = "none";
+}, 6000);  
 letzteAnmeldung = Date.now();  
   
 const paypalLink = document.getElementById("paypalLink");  
