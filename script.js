@@ -24,7 +24,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);  
 const warteschlangeRef = collection(db, "warteschlange");  
   
- let istAdmin = false; 
+ let istAdmin = sessionStorage.getItem("admin") === "true"; 
   
 let letzteAnmeldung = 0;  
 const cooldownSekunden = 25;  
