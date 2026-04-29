@@ -1,0 +1,37 @@
+<!DOCTYPE html>  
+<html lang="de">  
+<head>  
+  <meta charset="UTF-8">  
+  <title>Regelwerk</title>  
+</head>  
+<body>  
+  
+<h1>Regelwerk – Dannis Treff Dart Turnier</h1>  
+  
+<h2>Teilnahme</h2>  
+<p>Die Teilnahme ist für alle Spielklassen offen.</p>  
+<p>Die Teilnehmerzahl ist unbegrenzt. Die Startplätze werden nach Zahlungseingang vergeben.</p>  
+  
+<h2>Anmeldung & Zahlung</h2>  
+<p>Die Anmeldung erfolgt über die Website.</p>  
+<p>Die Teilnahme ist erst nach Zahlung des Startgeldes gültig.</p>  
+  
+<h2>Startgeld</h2>  
+<p>Das Startgeld beträgt 10,00 € und ist per PayPal zu zahlen.</p>  
+  
+<h2>Nichterscheinen</h2>  
+<p>Bei verspätetem Erscheinen oder Nichterscheinen am Turniertag erfolgt keine Rückerstattung.</p>  
+<p>Das Startgeld wird dem Preisgeld hinzugefügt.</p>  
+  
+<h2>Turniermodus</h2>  
+<p>Gespielt wird im Doppel-KO-System.</p>  
+  
+<h2>Fair Play</h2>  
+<p>Unsportliches Verhalten kann zum Ausschluss führen.</p>  
+  
+<h2>Streaming</h2>  
+<p>Während des Turniers können Spiele gestreamt werden.</p>  
+<p>Mit der Teilnahme erklärst du dich damit einverstanden.</p>  
+  
+</body>  
+</html>  
