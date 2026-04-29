@@ -24,7 +24,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);  
 const warteschlangeRef = collection(db, "warteschlange");  
   
-const istAdmin = new URLSearchParams(window.location.search).get("admin") === "1";  
+ let istAdmin = false; 
   
 let letzteAnmeldung = 0;  
 const cooldownSekunden = 25;  
@@ -182,3 +182,21 @@ eintrag.appendChild(bezahltButton);
     liste.innerHTML = "<li>Namen sind nur für die Turnierleitung sichtbar.</li>";  
   }  
 });  
+window.adminLogin = function () {
+  const passwort = prompt("Admin Passwort:");
+
+  if (passwort === "22.08.2002.Kr") {
+    document.getElementById("adminBereich").style.display = "block";
+  } else {
+    alert("Falsches Passwort");
+  
+  }
+}
+function spielerFreigeben() {
+  alert("Hier kannst du später Spieler aus Warteschlange übernehmen");
+}
+
+function listeLeeren() {
+  localStorage.clear();
+  location.reload();
+}
