@@ -426,4 +426,24 @@ footer {
   background: rgba(255,255,255,0.08);
   font-size: 14px;
 }
+.success-box {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 12px;
+  background: rgba(0, 255, 0, 0.08);
+  border: 2px solid #00ff88;
+  text-align: center;
+}
 
+.big180 {
+  font-size: 60px;
+  font-weight: bold;
+  color: #ff2e2e;
+  text-shadow: 0 0 10px rgba(255,0,0,0.7);
+  margin-bottom: 10px;
+}
+
+.success-text {
+  font-size: 16px;
+  color: #ccc;
+}
