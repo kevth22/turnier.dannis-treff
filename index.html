@@ -188,8 +188,8 @@
   <a href="datenschutz.html">Datenschutz</a>  
 </footer>  
   
-<script type="module" src="script.js"></script>  
-  
+<script type="module" src="script.js"></script>
+
 <script>  
   const checkboxDatenschutz = document.getElementById("datenschutzCheck");  
   const checkboxRegel = document.getElementById("regelCheck");  
@@ -207,8 +207,37 @@
   checkboxDatenschutz.addEventListener("change", checkForm);  
   checkboxRegel.addEventListener("change", checkForm);  
   nameInput.addEventListener("input", checkForm);  
-</script>  
-  
-</body>  
-</html>  
-  
+</script>
+
+<button onclick="adminLogin()">🔒 Admin</button>
+
+<div id="adminBereich" style="display:none; margin-top:20px;">
+  <h2>Admin Bereich</h2>
+
+  <button onclick="spielerFreigeben()">Spieler freigeben</button>
+  <button onclick="listeLeeren()">Liste leeren</button>
+</div>
+
+<script>
+  function adminLogin() {
+    const passwort = prompt("Admin Passwort:");
+
+    if (passwort === "1234") {
+      document.getElementById("adminBereich").style.display = "block";
+    } else {
+      alert("Falsches Passwort");
+    }
+  }
+
+  function spielerFreigeben() {
+    alert("Spieler freigeben bauen wir als Nächstes richtig ein.");
+  }
+
+  function listeLeeren() {
+    localStorage.clear();
+    location.reload();
+  }
+</script>
+
+</body>
+</html>
