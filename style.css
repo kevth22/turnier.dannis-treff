@@ -653,6 +653,7 @@ footer {
 }
 
 .anmeldung-logo img {
-  width: 120px;
-  opacity: 0.9;
+  width: 360px;
+  opacity: 0,9;
+  filter: drop-shadow(0 0 10px rgba(255,0,0,0.5));
 }
