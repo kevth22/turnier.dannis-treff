@@ -664,9 +664,3 @@ footer {
   color: #ff2b2b;
   text-shadow: 0 0 8px rgba(255, 43, 43, 0.7);
 }
-.infinity-status {
-  color: #ff2b2b !important;
-  font-size: 22px;
-  font-weight: bold;
-  text-shadow: 0 0 8px rgba(255, 43, 43, 0.8);
-}
