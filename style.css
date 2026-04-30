@@ -650,10 +650,11 @@ footer {
   display: flex;
   justify-content: center;
   margin-bottom: 15px;
+  margin-top: 15px;
 }
 
 .anmeldung-logo img {
-  width: 360px;
+  width: 320px;
   opacity: 0,9;
   filter: drop-shadow(0 0 10px rgba(255,0,0,0.5));
 }
