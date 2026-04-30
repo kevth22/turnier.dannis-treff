@@ -646,3 +646,13 @@ footer {
   z-index: 9999;
   box-shadow: 0 0 30px rgba(0, 255, 127, 0.5);
 }
+.anmeldung-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.anmeldung-logo img {
+  width: 90px;
+  opacity: 0.9;
+}
