@@ -698,3 +698,20 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.checkbox-row input {
+  width: 22px;
+  height: 22px;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.checkbox-row span {
+  line-height: 1.4;
+}
