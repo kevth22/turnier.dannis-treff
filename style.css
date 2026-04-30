@@ -555,3 +555,33 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+.turnier-info {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  border-left: 3px solid #e63946;
+}
+
+.icon {
+  font-size: 20px;
+}
+
+.info-item strong {
+  color: white;
+  font-size: 14px;
+}
+
+.info-item div {
+  color: #ccc;
+  font-size: 13px;
+}
