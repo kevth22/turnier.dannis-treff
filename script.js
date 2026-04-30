@@ -135,7 +135,8 @@ const wartendeSpieler = spieler.filter((person) => person.bezahlt !== true);
 const belegte = Math.min(bezahlteSpieler.length, maxPlaetze);  
 const wartend = wartendeSpieler.length;  
   
-document.getElementById("belegt").innerHTML = belegte + ' / <span class="infinity">∞</span>';
+document.getElementById("belegt").innerHTML =
+  belegte + ' / <span class="infinity">∞</span>';
 document.getElementById("wartend").textContent = wartend;  
   
 document.getElementById("barBelegt").style.width = (belegte / maxPlaetze * 100) + "%";  
