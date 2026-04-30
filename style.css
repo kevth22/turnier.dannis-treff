@@ -614,3 +614,20 @@ footer {
   width: 35px;
   text-align: center;
 }
+.quick-info {
+  margin-top: 15px;
+  padding: 14px;
+  border: 1px solid #ff2b2b;
+  border-radius: 12px;
+  background: rgba(255, 43, 43, 0.08);
+  box-shadow: 0 0 12px rgba(255, 43, 43, 0.25);
+  color: white;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quick-info strong {
+  color: #fff;
+}
