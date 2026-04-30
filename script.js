@@ -30,8 +30,13 @@ let letzteAnmeldung = 0;
 const cooldownSekunden = 25;  
   
 window.anmelden = async function () {  
-  const nameFeld = document.getElementById("spielerName");  
-  const name = nameFeld.value.trim();  
+  const nicknameFeld = document.getElementById("nickname");
+const vornameFeld = document.getElementById("vorname");
+const nachnameFeld = document.getElementById("nachname");
+
+const nickname = nicknameFeld.value.trim();
+const vorname = vornameFeld.value.trim();
+const nachname = nachnameFeld.value.trim();
   
 const jetzt = Date.now();  
   
@@ -48,27 +53,26 @@ if (honeypot !== "") {
   return;  
 }  
   
-if (name.length < 3) {  
-  alert("Bitte gib einen gültigen Namen ein.");  
-  return;  
+if (nickname.length < 2 || vorname.length < 2 || nachname.length < 2) {
+  alert("Bitte Spitzname, Vorname und Nachname eintragen.");
+  return;
+}
+
+if (nickname.length > 30 || vorname.length > 30 || nachname.length > 30) {
+  alert("Eine Eingabe ist zu lang.");
+  return;
+}
+
+const erlaubteZeichen = /^[a-zA-ZäöüÄÖÜß0-9\s\-]+$/;
+
+if (
+  !erlaubteZeichen.test(nickname) ||
+  !erlaubteZeichen.test(vorname) ||
+  !erlaubteZeichen.test(nachname)
+) {
+  alert("Bitte verwende nur Buchstaben, Zahlen, Leerzeichen oder Bindestriche.");
+  return;
 }  
-  
-if (name.length > 30) {  
-  alert("Der Name ist zu lang.");  
-  return;  
-}  
-  
-const erlaubteZeichen = /^[a-zA-ZäöüÄÖÜß\s\-]+$/;  
-  
-if (!erlaubteZeichen.test(name)) {  
-  alert("Bitte verwende nur Buchstaben, Leerzeichen oder Bindestriche.");  
-  return;  
-}  
-  
-  if (name === "") {  
-    alert("Bitte gib deinen Namen ein.");  
-    return;  
-  }  
   
  const existiert = await new Promise((resolve) => {  
   onSnapshot(warteschlangeRef, (snapshot) => {  
@@ -77,9 +81,12 @@ if (!erlaubteZeichen.test(name)) {
     snapshot.forEach((dokument) => {  
       const spieler = dokument.data();  
   
-      if (spieler.name.toLowerCase() === name.toLowerCase()) {  
-        gefunden = true;  
-      }  
+      if (
+  spieler.nickname &&
+  spieler.nickname.toLowerCase() === nickname.toLowerCase()
+) {
+  gefunden = true;
+      }
     });  
   
     resolve(gefunden);  
@@ -91,10 +98,21 @@ if (existiert) {
   return;  
 }  
   
-await addDoc(warteschlangeRef, {  
-  name: name,  
-  zeit: Date.now(),  
-  bezahlt: false  
+const nickname = document.getElementById("nickname").value.trim();
+const vorname = document.getElementById("vorname").value.trim();
+const nachname = document.getElementById("nachname").value.trim();
+
+if (nickname.length < 2 || vorname.length < 2 || nachname.length < 2) {
+  alert("Bitte Spitzname, Vorname und Nachname eintragen.");
+  return;
+}
+
+await addDoc(warteschlangeRef, {
+  nickname: nickname,
+  vorname: vorname,
+  nachname: nachname,
+  bezahlt: false,
+  createdAt: new Date()
 });  
 const msg = document.getElementById("successMessage");
 msg.style.display = "block";
@@ -111,7 +129,9 @@ paypalLink.classList.remove("disabled");
   
 alert("Anmeldung gespeichert. Bitte jetzt 10€ per PayPal zahlen.");  
   
-nameFeld.value = "";  
+nicknameFeld.value = "";
+vornameFeld.value = "";
+nachnameFeld.value = "";  
 };  
   
 onSnapshot(warteschlangeRef, (snapshot) => {  
@@ -150,7 +170,11 @@ document.getElementById("barWartend").style.width = "100%";
   if (istAdmin) {  
     spieler.forEach((person) => {  
       const eintrag = document.createElement("li");  
-      eintrag.textContent = person.name;  
+      eintrag.innerHTML = `
+  <strong>${person.nickname || "Kein Spitzname"}</strong><br>
+  <small>${person.vorname || ""} ${person.nachname || ""}</small><br>
+  <small>Status: ${person.bezahlt ? "Bezahlt ✓" : "Warteschlange"}</small>
+`;  
   
       const button = document.createElement("button");  
       button.textContent = "Löschen";  
