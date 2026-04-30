@@ -218,8 +218,8 @@ function starteCountdown() {
     const minuten = Math.floor((diff / (1000 * 60)) % 60);
     const sekunden = Math.floor((diff / 1000) % 60);
 
-    document.getElementById("timer").innerHTML =
-      `${tage}T ${stunden}h ${minuten}m ${sekunden}s`;
+document.getElementById("timer").innerHTML =
+  `${tage} : ${stunden.toString().padStart(2,"0")} : ${minuten.toString().padStart(2,"0")} : ${sekunden.toString().padStart(2,"0")}`;
   }
 
   updateCountdown();
