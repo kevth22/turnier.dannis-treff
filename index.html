@@ -254,23 +254,32 @@
   
 <script type="module" src="script.js"></script>
 
-<script>  
-  const checkboxDatenschutz = document.getElementById("datenschutzCheck");  
-  const checkboxRegel = document.getElementById("regelCheck");  
-  const button = document.getElementById("anmeldeButton");  
-  const nameInput = document.getElementById("spielerName");  
-  
-  function checkForm() {  
-    const nameOk = nameInput.value.trim().length > 0;  
-    const datenschutzOk = checkboxDatenschutz.checked;  
-    const regelOk = checkboxRegel.checked;  
-  
-    button.disabled = !(nameOk && datenschutzOk && regelOk);  
-  }  
-  
-  checkboxDatenschutz.addEventListener("change", checkForm);  
-  checkboxRegel.addEventListener("change", checkForm);  
-  nameInput.addEventListener("input", checkForm);  
+<script>
+const checkboxDatenschutz = document.getElementById("datenschutzCheck");
+const checkboxRegel = document.getElementById("regelCheck");
+const button = document.getElementById("anmeldeButton");
+
+const nicknameInput = document.getElementById("nickname");
+const vornameInput = document.getElementById("vorname");
+const nachnameInput = document.getElementById("nachname");
+
+function checkForm() {
+  const nicknameOk = nicknameInput.value.trim().length >= 2;
+  const vornameOk = vornameInput.value.trim().length >= 2;
+  const nachnameOk = nachnameInput.value.trim().length >= 2;
+
+  const datenschutzOk = checkboxDatenschutz.checked;
+  const regelOk = checkboxRegel.checked;
+
+  button.disabled = !(nicknameOk && vornameOk && nachnameOk && datenschutzOk && regelOk);
+}
+
+checkboxDatenschutz.addEventListener("change", checkForm);
+checkboxRegel.addEventListener("change", checkForm);
+
+nicknameInput.addEventListener("input", checkForm);
+vornameInput.addEventListener("input", checkForm);
+nachnameInput.addEventListener("input", checkForm);
 </script>
 
 <button onclick="adminLogin()">🔒 Admin</button>
