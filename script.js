@@ -194,9 +194,13 @@ bezahltButton.onclick = async function () {
 eintrag.appendChild(bezahltButton);  
       liste.appendChild(eintrag);  
     });  
-  } else {  
-    liste.innerHTML = "<li>Namen sind nur für die Turnierleitung sichtbar.</li>";  
-  }  
+  } else {
+  spieler.forEach((person) => {
+    const eintrag = document.createElement("li");
+    eintrag.textContent = person.nickname || "Kein Spitzname";
+    liste.appendChild(eintrag);
+  });
+}  
 });  
 window.adminLogin = function () {
   const passwort = prompt("Admin Passwort:");
