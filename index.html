@@ -300,31 +300,12 @@ nachnameInput.addEventListener("input", checkForm);
   <button onclick="listeLeeren()">Liste leeren</button>
 </div>
 
-<script>
-  function adminLogin() {
-    const passwort = prompt("Admin Passwort:");
-
-    if (passwort === "22.08.2002.Kr") {
-      document.getElementById("adminBereich").style.display = "block";
-    } else {
-      alert("Falsches Passwort");
-    }
-  }
-
-  function spielerFreigeben() {
-    alert("Spieler freigeben bauen wir als Nächstes richtig ein.");
-  }
-
-  function listeLeeren() {
-    localStorage.clear();
-    location.reload();
-  }
-</script>
  <div id="successMessage" class="success-box" style="display:none;">
   <div class="big180">180!!!</div>
   <div class="success-text">
     Jetzt bist du erfolgreich in der Warteschlange.<br>
     Nach Zahlung erhältst du deinen Turnierplatz.
   </div>
+</div>
 </body>
 </html>
