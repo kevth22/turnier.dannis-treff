@@ -125,8 +125,11 @@ nachnameFeld.value = "";
 };  
   
 onSnapshot(warteschlangeRef, (snapshot) => {  
-  const liste = document.getElementById("warteschlange");  
-  liste.innerHTML = "";  
+  const warteschlangeListe = document.getElementById("warteschlange");
+const bezahlteListe = document.getElementById("bezahlteListe");
+
+warteschlangeListe.innerHTML = "";
+bezahlteListe.innerHTML = "";  
   
   const spieler = [];  
   
@@ -157,51 +160,64 @@ document.getElementById("barWartend").style.width = "100%";
     anzahlAnzeige.textContent = spieler.length;  
   }  
   
-  if (istAdmin) {  
-    spieler.forEach((person) => {  
-      const eintrag = document.createElement("li");  
-      eintrag.innerHTML = `
-  <strong>${person.nickname || "Kein Spitzname"}</strong><br>
-  <small>${person.vorname || ""} ${person.nachname || ""}</small><br>
-  <small>Status: ${person.bezahlt ? "Bezahlt ✓" : "Warteschlange"}</small>
-`;  
-  
-      const button = document.createElement("button");  
-      button.textContent = "Löschen";  
-      button.style.marginLeft = "10px";  
-      button.style.width = "auto";  
-      button.style.padding = "6px 10px";  
-      button.style.fontSize = "14px";  
-  
-      button.onclick = async function () {  
-        await deleteDoc(doc(db, "warteschlange", person.id));  
-      };  
-  
-      eintrag.appendChild(button);  
-const bezahltButton = document.createElement("button");  
-bezahltButton.textContent = person.bezahlt ? "Bezahlt ✓" : "Als bezahlt setzen";  
-bezahltButton.style.marginLeft = "10px";  
-bezahltButton.style.width = "auto";  
-bezahltButton.style.padding = "6px 10px";  
-bezahltButton.style.fontSize = "14px";  
-  
-bezahltButton.onclick = async function () {  
-  await updateDoc(doc(db, "warteschlange", person.id), {  
-    bezahlt: true  
-  });  
-};  
-  
-eintrag.appendChild(bezahltButton);  
-      liste.appendChild(eintrag);  
-    });  
-  } else {
+  if (istAdmin) {
+  spieler.forEach((person) => {
+    const eintrag = document.createElement("li");
+
+    eintrag.innerHTML = `
+      <strong>${person.nickname || "Kein Spitzname"}</strong><br>
+      <small>${person.vorname || ""} ${person.nachname || ""}</small><br>
+      <small>Status: ${person.bezahlt ? "Bezahlt ✓" : "Warteschlange"}</small>
+    `;
+
+    const button = document.createElement("button");
+    button.textContent = "Löschen";
+    button.style.marginLeft = "10px";
+    button.style.width = "auto";
+    button.style.padding = "6px 10px";
+    button.style.fontSize = "14px";
+
+    button.onclick = async function () {
+      await deleteDoc(doc(db, "warteschlange", person.id));
+    };
+
+    eintrag.appendChild(button);
+
+    const bezahltButton = document.createElement("button");
+    bezahltButton.textContent = person.bezahlt ? "Bezahlt ✓" : "Als bezahlt setzen";
+    bezahltButton.disabled = person.bezahlt === true;
+    bezahltButton.style.marginLeft = "10px";
+    bezahltButton.style.width = "auto";
+    bezahltButton.style.padding = "6px 10px";
+    bezahltButton.style.fontSize = "14px";
+
+    bezahltButton.onclick = async function () {
+      await updateDoc(doc(db, "warteschlange", person.id), {
+        bezahlt: true
+      });
+    };
+
+    eintrag.appendChild(bezahltButton);
+
+    if (person.bezahlt === true) {
+      bezahlteListe.appendChild(eintrag);
+    } else {
+      warteschlangeListe.appendChild(eintrag);
+    }
+  });
+} else {
   spieler.forEach((person) => {
     const eintrag = document.createElement("li");
     eintrag.textContent = person.nickname || "Kein Spitzname";
-    liste.appendChild(eintrag);
-  });
-}  
-});  
+
+    if (person.bezahlt === true) {
+      bezahlteListe.appendChild(eintrag);
+    } else {
+      warteschlangeListe.appendChild(eintrag);
+    }
+    });
+}
+});
 window.adminLogin = function () {
   const passwort = prompt("Admin Passwort:");
 
