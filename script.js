@@ -94,19 +94,9 @@ if (
 });  
   
 if (existiert) {  
-  alert("Dieser Name steht bereits in der Warteschlange.");  
+  alert("Dieser Spitzname steht bereits in der Warteschlange.");  
   return;  
 }  
-  
-const nickname = document.getElementById("nickname").value.trim();
-const vorname = document.getElementById("vorname").value.trim();
-const nachname = document.getElementById("nachname").value.trim();
-
-if (nickname.length < 2 || vorname.length < 2 || nachname.length < 2) {
-  alert("Bitte Spitzname, Vorname und Nachname eintragen.");
-  return;
-}
-
 await addDoc(warteschlangeRef, {
   nickname: nickname,
   vorname: vorname,
