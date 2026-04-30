@@ -715,3 +715,24 @@ footer {
 .checkbox-row span {
   line-height: 1.4;
 }
+.spieler-zeile,
+.spieler-admin {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-bezahlt {
+  margin-left: auto;
+  color: #39ff5a;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-wartend {
+  margin-left: auto;
+  color: #ffb000;
+  font-weight: 700;
+  white-space: nowrap;
+}
