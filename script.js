@@ -128,19 +128,20 @@ onSnapshot(warteschlangeRef, (snapshot) => {
   });  
   
   spieler.sort((a, b) => a.zeit - b.zeit);  
-const maxPlaetze = ∞;  
 const bezahlteSpieler = spieler.filter((person) => person.bezahlt === true);  
 const wartendeSpieler = spieler.filter((person) => person.bezahlt !== true);  
-  
-const belegte = Math.min(bezahlteSpieler.length, maxPlaetze);  
-const wartend = wartendeSpieler.length;  
-  
+
+const belegte = bezahlteSpieler.length;
+const wartend = wartendeSpieler.length;
+
 document.getElementById("belegt").innerHTML =
-  belegte + ' / <span class="infinity">∞</span>';
-document.getElementById("wartend").textContent = wartend;  
-  
-document.getElementById("barBelegt").style.width = (belegte / maxPlaetze * 100) + "%";  
-document.getElementById("barWartend").style.width = (wartend / maxPlaetze * 100) + "%";  
+  belegte + ' / <span class="infinity-status">∞</span>';
+
+document.getElementById("wartend").textContent = wartend;
+
+// Bei unbegrenzten Plätzen macht Prozent-Balken keinen Sinn
+document.getElementById("barBelegt").style.width = "100%";
+document.getElementById("barWartend").style.width = "100%";  
   const anzahlAnzeige = document.getElementById("anzahl");  
   if (anzahlAnzeige) {  
     anzahlAnzeige.textContent = spieler.length;  
