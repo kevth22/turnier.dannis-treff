@@ -163,19 +163,19 @@ document.getElementById("barWartend").style.width = "100%";
   if (istAdmin) {
   spieler.forEach((person) => {
     const eintrag = document.createElement("li");
-}
 
-eintrag.innerHTML = `
-  <div class="spieler-admin">
-    <div>
-      <strong>${person.nickname || "Kein Spitzname"}</strong><br>
-      <small>${person.vorname || ""} ${person.nachname || ""}</small>
-    </div>
-    <span class="${person.bezahlt ? "status-bezahlt" : "status-wartend"}">
-      ${person.bezahlt ? "Bezahlt ✓" : "Warteschlange"}
-    </span>
-  </div>
-`;
+    eintrag.innerHTML = `
+      <div class="spieler-admin">
+        <div>
+          <strong>${person.nickname || "Kein Spitzname"}</strong><br>
+          <small>${person.vorname || ""} ${person.nachname || ""}</small>
+        </div>
+        <span class="${person.bezahlt ? "status-bezahlt" : "status-wartend"}">
+          ${person.bezahlt ? "Bezahlt ✓" : "Warteschlange"}
+        </span>
+      </div>
+    `;
+
     const button = document.createElement("button");
     button.textContent = "Löschen";
     button.style.marginLeft = "10px";
