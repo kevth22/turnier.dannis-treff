@@ -469,3 +469,89 @@ footer {
   color: #fff;
   letter-spacing: 2px;
 }
+.auszahlung-box {
+  margin-top: 25px;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid #ff2b2b;
+  border-radius: 14px;
+  box-shadow: 0 0 18px rgba(255, 43, 43, 0.35);
+}
+
+.auszahlung-box h3 {
+  margin: 0;
+  color: #ff2b2b;
+  font-size: 24px;
+  text-transform: uppercase;
+}
+
+.auszahlung-info {
+  color: #ddd;
+  margin-bottom: 18px;
+}
+
+.preise-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.preis-card {
+  padding: 15px;
+  text-align: center;
+  border-radius: 12px;
+  background: #111;
+  border: 1px solid #333;
+}
+
+.medaille {
+  font-size: 34px;
+  margin-bottom: 8px;
+}
+
+.preis-card strong {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.preis-card span {
+  display: block;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.preis-card small {
+  color: #aaa;
+  text-transform: uppercase;
+}
+
+.gold {
+  border-color: gold;
+}
+
+.silber {
+  border-color: silver;
+}
+
+.bronze {
+  border-color: #cd7f32;
+}
+
+.best-lady {
+  margin-top: 15px;
+  padding: 12px;
+  text-align: center;
+  border-radius: 10px;
+  background: rgba(255, 43, 43, 0.12);
+  color: white;
+  font-weight: bold;
+}
+
+/* Handy-Ansicht */
+@media (max-width: 700px) {
+  .preise-grid {
+    grid-template-columns: 1fr;
+  }
+}
