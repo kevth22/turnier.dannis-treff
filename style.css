@@ -736,3 +736,18 @@ footer {
   font-weight: 700;
   white-space: nowrap;
 }
+.liste-bezahlt h2 {
+  color: #39ff5a;
+  background: rgba(57, 255, 90, 0.12);
+  padding: 6px 12px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.liste-wartend h2 {
+  color: #ffb000;
+  background: rgba(255, 176, 0, 0.12);
+  padding: 6px 12px;
+  border-radius: 8px;
+  display: inline-block;
+}PS
