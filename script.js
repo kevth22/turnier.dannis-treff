@@ -102,7 +102,7 @@ await addDoc(warteschlangeRef, {
   vorname: vorname,
   nachname: nachname,
   bezahlt: false,
-  createdAt: new Date()
+  createdAt: Date.now()
 });  
 const msg = document.getElementById("successMessage");
 msg.style.display = "block";
