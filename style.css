@@ -631,7 +631,6 @@ footer {
 .quick-info strong {
   color: #fff;
 }
-
 .success-box {
   position: fixed;
   top: 50%;
@@ -639,22 +638,11 @@ footer {
   transform: translate(-50%, -50%);
   
   background: #111;
-  border: 2px solid #ff2b2b;
+  border: 2px solid #00ff7f;
   border-radius: 18px;
   padding: 30px;
   text-align: center;
+
   z-index: 9999;
-
-  box-shadow: 0 0 30px rgba(255, 43, 43, 0.6);
-}
-
-.big180 {
-  font-size: 70px;
-  font-weight: bold;
-  color: #ff2b2b;
-}
-
-.success-text {
-  font-size: 20px;
-  color: white;
+  box-shadow: 0 0 30px rgba(0, 255, 127, 0.5);
 }
