@@ -163,13 +163,19 @@ document.getElementById("barWartend").style.width = "100%";
   if (istAdmin) {
   spieler.forEach((person) => {
     const eintrag = document.createElement("li");
+}
 
-    eintrag.innerHTML = `
+eintrag.innerHTML = `
+  <div class="spieler-admin">
+    <div>
       <strong>${person.nickname || "Kein Spitzname"}</strong><br>
-      <small>${person.vorname || ""} ${person.nachname || ""}</small><br>
-      <small>Status: ${person.bezahlt ? "Bezahlt ✓" : "Warteschlange"}</small>
-    `;
-
+      <small>${person.vorname || ""} ${person.nachname || ""}</small>
+    </div>
+    <span class="${person.bezahlt ? "status-bezahlt" : "status-wartend"}">
+      ${person.bezahlt ? "Bezahlt ✓" : "Warteschlange"}
+    </span>
+  </div>
+`;
     const button = document.createElement("button");
     button.textContent = "Löschen";
     button.style.marginLeft = "10px";
@@ -208,7 +214,19 @@ document.getElementById("barWartend").style.width = "100%";
 } else {
   spieler.forEach((person) => {
     const eintrag = document.createElement("li");
-    eintrag.textContent = person.nickname || "Kein Spitzname";
+    eintrag.classList.add("spieler-zeile");
+
+if (person.bezahlt === true) {
+  eintrag.innerHTML = `
+    <span>${person.nickname || "Kein Spitzname"}</span>
+    <span class="status-bezahlt">Bezahlt ✓</span>
+  `;
+} else {
+  eintrag.innerHTML = `
+    <span>${person.nickname || "Kein Spitzname"}</span>
+    <span class="status-wartend">Warteschlange</span>
+  `;
+}
 
     if (person.bezahlt === true) {
       bezahlteListe.appendChild(eintrag);
