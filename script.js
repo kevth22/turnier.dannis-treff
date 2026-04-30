@@ -201,3 +201,29 @@ function listeLeeren() {
   localStorage.clear();
   location.reload();
 }
+function starteCountdown() {
+  const zielDatum = new Date("2026-05-24T11:30:00"); // dein Turnierstart
+
+  function updateCountdown() {
+    const jetzt = new Date();
+    const diff = zielDatum - jetzt;
+
+    if (diff <= 0) {
+      document.getElementById("timer").innerHTML = "🚀 Turnier läuft!";
+      return;
+    }
+
+    const tage = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const stunden = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minuten = Math.floor((diff / (1000 * 60)) % 60);
+    const sekunden = Math.floor((diff / 1000) % 60);
+
+    document.getElementById("timer").innerHTML =
+      `${tage}T ${stunden}h ${minuten}m ${sekunden}s`;
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+}
+
+starteCountdown();
