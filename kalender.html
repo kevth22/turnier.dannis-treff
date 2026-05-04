@@ -19,15 +19,16 @@
 
   <section id="loginBox" class="info-card">
     <h2>🔒 Mitgliederbereich</h2>
-    <p>Bitte gib das Mitglieder-Passwort ein.</p>
+    <p>Bitte melde dich mit deinen Mitgliedsdaten an.</p>
 
-    <input id="kalenderPasswort" type="password" placeholder="Passwort eingeben">
+<input id="loginUser" type="text" placeholder="Benutzername">
+<input id="loginPass" type="password" placeholder="Passwort">
 
-    <button class="main-button" onclick="kalenderLogin()">Kalender öffnen</button>
+<button class="main-button" onclick="login()">Login</button>
 
-    <p id="loginFehler" style="color:red; display:none;">
-      Falsches Passwort.
-    </p>
+<p id="loginFehler" style="color:red; display:none;">
+  Falsche Login-Daten.
+</p>
   </section>
 
   <section id="kalenderBereich" style="display:none;">
