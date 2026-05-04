@@ -1,20 +1,39 @@
-<div class="info-card">
-  <h2>B1 Ruhrpott Liga</h2>
+<main class="app-container">
 
-  <iframe 
-    src="https://www.2k-dart-software.com/frontend/events/11/event/1255/table"
-    width="100%" 
-    height="700"
-    style="border:none; border-radius:12px;">
-  </iframe>
-</div>
-<div class="info-card">
-  <h2>C2 Rhein Ruhr</h2>
+  <div class="info-card">
+    <h2>🏆 Ligastände</h2>
+    <p>Aktuelle Tabellen unserer Dart11en Mannschaften.</p>
 
-  <iframe 
-    src="https://www.2k-dart-software.com/frontend/events/6/event/16658/table"
-    width="100%" 
-    height="700"
-    style="border:none; border-radius:12px;">
-  </iframe>
-</div>
+    <div class="liga-tabs">
+      <button onclick="zeigeLiga('b1')" id="tab-b1" class="liga-tab active">B1 Ruhrpott</button>
+      <button onclick="zeigeLiga('c2')" id="tab-c2" class="liga-tab">C2 Rhein Ruhr</button>
+    </div>
+  </div>
+
+  <div id="liga-b1" class="liga-frame-box">
+    <h3>B1 Ruhrpott Liga</h3>
+    <iframe 
+      src="DEIN-B1-LINK"
+      class="liga-frame">
+    </iframe>
+  </div>
+
+  <div id="liga-c2" class="liga-frame-box" style="display:none;">
+    <h3>C2 Rhein Ruhr</h3>
+    <iframe 
+      src="DEIN-C2-LINK"
+      class="liga-frame">
+    </iframe>
+  </div>
+
+</main>
+
+<script>
+function zeigeLiga(liga) {
+  document.getElementById("liga-b1").style.display = liga === "b1" ? "block" : "none";
+  document.getElementById("liga-c2").style.display = liga === "c2" ? "block" : "none";
+
+  document.getElementById("tab-b1").classList.toggle("active", liga === "b1");
+  document.getElementById("tab-c2").classList.toggle("active", liga === "c2");
+}
+</script>
