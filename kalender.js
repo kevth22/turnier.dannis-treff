@@ -5,7 +5,8 @@ import {
   collection,
   addDoc,
   onSnapshot,
-  serverTimestamp
+  serverTimestamp,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -22,11 +23,29 @@ const db = getFirestore(app);
 
 const kalenderRef = collection(db, "kalender_anmeldungen");
 
-// LOGIN
-window.kalenderLogin = function () {
-  const passwort = document.getElementById("kalenderPasswort").value;
+window.login = async function () {
+  const userInput = document.getElementById("loginUser").value.trim();
+  const passInput = document.getElementById("loginPass").value.trim();
 
-  if (passwort === "dart11en") {
+  if (!userInput || !passInput) {
+    alert("Bitte Benutzername und Passwort eingeben");
+    return;
+  }
+
+  const snapshot = await getDocs(collection(db, "mitglieder"));
+
+  let gefunden = null;
+
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+
+    if (data.benutzername === userInput && data.passwort === passInput) {
+      gefunden = data;
+    }
+  });
+
+  if (gefunden) {
+    sessionStorage.setItem("user", JSON.stringify(gefunden));
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("kalenderBereich").style.display = "block";
     document.getElementById("loginFehler").style.display = "none";
@@ -35,7 +54,6 @@ window.kalenderLogin = function () {
   }
 };
 
-// EINTRAGEN
 window.eintragen = async function (spieltag, inputId) {
   const input = document.getElementById(inputId);
   const name = input.value.trim();
@@ -54,7 +72,6 @@ window.eintragen = async function (spieltag, inputId) {
   input.value = "";
 };
 
-// LIVE ANZEIGE
 onSnapshot(kalenderRef, (snapshot) => {
   const liste1 = document.getElementById("liste1");
   const liste2 = document.getElementById("liste2");
@@ -66,16 +83,17 @@ onSnapshot(kalenderRef, (snapshot) => {
 
   snapshot.forEach((doc) => {
     const data = doc.data();
-
     const li = document.createElement("li");
     li.textContent = data.name;
 
-    if (data.spieltag === "spieltag1") {
-      liste1.appendChild(li);
-    }
-
-    if (data.spieltag === "spieltag2") {
-      liste2.appendChild(li);
-    }
+    if (data.spieltag === "spieltag1") liste1.appendChild(li);
+    if (data.spieltag === "spieltag2") liste2.appendChild(li);
   });
 });
+
+const gespeicherterUser = sessionStorage.getItem("user");
+
+if (gespeicherterUser) {
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("kalenderBereich").style.display = "block";
+}
