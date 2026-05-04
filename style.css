@@ -895,3 +895,48 @@ footer {
   padding: 6px 10px;
   font-size: 12px;
 }
+body {
+  background: #0f0f0f;
+  color: white;
+}
+
+.app-header {
+  background: #8B0000; /* dunkelrot */
+  color: white;
+}
+
+.main-button {
+  background: #e60000; /* kräftiges rot */
+  color: white;
+  border: none;
+}
+
+.main-button:hover {
+  background: #b30000;
+}
+
+.info-card {
+  background: rgba(139, 0, 0, 0.15); /* leicht rot im Hintergrund */
+  border: 1px solid #8B0000;
+}
+
+.bottom-nav {
+  background: #8B0000;
+}
+
+.bottom-nav a {
+  color: white;
+}
+.kalender-tag {
+  background: rgba(255, 0, 0, 0.1);
+  border: 1px solid #8B0000;
+}
+
+.kalender-event {
+  background: #e60000;
+  color: white;
+  border-radius: 5px;
+  padding: 2px 4px;
+  margin-top: 4px;
+  font-size: 12px;
+}
