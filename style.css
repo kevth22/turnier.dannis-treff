@@ -751,3 +751,71 @@ footer {
   border-radius: 8px;
   display: inline-block;
 }PS
+
+.app-header {
+  text-align: center;
+  padding: 25px;
+}
+
+.app-header h1 {
+  color: #ffcc00;
+  margin: 10px 0;
+}
+
+.app-container {
+  padding: 15px;
+}
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.quick-card {
+  background: rgba(255,255,255,0.07);
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+  color: white;
+  text-decoration: none;
+}
+
+.quick-card h3 {
+  margin: 10px 0 5px;
+  color: #ffcc00;
+}
+
+.info-card {
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 15px;
+}
+
+.main-button {
+  display: inline-block;
+  margin-top: 10px;
+  background: #ffcc00;
+  color: black;
+  padding: 10px 15px;
+  border-radius: 10px;
+  text-decoration: none;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #111;
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+}
+
+.bottom-nav a {
+  color: white;
+  text-decoration: none;
+  font-size: 12px;
+  text-align: center;
+}

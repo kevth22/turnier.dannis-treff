@@ -1,315 +1,65 @@
-<!DOCTYPE html>  
-<html lang="de">  
-<head>  
-  <meta charset="UTF-8">  
-  <title>Dannis Treff Dart Turnier</title>  
-  <link rel="stylesheet" href="style.css">  
-</head>  
-<body>  
-  
-<header class="navbar">  
-    <div class="logo-box">  
-        <img src="dart11enlogo.png" class="logo">  
-        <span class="logo-text">Dannis Treff</span>  
-    </div>  
-  
-    <nav class="menu">  
-        <a href="#">Turniere</a>  
-        <a href="#">Regeln</a>  
-        <a href="#">Kontakt</a>  
-    </nav>  
-</header>  
-  
-<main class="hero">  
-  
-  <section class="info">  
-    <p class="red">DART TURNIER</p>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dart11en App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
 
-<h1>DANNIS TREFF<br>Turnier 2026</h1>
+<body>
 
-<h2>Melde dich an und sei dabei!</h2>
+<header class="app-header">
+  <img src="dart11enlogo.png" class="logo">
+  <h1>Dart11en</h1>
+  <p>Vereins-App für Turniere, Liga & mehr</p>
+</header>
 
-<div class="event-details">
+<main class="app-container">
 
-  <div class="event-line">
-    <span class="event-icon">📅</span>
-    <span>Spieltag 1: 24.05.2026, 12:00 Uhr</span>
+  <div class="quick-grid">
+
+    <a href="turniere.html" class="quick-card">
+      🎯
+      <h3>Turniere</h3>
+      <p>Anmeldung & Warteschlange</p>
+    </a>
+
+    <a href="liga.html" class="quick-card">
+      🏆
+      <h3>Liga</h3>
+      <p>Tabellen & Ergebnisse</p>
+    </a>
+
+    <a href="kalender.html" class="quick-card">
+      📅
+      <h3>Kalender</h3>
+      <p>Spieltage eintragen</p>
+    </a>
+
+    <a href="kader.html" class="quick-card">
+      👥
+      <h3>Kader</h3>
+      <p>Mitglieder & Stats</p>
+    </a>
+
   </div>
 
-  <div class="event-line">
-    <span class="event-icon">⏰</span>
-    <span>Anmeldeschluss: 11:30 Uhr</span>
+  <div class="info-card">
+    <h2>🔥 Nächstes Event</h2>
+    <p><strong>Pfingst-Dart-Turnier</strong></p>
+    <p>📅 24.05.2026</p>
+    <a href="turniere.html" class="main-button">Jetzt anmelden</a>
   </div>
 
-  <div class="event-line">
-    <span class="event-icon">📍</span>
-    <span>Dannis Treff,Emilzimmermann-Allee 10,45897 Gelsenkirchen</span>
-  </div>
+</main>
 
-  <div class="event-line">
-    <span class="event-icon">👥</span>
-   <span><span class="infinity">∞</span> unbegrenzte Teilnehmeranzahl</span>
-  </div>
+<nav class="bottom-nav">
+  <a href="index.html">🏠<br>Home</a>
+  <a href="turniere.html">🎯<br>Turniere</a>
+  <a href="liga.html">🏆<br>Liga</a>
+  <a href="kader.html">👥<br>Kader</a>
+</nav>
 
-  <div class="event-line">
-    <span class="event-icon">💶</span>
-    <span>Startgeld: 10,00 €</span>
-  </div>
-
-</div>
-
-</div>
-  
-     <div class="auszahlung-box">
-  <h3>🏆 100 % Ausschüttung</h3>
-  <p class="auszahlung-info">Das gesamte Startgeld wird als Preisgeld ausgeschüttet.</p>
-
-  <div class="preise-grid">
-    <div class="preis-card gold">
-      <div class="medaille">🥇</div>
-      <strong>1. Platz</strong>
-      <span>50 %</span>
-      <small>des Preisgeldes</small>
-    </div>
-
-    <div class="preis-card silber">
-      <div class="medaille">🥈</div>
-      <strong>2. Platz</strong>
-      <span>30 %</span>
-      <small>des Preisgeldes</small>
-    </div>
-
-    <div class="preis-card bronze">
-      <div class="medaille">🥉</div>
-      <strong>3. Platz</strong>
-      <span>20 %</span>
-      <small>des Preisgeldes</small>
-    </div>
-  </div>
-
-  <div class="best-lady">
-    🍾 Best Lady erhält eine Flasche Sekt
-  </div>
-</div>
-   <div id="countdownBox">
-  <div class="countdown-title">⏳ Anmeldung endet in</div>
-  <div id="timer" class="countdown-timer"></div>
-   </div>
-  </section>  
-  
-  <section class="anmeldung">  
-    <h2>👥 Jetzt anmelden</h2>  
-  
-    <input id="nickname" type="text" placeholder="Spitzname" required>
-<input id="vorname" type="text" placeholder="Vorname" required>
-<input id="nachname" type="text" placeholder="Nachname" required>  
-  
-<input type="text" id="honeypot" style="display:none" autocomplete="off">  
-  
-<div class="datenschutz-box">  
-  <p>  
-    Bitte lies vor der Anmeldung unsere   
-    <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a>.  
-  </p>  
-  
-  <label class="checkbox-row">
-  <input type="checkbox" id="datenschutzCheck">
-  <span>
-    Ich habe die Datenschutzerklärung gelesen und akzeptiere die Verarbeitung meiner Daten zur Turnieranmeldung.
-  </span>
-</label>
-</div>  
-  
-<div class="regelwerk-box">  
-  <p>  
-    Bitte lies vor der Anmeldung unser   
-    <a href="regeln.html" target="_blank">Regelwerk</a>.  
-  </p>  
-  
-  <label class="checkbox-row">
-  <input type="checkbox" id="regelCheck">
-  <span>
-    Ich habe das Regelwerk gelesen und akzeptiere es.
-  </span>
-</label>
-</div>  
-  
-<button id="anmeldeButton" onclick="anmelden()" disabled>  
-  Anmeldung absenden  
-</button>  
-
-</div> 
-    <p class="hinweis">Dein Platz wird live in der Warteschlange angezeigt.</p>  
-    <div class="quick-info">
-  <div>🎯 <strong>501 Master Out</strong></div>
-  <div>🔁 <strong>Doppel K.O.</strong></div>
-  <div>⚡ <strong>Best of 3</strong></div>
-</div>
- <div class="anmeldung-logo">
-  <img src="EA5EE930-1AD4-4D93-B4A2-0CD4D1D3C065.png" alt="Dannis Treff Logo">
-</div>   
-  </section>  
-  
-</main>  
-  
-  
-  
-<section class="status">  
-  
-  <div class="box">  
-    <div class="icon">👥</div>  
-    <div id="belegt">0 / ∞</div>  
-    <small>BELEGTE PLÄTZE</small>  
-    <div class="bar">  
-      <div id="barBelegt"></div>  
-    </div>  
-  </div>  
-  
-  <div class="box">  
-    <div class="icon">⏳</div>  
-    <div id="wartend">0</div>  
-    <small>WARTESCHLANGE</small>  
-    <div class="bar">  
-      <div id="barWartend"></div>  
-    </div>  
-  </div>  
-  
-  <div class="box">  
-    <div class="icon">€</div>  
-    <div>10,00 €</div>  
-    <small>STARTGELD</small>  
-  </div>  
-  
-</section>  
-  
-<section class="listen-container">
-
-  <div class="liste liste-bezahlt">
-    <h2>✅ Bezahlte Teilnehmer</h2>
-    <ol id="bezahlteListe"></ol>
-  </div>
-
-  <div class="liste liste-wartend">
-    <h2>⏳ Warteschlange</h2>
-    <ol id="warteschlange"></ol>
-  </div>
-
-</section>  
-  
-<section class="info-zahlung">  
-  
-  <!-- LINKS: Ablauf -->  
-  <div class="ablauf">  
-    <h2>So funktioniert's</h2>  
-  
-    <div class="steps">  
-      <div class="step">  
-        <div class="nummer">1</div>  
-        <div>  
-          <h3>Anmeldung</h3>  
-          <p>Fülle das Formular aus und sende deine Anmeldung ab.</p>  
-        </div>  
-      </div>  
-  
-      <div class="step">  
-        <div class="nummer">2</div>  
-        <div>  
-          <h3>Zahlung</h3>  
-          <p>Überweise das Startgeld per PayPal.</p>  
-        </div>  
-      </div>  
-  
-      <div class="step">  
-        <div class="nummer">3</div>  
-        <div>  
-          <h3>Platz sichern</h3>  
-          <p>Nach Zahlungseingang rutschst du in die Teilnehmerliste.</p>  
-        </div>  
-      </div>  
-  
-      <div class="step">  
-        <div class="nummer">4</div>  
-        <div>  
-          <h3>Turnier spielen</h3>  
-          <p>Komm am Spieltag vorbei und spiel dein Turnier!</p>  
-        </div>  
-      </div>  
-    </div>  
-  </div>  
-  
-  <!-- RECHTS: PayPal -->  
-  <div class="zahlung-box">  
-    <h2>💳 Zahlung per PayPal</h2>  
-  
-    <p>Bitte sende das Startgeld in Höhe von <strong>10,00 €</strong> an:</p>  
-  
-    <a href="#" id="paypalLink" class="paypal-btn disabled" target="_blank">  
-  👉 paypal.me/DannisTreff  
-</a>  
-  
-    <div class="hinweis-zahlung">  
-      <p><strong>Wichtig:</strong></p>  
-      <ul>  
-        <li>Bitte Name + Turniertag angeben</li>  
-        <li>Anmeldung erst nach Zahlung gültig</li>  
-        <li>Keine Rückerstattung bei Nichterscheinen</li>  
-      </ul>  
-    </div>  
-  </div>  
-  
-</section>  
-  
-<footer>  
-  Dannis Treff Dart Turnier 2026<br>  
-  <a href="impressum.html">Impressum</a> |   
-  <a href="datenschutz.html">Datenschutz</a>  
-</footer>  
-  
-<script type="module" src="script.js"></script>
-
-<script>
-const checkboxDatenschutz = document.getElementById("datenschutzCheck");
-const checkboxRegel = document.getElementById("regelCheck");
-const button = document.getElementById("anmeldeButton");
-
-const nicknameInput = document.getElementById("nickname");
-const vornameInput = document.getElementById("vorname");
-const nachnameInput = document.getElementById("nachname");
-
-function checkForm() {
-  const nicknameOk = nicknameInput.value.trim().length >= 2;
-  const vornameOk = vornameInput.value.trim().length >= 2;
-  const nachnameOk = nachnameInput.value.trim().length >= 2;
-
-  const datenschutzOk = checkboxDatenschutz.checked;
-  const regelOk = checkboxRegel.checked;
-
-  button.disabled = !(nicknameOk && vornameOk && nachnameOk && datenschutzOk && regelOk);
-}
-
-checkboxDatenschutz.addEventListener("change", checkForm);
-checkboxRegel.addEventListener("change", checkForm);
-
-nicknameInput.addEventListener("input", checkForm);
-vornameInput.addEventListener("input", checkForm);
-nachnameInput.addEventListener("input", checkForm);
-</script>
-
-<button onclick="adminLogin()">🔒 Admin</button>
-
-<div id="adminBereich" style="display:none; margin-top:20px;">
-  <h2>Admin Bereich</h2>
-
-  <button onclick="spielerFreigeben()">Spieler freigeben</button>
-  <button onclick="listeLeeren()">Liste leeren</button>
-</div>
-
- <div id="successMessage" class="success-box" style="display:none;">
-  <div class="big180">180!!!</div>
-  <div class="success-text">
-    Jetzt bist du erfolgreich in der Warteschlange.<br>
-    Nach Zahlung erhältst du deinen Turnierplatz.
-  </div>
-</div>
 </body>
 </html>
