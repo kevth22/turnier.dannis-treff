@@ -964,3 +964,61 @@ footer {
   border-left: 4px solid #e00022;
   padding-left: 10px;
 }
+.spieler-card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 15px;
+  padding: 15px;
+  text-align: center;
+  border: 1px solid #222;
+  transition: 0.2s;
+}
+
+.spieler-card:hover {
+  transform: scale(1.03);
+  border-color: #e00022;
+}
+
+.spieler-bild {
+  width: 100%;
+  max-width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #e00022;
+  margin-bottom: 10px;
+}
+.spieler-bild {
+  box-shadow: 0 0 15px rgba(224,0,34,0.6);
+}
+/* KADER: Hover Glow + Name Animation */
+
+.spieler-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.spieler-card:hover {
+  transform: translateY(-5px) scale(1.03);
+  box-shadow: 0 0 22px rgba(224, 0, 34, 0.55);
+  border-color: #e00022;
+}
+
+.spieler-card h3 {
+  transition: color 0.25s ease, transform 0.25s ease, text-shadow 0.25s ease;
+}
+
+.spieler-card:hover h3 {
+  color: #ff2b2b;
+  transform: scale(1.05);
+  text-shadow: 0 0 10px rgba(255, 43, 43, 0.8);
+}
+
+.spieler-bild {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.spieler-card:hover .spieler-bild {
+  transform: scale(1.08);
+  box-shadow: 0 0 18px rgba(224, 0, 34, 0.75);
+}
