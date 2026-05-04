@@ -917,3 +917,44 @@ footer {
   background: #e00022;
   color: white;
 }
+
+.liga-tabs {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.liga-tab {
+  flex: 1;
+  background: #222;
+  color: white;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.liga-tab.active {
+  background: #e00022;
+}
+
+.liga-frame-box {
+  margin-top: 20px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 16px;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.liga-frame-box h3 {
+  margin: 0 0 12px;
+  color: white;
+}
+
+.liga-frame {
+  width: 100%;
+  height: 650px;
+  border: none;
+  border-radius: 12px;
+  background: #111;
+}
