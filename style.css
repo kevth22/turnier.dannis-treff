@@ -1087,3 +1087,14 @@ body.kader-seite {
   margin-top: 5px;
   text-align: center;
 }
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #111;
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  border-top: 1px solid #333;
+  z-index: 9999;
+}
