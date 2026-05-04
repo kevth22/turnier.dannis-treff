@@ -917,12 +917,26 @@ footer {
   background: #e00022;
   color: white;
 }
+.liga-frame-box {
+  width: 100% !important;
+  overflow: hidden;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid #333;
+  border-radius: 16px;
+  padding: 10px;
+  margin-bottom: 30px;
+}
+
+.liga-frame-wrapper {
+  width: 100% !important;
+  height: 900px !important;
+  overflow: hidden;
+}
 
 .liga-frame {
-  width: 1200px;            
-  height: 1400px;           
-  border: none;
-
-  transform: scale(1.0);    
-  transform-origin: top left;
+  width: 100% !important;
+  height: 900px !important;
+  border: none !important;
+  border-radius: 12px;
+  display: block;
 }
