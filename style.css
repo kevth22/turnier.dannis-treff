@@ -959,3 +959,8 @@ footer {
 .liga-seite .bottom-nav a {
   color: white;
 }
+.kader-seite h2 {
+  margin-top: 30px;
+  border-left: 4px solid #e00022;
+  padding-left: 10px;
+}
