@@ -918,3 +918,23 @@ footer {
   color: white;
 }
 
+.liga-frame-box {
+  background: rgba(255,255,255,0.05);
+  border-radius: 16px;
+  padding: 15px;
+  margin-bottom: 30px;
+  border: 1px solid #333;
+}
+
+.liga-frame {
+  width: 100%;
+  height: 700px;
+  border: none;
+  border-radius: 10px;
+  background: #111;
+}
+
+.liga-frame-box h2 {
+  color: #e60000;
+  margin-bottom: 10px;
+}
