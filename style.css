@@ -1075,7 +1075,7 @@ footer {
   box-shadow: 0 0 20px rgba(224,0,34,0.6);
 }
 body.kader-seite {
-  padding-bottom: 100px; /* Platz für Navbar */
+  padding-bottom: 140px; /* Platz für Navbar */
 }
 
 .spieler-card h3 {
