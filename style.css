@@ -752,18 +752,23 @@ footer {
   display: inline-block;
 }PS
 
+/* APP-SEITEN: Startseite + Kalender sauber dunkel mit roten Akzenten */
+
 .app-header {
   text-align: center;
   padding: 25px;
+  background: #111;
+  color: white;
 }
 
 .app-header h1 {
-  color: #ffcc00;
+  color: white;
   margin: 10px 0;
 }
 
 .app-container {
   padding: 15px;
+  padding-bottom: 90px;
 }
 
 .quick-grid {
@@ -779,28 +784,36 @@ footer {
   text-align: center;
   color: white;
   text-decoration: none;
+  border: 1px solid #333;
 }
 
 .quick-card h3 {
   margin: 10px 0 5px;
-  color: #ffcc00;
+  color: white;
 }
 
 .info-card {
   margin-top: 20px;
   padding: 20px;
   background: rgba(255,255,255,0.08);
+  border: 1px solid #333;
   border-radius: 15px;
+  color: white;
 }
 
 .main-button {
   display: inline-block;
   margin-top: 10px;
-  background: #ffcc00;
-  color: black;
+  background: #e00022;
+  color: white;
+  border: none;
   padding: 10px 15px;
   border-radius: 10px;
   text-decoration: none;
+}
+
+.main-button:hover {
+  background: #ff002b;
 }
 
 .bottom-nav {
@@ -811,6 +824,7 @@ footer {
   display: flex;
   justify-content: space-around;
   padding: 10px 0;
+  border-top: 1px solid #333;
 }
 
 .bottom-nav a {
@@ -830,6 +844,8 @@ footer {
 .kalender-nav button {
   width: auto;
   padding: 8px 14px;
+  background: #e00022;
+  color: white;
 }
 
 .kalender-grid {
@@ -841,25 +857,28 @@ footer {
 .kalender-kopf div {
   text-align: center;
   font-weight: bold;
-  color: #ffcc00;
+  color: white;
 }
 
 .kalender-tag {
   min-height: 70px;
   background: rgba(255,255,255,0.07);
+  border: 1px solid #333;
   border-radius: 10px;
   padding: 6px;
   font-size: 13px;
+  color: white;
 }
 
 .kalender-tag.leer {
   background: transparent;
+  border: none;
 }
 
 .kalender-event {
   margin-top: 5px;
-  background: #ffcc00;
-  color: #111;
+  background: #e00022;
+  color: white;
   border-radius: 6px;
   padding: 4px;
   font-size: 11px;
@@ -868,6 +887,7 @@ footer {
 
 .spieltag-card {
   background: rgba(255,255,255,0.08);
+  border: 1px solid #333;
   border-radius: 15px;
   padding: 15px;
   margin-bottom: 12px;
@@ -875,7 +895,7 @@ footer {
 
 .spieltag-card h4 {
   margin: 0 0 5px;
-  color: #ffcc00;
+  color: white;
 }
 
 .spieltag-meta {
@@ -894,69 +914,6 @@ footer {
   width: auto;
   padding: 6px 10px;
   font-size: 12px;
-}
-body {
-  background: #0f0f0f;
+  background: #e00022;
   color: white;
 }
-
-.app-header {
-  background: #8B0000; /* dunkelrot */
-  color: white;
-}
-
-.main-button {
-  background: #e60000; /* kräftiges rot */
-  color: white;
-  border: none;
-}
-
-.main-button:hover {
-  background: #b30000;
-}
-
-.info-card {
-  background: rgba(139, 0, 0, 0.15); /* leicht rot im Hintergrund */
-  border: 1px solid #8B0000;
-}
-
-.bottom-nav {
-  background: #8B0000;
-}
-
-.bottom-nav a {
-  color: white;
-}
-
-/* TEXT ROT */
-h1, h2, h3, h4 {
-  color: #e60000;
-}
-
-/* OPTIONAL: wichtige Texte */
-.app-header h1 {
-  color: #e60000;
-}
-
-/* BUTTONS ROT */
-.main-button {
-  background: #e60000;
-  color: white;
-  border: none;
-}
-
-.main-button:hover {
-  background: #b30000;
-}
-
-/* NAV UNTEN (optional auch rot) */
-.bottom-nav a {
-  color: #e60000;
-}
-
-/* KALENDER EVENTS ROT */
-.kalender-event {
-  background: #e60000;
-  color: white;
-}
-
