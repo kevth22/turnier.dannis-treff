@@ -927,16 +927,36 @@ body {
 .bottom-nav a {
   color: white;
 }
-.kalender-tag {
-  background: rgba(255, 0, 0, 0.1);
-  border: 1px solid #8B0000;
+
+/* TEXT ROT */
+h1, h2, h3, h4 {
+  color: #e60000;
 }
 
+/* OPTIONAL: wichtige Texte */
+.app-header h1 {
+  color: #e60000;
+}
+
+/* BUTTONS ROT */
+.main-button {
+  background: #e60000;
+  color: white;
+  border: none;
+}
+
+.main-button:hover {
+  background: #b30000;
+}
+
+/* NAV UNTEN (optional auch rot) */
+.bottom-nav a {
+  color: #e60000;
+}
+
+/* KALENDER EVENTS ROT */
 .kalender-event {
   background: #e60000;
   color: white;
-  border-radius: 5px;
-  padding: 2px 4px;
-  margin-top: 4px;
-  font-size: 12px;
 }
+
