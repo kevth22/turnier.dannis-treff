@@ -10,7 +10,8 @@ import {
   query,
   where,
   updateDoc,
-  doc
+  doc,
+  deleteDoc,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -275,18 +276,51 @@ function rueckmeldungenAnzeigen(spieltagId) {
 
   const rueckmeldungen = zusagen.filter(z => z.spieltagId === spieltagId);
 
-  const fahrer = rueckmeldungen.filter(z => z.status === "Fahrer");
-  const direkt = rueckmeldungen.filter(z => z.status === "Komme direkt");
-  const dabei = rueckmeldungen.filter(z => z.status === "Dabei");
-  const nein = rueckmeldungen.filter(z => z.status === "Nein");
+  if (rueckmeldungen.length === 0) {
+    box.innerHTML = "<p>Keine Rückmeldungen</p>";
+    return;
+  }
 
-  box.innerHTML = `
-    <p><strong>🚗 Fahrer:</strong> ${fahrer.map(z => z.name).join(", ") || "-"}</p>
-    <p><strong>📍 Kommt direkt:</strong> ${direkt.map(z => z.name).join(", ") || "-"}</p>
-    <p><strong>✅ Dabei:</strong> ${dabei.map(z => z.name).join(", ") || "-"}</p>
-    <p><strong>❌ Nein:</strong> ${nein.map(z => z.name).join(", ") || "-"}</p>
-  `;
+  box.innerHTML = "";
+
+  rueckmeldungen.forEach((z) => {
+    const div = document.createElement("div");
+    div.style.marginBottom = "10px";
+
+    div.innerHTML = `
+      <strong>${z.name}</strong> → ${z.status}
+    `;
+
+    // 👇 ADMIN FUNKTION
+    if (aktuellerUser && aktuellerUser.rolle === "admin") {
+
+      const actions = document.createElement("div");
+
+      actions.innerHTML = `
+        <button onclick="adminUpdate('${z.id}', 'Dabei')">Dabei</button>
+        <button onclick="adminUpdate('${z.id}', 'Fahrer')">Fahrer</button>
+        <button onclick="adminUpdate('${z.id}', 'Komme direkt')">Direkt</button>
+        <button onclick="adminUpdate('${z.id}', 'Nein')">Nein</button>
+        <button onclick="adminDelete('${z.id}')">❌</button>
+      `;
+
+      div.appendChild(actions);
+    }
+
+    box.appendChild(div);
+  });
 }
+window.adminUpdate = async function (docId, status) {
+  await updateDoc(doc(db, "zusagen", docId), {
+    status: status
+  });
+};
+
+window.adminDelete = async function (docId) {
+  if (confirm("Eintrag wirklich löschen?")) {
+    await deleteDoc(doc(db, "zusagen", docId));
+  }
+};
 
 window.abstimmen = async function (spieltagId, status) {
   if (!aktuellerUser) {
