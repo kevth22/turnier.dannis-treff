@@ -917,17 +917,4 @@ footer {
   background: #e00022;
   color: white;
 }
-.liga-frame {
-  width: 100%;
-  height: 700px;
-  border: none;
-  display: block;
-  margin-bottom: 12px;
-}
 
-@media (max-width: 768px) {
-  .liga-frame {
-    width: 100%;
-    height: 650px;
-  }
-}
