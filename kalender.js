@@ -63,7 +63,47 @@ window.login = async function () {
     document.getElementById("loginFehler").style.display = "block";
   }
 };
+  function spieltagListeAnzeigen() {
+  const liste = document.getElementById("spieltagListe");
+  if (!liste) return;
 
+  liste.innerHTML = "";
+
+  const jahr = aktuellesDatum.getFullYear();
+  const monat = aktuellesDatum.getMonth() + 1;
+
+  const relevanteSpieltage = spieltage.filter(s => {
+    const [y, m] = s.datum.split("-");
+    return parseInt(y) === jahr && parseInt(m) === monat;
+  });
+
+  if (relevanteSpieltage.length === 0) {
+    liste.innerHTML = "<p>Keine Spieltage in diesem Monat.</p>";
+    return;
+  }
+
+  relevanteSpieltage.forEach(spieltag => {
+    const card = document.createElement("div");
+    card.classList.add("spieltag-card");
+
+    card.innerHTML = `
+      <h4>${spieltag.liga}</h4>
+      <div class="spieltag-meta">
+        📅 ${spieltag.datum} <br>
+        ⏰ Anwurf: ${spieltag.anwurf} <br>
+        🕒 Treffen: ${spieltag.treffen || "-"} <br>
+        📍 ${spieltag.ort} <br>
+        ${spieltag.typ === "heim" ? "🏠 Heimspiel" : "🚗 Auswärtsspiel"}
+      </div>
+
+      <div class="spieltag-actions">
+        <button onclick="zeigeSpieltag('${spieltag.id}')">Details</button>
+      </div>
+    `;
+
+    liste.appendChild(card);
+  });
+}
 window.spieltagSpeichern = async function () {
   const liga = document.getElementById("spieltagLiga").value.trim();
   const datum = document.getElementById("spieltagDatum").value;
@@ -157,7 +197,7 @@ function kalenderZeichnen() {
       event.classList.add("kalender-event");
       event.textContent = spieltag.liga;
       event.onclick = function () {
-        zeigeSpieltag(spieltag);
+        zeigeSpieltag(spieltag.id);
       };
 
       feld.appendChild(event);
@@ -165,7 +205,7 @@ function kalenderZeichnen() {
 
     grid.appendChild(feld);
   }
-}
+spieltagListeAnzeigen();}
 
 window.monatZurueck = function () {
   aktuellesDatum.setMonth(aktuellesDatum.getMonth() - 1);
@@ -177,8 +217,11 @@ window.monatVor = function () {
   kalenderZeichnen();
 };
 
-function zeigeSpieltag(spieltag) {
-  const details = document.getElementById("spieltagDetails");
+window.zeigeSpieltag = function (spieltagId) {
+  const spieltag = spieltage.find(s => s.id === spieltagId);
+  if (!spieltag) return;
+
+const details = document.getElementById("spieltagDetails");
 
   details.style.display = "block";
 

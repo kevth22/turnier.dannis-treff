@@ -819,3 +819,79 @@ footer {
   font-size: 12px;
   text-align: center;
 }
+
+.kalender-nav {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.kalender-nav button {
+  width: auto;
+  padding: 8px 14px;
+}
+
+.kalender-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.kalender-kopf div {
+  text-align: center;
+  font-weight: bold;
+  color: #ffcc00;
+}
+
+.kalender-tag {
+  min-height: 70px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 6px;
+  font-size: 13px;
+}
+
+.kalender-tag.leer {
+  background: transparent;
+}
+
+.kalender-event {
+  margin-top: 5px;
+  background: #ffcc00;
+  color: #111;
+  border-radius: 6px;
+  padding: 4px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.spieltag-card {
+  background: rgba(255,255,255,0.08);
+  border-radius: 15px;
+  padding: 15px;
+  margin-bottom: 12px;
+}
+
+.spieltag-card h4 {
+  margin: 0 0 5px;
+  color: #ffcc00;
+}
+
+.spieltag-meta {
+  font-size: 13px;
+  color: #ccc;
+}
+
+.spieltag-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.spieltag-actions button {
+  width: auto;
+  padding: 6px 10px;
+  font-size: 12px;
+}
