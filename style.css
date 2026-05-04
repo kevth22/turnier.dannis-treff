@@ -918,3 +918,44 @@ footer {
   color: white;
 }
 
+/* LIGA-SEITE: Schwarz mit roten Akzenten */
+
+.liga-seite h1,
+.liga-seite h2,
+.liga-seite h3 {
+  color: white;
+}
+
+.liga-seite h2 {
+  border-left: 4px solid #e00022;
+  padding-left: 10px;
+}
+
+.liga-seite .info-card {
+  background: #111;
+  border: 1px solid #333;
+}
+
+.liga-seite .main-button {
+  background: #e00022;
+  color: white;
+  border: none;
+}
+
+.liga-seite .main-button:hover {
+  background: #ff002b;
+}
+
+.liga-seite iframe {
+  background: #111;
+  border-radius: 12px;
+}
+
+.liga-seite .bottom-nav {
+  background: #111;
+  border-top: 1px solid #333;
+}
+
+.liga-seite .bottom-nav a {
+  color: white;
+}
