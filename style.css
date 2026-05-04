@@ -1060,3 +1060,30 @@ footer {
   transform: scale(1.1);
   box-shadow: 0 0 20px rgba(224, 0, 34, 0.8);
 }
+
+.spieler-bild {
+  display: block;
+  margin: 0 auto; /* ZENTRIERT */
+  
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+
+  border-radius: 50%;
+  border: 3px solid #e00022;
+
+  box-shadow: 0 0 20px rgba(224,0,34,0.6);
+}
+body.kader-seite {
+  padding-bottom: 100px; /* Platz für Navbar */
+}
+
+.spieler-card h3 {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.rolle {
+  margin-top: 5px;
+  text-align: center;
+}
