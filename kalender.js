@@ -253,6 +253,12 @@ window.aktiverSpieltagId = spieltag.id;
     <p>📍 Ort: ${spieltag.ort}</p>
     <p>🏠 Typ: ${spieltag.typ === "heim" ? "Heimspiel" : "Auswärtsspiel"}</p>
 
+${aktuellerUser && aktuellerUser.rolle === "admin" ? `
+  <button class="main-button" style="background:#555;" onclick="spieltagLoeschen('${spieltag.id}')">
+    ❌ Spieltag löschen
+  </button>
+` : ""}
+
     <h3>Deine Rückmeldung</h3>
 
     <button class="main-button" onclick="abstimmen('${spieltag.id}', 'Dabei')">Dabei</button>
@@ -321,7 +327,15 @@ window.adminDelete = async function (docId) {
     await deleteDoc(doc(db, "zusagen", docId));
   }
 };
+window.spieltagLoeschen = async function (spieltagId) {
+  if (!confirm("Diesen Spieltag wirklich löschen?")) return;
 
+  await deleteDoc(doc(db, "spieltage", spieltagId));
+
+  alert("Spieltag gelöscht");
+
+  document.getElementById("spieltagDetails").style.display = "none";
+};
 window.abstimmen = async function (spieltagId, status) {
   if (!aktuellerUser) {
     alert("Bitte neu einloggen.");
