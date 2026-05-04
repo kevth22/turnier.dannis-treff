@@ -919,6 +919,7 @@ footer {
 }
 
 .liga-frame-box {
+  display: block;
   background: rgba(255,255,255,0.05);
   border-radius: 16px;
   padding: 15px;
@@ -946,6 +947,7 @@ footer {
   margin-bottom: 10px;
 }
 .liga-frame-box {
+  display: block;
   background: rgba(139, 0, 0, 0.15);
   border: 1px solid #8B0000;
   border-radius: 16px;
