@@ -6,7 +6,9 @@ import {
   addDoc,
   onSnapshot,
   serverTimestamp,
-  getDocs
+  getDocs,
+  query,
+  where
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -22,6 +24,8 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const spieltageRef = collection(db, "spieltage");
+const zusagenRef = collection(db, "zusagen");
+let zusagen = [];
 
 let aktuellerUser = null;
 let spieltage = [];
@@ -149,6 +153,19 @@ onSnapshot(spieltageRef, (snapshot) => {
   kalenderZeichnen();
 });
 
+onSnapshot(zusagenRef, (snapshot) => {
+  zusagen = [];
+
+  snapshot.forEach((doc) => {
+    zusagen.push({
+      id: doc.id,
+      ...doc.data()
+    });
+  });
+if (window.aktiverSpieltagId) {
+  rueckmeldungenAnzeigen(window.aktiverSpieltagId);
+}});
+
 function kalenderZeichnen() {
   const grid = document.getElementById("kalenderGrid");
   const titel = document.getElementById("monatTitel");
@@ -216,21 +233,14 @@ window.monatVor = function () {
   aktuellesDatum.setMonth(aktuellesDatum.getMonth() + 1);
   kalenderZeichnen();
 };
-
 window.zeigeSpieltag = function (spieltagId) {
   const spieltag = spieltage.find(s => s.id === spieltagId);
   if (!spieltag) return;
 
-const details = document.getElementById("spieltagDetails");
+window.aktiverSpieltagId = spieltag.id;
 
+  const details = document.getElementById("spieltagDetails");
   details.style.display = "block";
-
-  const auswaertsOptionen = spieltag.typ === "auswaerts"
-    ? `
-      <button class="main-button">Fahrer</button>
-      <button class="main-button">Komme direkt</button>
-    `
-    : "";
 
   details.innerHTML = `
     <h2>${spieltag.liga}</h2>
@@ -241,12 +251,57 @@ const details = document.getElementById("spieltagDetails");
     <p>🏠 Typ: ${spieltag.typ === "heim" ? "Heimspiel" : "Auswärtsspiel"}</p>
 
     <h3>Deine Rückmeldung</h3>
-    <button class="main-button">Dabei</button>
-    ${auswaertsOptionen}
-    <button class="main-button">Nein</button>
+
+    <button class="main-button" onclick="abstimmen('${spieltag.id}', 'Dabei')">Dabei</button>
+
+    ${spieltag.typ === "auswaerts" ? `
+      <button class="main-button" onclick="abstimmen('${spieltag.id}', 'Fahrer')">Fahrer</button>
+      <button class="main-button" onclick="abstimmen('${spieltag.id}', 'Komme direkt')">Komme direkt</button>
+    ` : ""}
+
+    <button class="main-button" onclick="abstimmen('${spieltag.id}', 'Nein')">Nein</button>
+
+    <h3>Rückmeldungen</h3>
+    <div id="rueckmeldungen"></div>
+  `;
+
+  rueckmeldungenAnzeigen(spieltag.id);
+};
+function rueckmeldungenAnzeigen(spieltagId) {
+  const box = document.getElementById("rueckmeldungen");
+  if (!box) return;
+
+  const rueckmeldungen = zusagen.filter(z => z.spieltagId === spieltagId);
+
+  const fahrer = rueckmeldungen.filter(z => z.status === "Fahrer");
+  const direkt = rueckmeldungen.filter(z => z.status === "Komme direkt");
+  const dabei = rueckmeldungen.filter(z => z.status === "Dabei");
+  const nein = rueckmeldungen.filter(z => z.status === "Nein");
+
+  box.innerHTML = `
+    <p><strong>🚗 Fahrer:</strong> ${fahrer.map(z => z.name).join(", ") || "-"}</p>
+    <p><strong>📍 Kommt direkt:</strong> ${direkt.map(z => z.name).join(", ") || "-"}</p>
+    <p><strong>✅ Dabei:</strong> ${dabei.map(z => z.name).join(", ") || "-"}</p>
+    <p><strong>❌ Nein:</strong> ${nein.map(z => z.name).join(", ") || "-"}</p>
   `;
 }
 
+window.abstimmen = async function (spieltagId, status) {
+  if (!aktuellerUser) {
+    alert("Bitte neu einloggen.");
+    return;
+  }
+
+  await addDoc(zusagenRef, {
+    spieltagId: spieltagId,
+    name: aktuellerUser.name,
+    benutzername: aktuellerUser.benutzername,
+    status: status,
+    erstelltAm: serverTimestamp()
+  });
+
+  alert("Rückmeldung gespeichert: " + status);
+};
 const gespeicherterUser = sessionStorage.getItem("user");
 
 if (gespeicherterUser) {
