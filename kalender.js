@@ -332,9 +332,8 @@ function gruppeAnzeigen(gruppe) {
     `;
   }).join("");
 }
-  }
 
-  
+
 window.adminUpdate = async function (docId, status) {
   await updateDoc(doc(db, "zusagen", docId), {
     status: status
