@@ -8,7 +8,9 @@ import {
   serverTimestamp,
   getDocs,
   query,
-  where
+  where,
+  updateDoc,
+  doc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -292,15 +294,33 @@ window.abstimmen = async function (spieltagId, status) {
     return;
   }
 
-  await addDoc(zusagenRef, {
-    spieltagId: spieltagId,
-    name: aktuellerUser.name,
-    benutzername: aktuellerUser.benutzername,
-    status: status,
-    erstelltAm: serverTimestamp()
-  });
+  const q = query(
+    zusagenRef,
+    where("spieltagId", "==", spieltagId),
+    where("benutzername", "==", aktuellerUser.benutzername)
+  );
 
-  alert("Rückmeldung gespeichert: " + status);
+  const snapshot = await getDocs(q);
+
+  if (!snapshot.empty) {
+    snapshot.forEach(async (docSnap) => {
+      await updateDoc(doc(db, "zusagen", docSnap.id), {
+        status: status
+      });
+    });
+
+    alert("Rückmeldung geändert: " + status);
+  } else {
+    await addDoc(zusagenRef, {
+      spieltagId: spieltagId,
+      name: aktuellerUser.name,
+      benutzername: aktuellerUser.benutzername,
+      status: status,
+      erstelltAm: serverTimestamp()
+    });
+
+    alert("Rückmeldung gespeichert: " + status);
+  }
 };
 const gespeicherterUser = sessionStorage.getItem("user");
 
