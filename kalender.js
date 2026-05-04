@@ -282,40 +282,59 @@ function rueckmeldungenAnzeigen(spieltagId) {
 
   const rueckmeldungen = zusagen.filter(z => z.spieltagId === spieltagId);
 
-  if (rueckmeldungen.length === 0) {
-    box.innerHTML = "<p>Keine Rückmeldungen</p>";
-    return;
+  const fahrer = rueckmeldungen.filter(z => z.status === "Fahrer");
+  const direkt = rueckmeldungen.filter(z => z.status === "Komme direkt");
+  const dabei = rueckmeldungen.filter(z => z.status === "Dabei");
+  const nein = rueckmeldungen.filter(z => z.status === "Nein");
+
+  box.innerHTML = `
+    <div class="rueckmeldung-summary">
+      <div>✅<br><strong>${dabei.length}</strong><br>Dabei</div>
+      <div>🚗<br><strong>${fahrer.length}</strong><br>Fahrer</div>
+      <div>📍<br><strong>${direkt.length}</strong><br>Direkt</div>
+      <div>❌<br><strong>${nein.length}</strong><br>Nein</div>
+    </div>
+
+    <h4>🚗 Fahrer</h4>
+    ${gruppeAnzeigen(fahrer)}
+
+    <h4>✅ Dabei</h4>
+    ${gruppeAnzeigen(dabei)}
+
+    <h4>📍 Kommt direkt</h4>
+    ${gruppeAnzeigen(direkt)}
+
+    <h4>❌ Nein</h4>
+    ${gruppeAnzeigen(nein)}
+  `;
+}
+function gruppeAnzeigen(gruppe) {
+  if (gruppe.length === 0) return "<p>-</p>";
+
+  return gruppe.map(z => {
+    const adminButtons = aktuellerUser && aktuellerUser.rolle === "admin"
+      ? `
+        <div class="admin-actions">
+          <button onclick="adminUpdate('${z.id}', 'Dabei')">Dabei</button>
+          <button onclick="adminUpdate('${z.id}', 'Fahrer')">Fahrer</button>
+          <button onclick="adminUpdate('${z.id}', 'Komme direkt')">Direkt</button>
+          <button onclick="adminUpdate('${z.id}', 'Nein')">Nein</button>
+          <button onclick="adminDelete('${z.id}')">❌</button>
+        </div>
+      `
+      : "";
+
+    return `
+      <div class="rueckmeldung-person">
+        <span>${z.name}</span>
+        ${adminButtons}
+      </div>
+    `;
+  }).join("");
+}
   }
 
-  box.innerHTML = "";
-
-  rueckmeldungen.forEach((z) => {
-    const div = document.createElement("div");
-    div.style.marginBottom = "10px";
-
-    div.innerHTML = `
-      <strong>${z.name}</strong> → ${z.status}
-    `;
-
-    // 👇 ADMIN FUNKTION
-    if (aktuellerUser && aktuellerUser.rolle === "admin") {
-
-      const actions = document.createElement("div");
-
-      actions.innerHTML = `
-        <button onclick="adminUpdate('${z.id}', 'Dabei')">Dabei</button>
-        <button onclick="adminUpdate('${z.id}', 'Fahrer')">Fahrer</button>
-        <button onclick="adminUpdate('${z.id}', 'Komme direkt')">Direkt</button>
-        <button onclick="adminUpdate('${z.id}', 'Nein')">Nein</button>
-        <button onclick="adminDelete('${z.id}')">❌</button>
-      `;
-
-      div.appendChild(actions);
-    }
-
-    box.appendChild(div);
-  });
-}
+  
 window.adminUpdate = async function (docId, status) {
   await updateDoc(doc(db, "zusagen", docId), {
     status: status
