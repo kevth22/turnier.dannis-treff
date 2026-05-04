@@ -917,26 +917,17 @@ footer {
   background: #e00022;
   color: white;
 }
-.liga-frame-box {
-  width: 100% !important;
-  overflow: hidden;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid #333;
-  border-radius: 16px;
-  padding: 10px;
-  margin-bottom: 30px;
-}
-
-.liga-frame-wrapper {
-  width: 100% !important;
-  height: 900px !important;
-  overflow: hidden;
-}
-
 .liga-frame {
-  width: 100% !important;
-  height: 900px !important;
-  border: none !important;
-  border-radius: 12px;
+  width: 100%;
+  height: 700px;
+  border: none;
   display: block;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 768px) {
+  .liga-frame {
+    width: 100%;
+    height: 650px;
+  }
 }
