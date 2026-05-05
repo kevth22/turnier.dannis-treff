@@ -1165,3 +1165,19 @@ body.kader-seite {
 .liga-seite .bottom-nav a::first-line {
   font-size: 50px;
 }
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+
+  height: 95px;            /* 🔥 HÖHE */
+  padding: 12px 0 18px;
+
+  background: #111;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+  border-top: 1px solid #333;
+  z-index: 9999;
+}
