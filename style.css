@@ -1,438 +1,293 @@
-body {  
-  margin: 0;  
-  font-family: Arial, sans-serif;  
-  background: #050505;  
-  color: white;  
-}  
-  
-.navbar {  
-  display: flex;  
-  align-items: center;  
-  justify-content: space-between;  
-  padding: 15px 40px;  
-  background: #0b0b0b;  
-  border-bottom: 2px solid red;  
-}  
-  
-.logo-box {  
-  display: flex;  
-  align-items: center;  
-  gap: 10px; /* Abstand zwischen Logo & Text */  
-}  
-  
-.logo {  
-  height: 70px;  
-  weight: 95px;  
-}  
-  
-.logo-text {  
-  color: white;  
-  font-size: 110px;  
-  font-weight: 600;  
-  letter-spacing: 1px;  
-}  
-  
-  
-.menu a {  
-  color: white;  
-  text-decoration: none;  
-  margin-left: 25px;  
-  font-weight: 500;  
-}  
-  
-.menu a:hover {  
-  color: red;  
-}  
-.logo {  
-  font-weight: bold;  
-  font-size: 20px;  
-}  
-  
-nav a {  
-  color: white;  
-  text-decoration: none;  
-  margin-left: 25px;  
-  font-size: 14px;  
-  text-transform: uppercase;  
-}  
-  
-.hero {  
-  display: flex;  
-  gap: 40px;  
-  padding: 60px 50px;  
-  background: linear-gradient(90deg, #111 0%, #050505 100%);  
-}  
-  
-.info {  
-  flex: 1;  
-}  
-  
-.red {  
-  color: #e00022;  
-  font-weight: bold;  
-  font-size: 28px;  
-}  
-  
-.info h1 {  
-  font-size: 58px;  
-  line-height: 1.05;  
-  margin: 10px 0;  
-}  
-  
-.info h2 {  
-  font-size: 22px;  
-  margin-bottom: 30px;  
-}  
-  
-.info p {  
-  font-size: 18px;  
-  margin: 14px 0;  
-}  
-  
-.anmeldung {  
-  width: 380px;  
-  background: #111;  
-  border: 1px solid #333;  
-  border-radius: 12px;  
-  padding: 30px;  
-  box-shadow: 0 0 20px rgba(224, 0, 34, 0.2);  
-}  
-  
-.anmeldung h2 {  
-  color: #e00022;  
-  text-transform: uppercase;  
-  margin-top: 0;  
-}  
-  
-input {  
-  width: 100%;  
-  padding: 15px;  
-  margin: 15px 0;  
-  background: #1d1d1d;  
-  border: 1px solid #333;  
-  border-radius: 6px;  
-  color: white;  
-  font-size: 16px;  
-  box-sizing: border-box;  
-}  
-  
-button {  
-  width: 100%;  
-  padding: 15px;  
-  background: #e00022;  
-  color: white;  
-  border: none;  
-  border-radius: 6px;  
-  font-weight: bold;  
-  cursor: pointer;  
-  text-transform: uppercase;  
-}  
-  
-button:hover {  
-  background: #ff002b;  
-}  
-  
-.hinweis {  
-  color: #aaa;  
-  font-size: 13px;  
-  text-align: center;  
-}  
-  
-.stand, .liste {  
-  margin: 30px 50px;  
-  background: #101010;  
-  border: 1px solid #2a2a2a;  
-  border-radius: 12px;  
-  padding: 25px;  
-}  
-  
-.karten {  
-  display: flex;  
-  gap: 20px;  
-}  
-  
-.karte {  
-  flex: 1;  
-  background: #151515;  
-  border: 1px solid #333;  
-  border-radius: 10px;  
-  text-align: center;  
-  padding: 25px;  
-}  
-  
-.karte h3 {  
-  color: #aaa;  
-  text-transform: uppercase;  
-  font-size: 14px;  
-}  
-  
-.karte p {  
-  font-size: 34px;  
-  font-weight: bold;  
-  margin: 10px 0 0;  
-}  
-  
-ol {  
-  font-size: 20px;  
-}  
-  
-li {  
-  padding: 12px;  
-  border-bottom: 1px solid #333;  
-}  
-  
-footer {  
-  text-align: center;  
-  color: #aaa;  
-  padding: 30px;  
-}  
-  
-@media (max-width: 800px) {  
-  header {  
-    padding: 0 20px;  
-  }  
-  
-  nav {  
-    display: none;  
-  }  
-  
-  .hero {  
-    flex-direction: column;  
-    padding: 35px 20px;  
-  }  
-  
-  .info h1 {  
-    font-size: 42px;  
-  }  
-  
-  .anmeldung {  
-    width: auto;  
-  }  
-  
-  .karten {  
-    flex-direction: column;  
-  }  
-  
-  .stand, .liste {  
-    margin: 20px;  
-  }  
-}  
-.status {  
-  display: flex;  
-  gap: 20px;  
-  justify-content: center;  
-  margin-top: 40px;  
-}  
-  
-.box {  
-  background: #1a1a1a;  
-  padding: 20px;  
-  border-radius: 12px;  
-  text-align: center;  
-  width: 180px;  
-  color: white;  
-  box-shadow: 0 0 10px rgba(0,0,0,0.4);  
-}  
-  
-.icon {  
-  font-size: 30px;  
-  margin-bottom: 10px;  
-}  
-  
-.bar {  
-  width: 100%;  
-  height: 6px;  
-  background: #333;  
-  border-radius: 5px;  
-  margin-top: 10px;  
-  overflow: hidden;  
-}  
-  
-#barBelegt {  
-  height: 100%;  
-  background: #ff3b3b;  
-  width: 0%;  
-  transition: 0.3s;  
-}  
-  
-#barWartend {  
-  height: 100%;  
-  background: orange;  
-  width: 0%;  
-  transition: 0.3s;  
-}  
-  
-#anmeldeButton:disabled {  
-  opacity: 0.5;  
-  cursor: not-allowed;  
-}  
-  
-.datenschutz-box {  
-  margin-top: 20px;  
-  padding: 15px;  
-  border: 1px solid #444;  
-  border-radius: 10px;  
-  background: rgba(255,255,255,0.08);  
-  font-size: 14px;  
-}  
-  
-.ablauf {  
-  padding: 40px 20px;  
-  color: white;  
-}  
-  
-.ablauf h2 {  
-  margin-bottom: 20px;  
-  color: #ff2e2e;  
-}  
-  
-.steps {  
-  display: flex;  
-  flex-direction: column;  
-  gap: 15px;  
-}  
-  
-.step {  
-  display: flex;  
-  align-items: flex-start;  
-  gap: 15px;  
-  background: rgba(255,255,255,0.05);  
-  padding: 15px;  
-  border-radius: 10px;  
-}  
-  
-.nummer {  
-  min-width: 30px;  
-  height: 30px;  
-  background: #ff2e2e;  
-  border-radius: 50%;  
-  display: flex;  
-  align-items: center;  
-  justify-content: center;  
-  font-weight: bold;  
-}  
-  
-.step h3 {  
-  margin: 0;  
-  font-size: 16px;  
-}  
-  
-.step p {  
-  margin: 5px 0 0;  
-  font-size: 14px;  
-  color: #ccc;  
-}  
-  
-.zahlung {  
-  padding: 40px 20px;  
-}  
-  
-.zahlung-box {  
-  background: rgba(255,255,255,0.05);  
-  border-radius: 12px;  
-  padding: 20px;  
-  color: white;  
-  max-width: 500px;  
-}  
-  
-.paypal-btn {  
-  display: block;  
-  margin: 15px 0;  
-  padding: 12px;  
-  text-align: center;  
-  background: #0070ba;  
-  color: white;  
-  text-decoration: none;  
-  border-radius: 8px;  
-  font-weight: bold;  
-}  
-  
-.paypal-btn:hover {  
-  background: #005ea6;  
-}  
-  
-.hinweis-zahlung {  
-  margin-top: 15px;  
-  font-size: 14px;  
-  color: #ccc;  
-}  
-  
-.info-zahlung {  
-  display: flex;  
-  gap: 30px;  
-  padding: 40px 20px;  
-  align-items: flex-start;  
-}  
-  
-/* LINKS */  
-.ablauf {  
-  flex: 2;  
-}  
-  
-/* RECHTS */  
-.zahlung-box {  
-  flex: 1;  
-  background: rgba(255,255,255,0.05);  
-  border-radius: 12px;  
-  padding: 20px;  
-  color: white;  
-}  
-  
-/* PayPal Button */  
-.paypal-btn {  
-  display: block;  
-  margin: 15px 0;  
-  padding: 12px;  
-  text-align: center;  
-  background: #0070ba;  
-  color: white;  
-  text-decoration: none;  
-  border-radius: 8px;  
-  font-weight: bold;  
-}  
-  
-.paypal-btn:hover {  
-  background: #005ea6;  
-}  
-  
-/* Mobile Anpassung */  
-@media (max-width: 768px) {  
-  .info-zahlung {  
-    flex-direction: column;  
-  }  
-}  
-  
-.zahlung-box {  
-  border: 2px solid #0070ba;  
-}  
-  
-.paypal-btn.disabled {  
-  background: grey;  
-  pointer-events: none;  
-  opacity: 0.5;  
-}  
-  
-.paypal-btn.disabled {  
-  background: grey;  
-  pointer-events: none;  
-  opacity: 0.5;  
-}  
-  
-.regelwerk-box {  
-  margin-top: 15px;  
-  padding: 10px;
-  border: 1px solid #444;  
-  border-radius: 10px;  
+/* =========================
+   GRUNDLAYOUT
+========================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #050505;
+  color: white;
+  padding-bottom: 95px;
+}
+
+a {
+  color: inherit;
+}
+
+h1, h2, h3, h4 {
+  color: white;
+}
+
+.red {
+  color: #e00022;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+
+/* =========================
+   HEADER / TOP NAV
+========================= */
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 40px;
+  background: #0b0b0b;
+  border-bottom: 2px solid #e00022;
+}
+
+.logo-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  height: 70px;
+  width: auto;
+}
+
+.logo-text {
+  color: white;
+  font-size: 80px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.menu a,
+nav a {
+  color: white;
+  text-decoration: none;
+  margin-left: 25px;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.menu a:hover,
+nav a:hover {
+  color: #e00022;
+}
+
+
+/* =========================
+   START / HERO
+========================= */
+
+.hero {
+  display: flex;
+  gap: 40px;
+  padding: 60px 50px;
+  background: linear-gradient(90deg, #111 0%, #050505 100%);
+}
+
+.info {
+  flex: 1;
+}
+
+.info h1 {
+  font-size: 58px;
+  line-height: 1.05;
+  margin: 10px 0;
+}
+
+.info h2 {
+  font-size: 22px;
+  margin-bottom: 30px;
+}
+
+.info p {
+  font-size: 18px;
+  margin: 14px 0;
+}
+
+
+/* =========================
+   FORMULARE / BUTTONS
+========================= */
+
+input,
+select {
+  width: 100%;
+  padding: 15px;
+  margin: 15px 0;
+  background: #1d1d1d;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+}
+
+button,
+.main-button {
+  display: inline-block;
+  width: 100%;
+  padding: 15px;
+  background: #e00022;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+  text-decoration: none;
+  text-align: center;
+}
+
+button:hover,
+.main-button:hover {
+  background: #ff002b;
+}
+
+
+/* =========================
+   TURNIERSEITE
+========================= */
+
+.anmeldung {
+  width: 380px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 0 20px rgba(224, 0, 34, 0.25);
+}
+
+.anmeldung h2 {
+  color: #e00022;
+  text-transform: uppercase;
+  margin-top: 0;
+}
+
+.hinweis {
+  color: #aaa;
+  font-size: 13px;
+  text-align: center;
+}
+
+.stand,
+.liste {
+  margin: 30px 50px;
+  background: #101010;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 25px;
+}
+
+.karten {
+  display: flex;
+  gap: 20px;
+}
+
+.karte {
+  flex: 1;
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 10px;
+  text-align: center;
+  padding: 25px;
+}
+
+.karte h3 {
+  color: #aaa;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+.karte p {
+  font-size: 34px;
+  font-weight: bold;
+  margin: 10px 0 0;
+}
+
+.status {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.box {
+  background: #1a1a1a;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  width: 180px;
+  color: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+}
+
+.bar {
+  width: 100%;
+  height: 6px;
+  background: #333;
+  border-radius: 5px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+#barBelegt {
+  height: 100%;
+  background: #ff3b3b;
+  width: 0%;
+  transition: 0.3s;
+}
+
+#barWartend {
+  height: 100%;
+  background: orange;
+  width: 0%;
+  transition: 0.3s;
+}
+
+#anmeldeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.datenschutz-box,
+.regelwerk-box {
+  margin-top: 15px;
+  padding: 12px;
+  border: 1px solid #444;
+  border-radius: 10px;
   background: rgba(255,255,255,0.08);
   font-size: 14px;
 }
+
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.checkbox-row input {
+  width: 22px;
+  height: 22px;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
 .success-box {
-  margin-top: 20px;
-  padding: 20px;
-  border-radius: 12px;
-  background: rgba(0, 255, 0, 0.08);
-  border: 2px solid #00ff88;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  
+  background: #111;
+  border: 2px solid #00ff7f;
+  border-radius: 18px;
+  padding: 30px;
   text-align: center;
+  z-index: 9999;
+  box-shadow: 0 0 30px rgba(0, 255, 127, 0.5);
 }
 
 .big180 {
@@ -447,28 +302,12 @@ footer {
   font-size: 16px;
   color: #ccc;
 }
-#countdownBox {
-  margin-top: 15px;
-  padding: 15px;
-  background: rgba(0,0,0,0.7);
-  border-radius: 12px;
-  text-align: center;
-  border: 2px solid #e63946;
-  box-shadow: 0 0 15px rgba(230,57,70,0.4);
-}
 
-.countdown-title {
-  font-size: 16px;
-  color: #ccc;
-  margin-bottom: 5px;
-}
 
-.countdown-timer {
-  font-size: 28px;
-  font-weight: bold;
-  color: #fff;
-  letter-spacing: 2px;
-}
+/* =========================
+   AUSZAHLUNG / INFOS
+========================= */
+
 .auszahlung-box {
   margin-top: 25px;
   padding: 20px;
@@ -549,127 +388,11 @@ footer {
   font-weight: bold;
 }
 
-/* Handy-Ansicht */
-@media (max-width: 700px) {
-  .preise-grid {
-    grid-template-columns: 1fr;
-  }
-}
-.turnier-info {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
 
-.info-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px;
-  background: rgba(255,255,255,0.03);
-  border-radius: 10px;
-  border-left: 3px solid #e63946;
-}
+/* =========================
+   LISTEN
+========================= */
 
-.icon {
-  font-size: 20px;
-}
-
-.info-item strong {
-  color: white;
-  font-size: 14px;
-}
-
-.info-item div {
-  color: #ccc;
-  font-size: 13px;
-}
-.red {
-  color: #ff2b2b;
-  font-weight: bold;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-.event-details {
-  margin-top: 25px;
-  max-width: 520px;
-  border-top: 1px solid rgba(255,255,255,0.25);
-}
-
-.event-line {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 14px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.25);
-  color: white;
-  font-size: 20px;
-}
-
-.event-icon {
-  color: #ff2b2b;
-  font-size: 26px;
-  width: 35px;
-  text-align: center;
-}
-.quick-info {
-  margin-top: 15px;
-  padding: 14px;
-  border: 1px solid #ff2b2b;
-  border-radius: 12px;
-  background: rgba(255, 43, 43, 0.08);
-  box-shadow: 0 0 12px rgba(255, 43, 43, 0.25);
-  color: white;
-  font-size: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.quick-info strong {
-  color: #fff;
-}
-.success-box {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  
-  background: #111;
-  border: 2px solid #00ff7f;
-  border-radius: 18px;
-  padding: 30px;
-  text-align: center;
-
-  z-index: 9999;
-  box-shadow: 0 0 30px rgba(0, 255, 127, 0.5);
-}
-.anmeldung-logo {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 15px;
-  margin-top: 30px;
-}
-
-.anmeldung-logo img {
-  width: 280px;
-  opacity: 0,9;
-  filter: drop-shadow(0 0 10px rgba(255,0,0,0.5));
-}
-.infinity {
-  font-size: 26px;
-  font-weight: bold;
-  color: #ff2b2b;
-  text-shadow: 0 0 8px rgba(255, 43, 43, 0.7);
-}
-.infinity-status {
-  color: #ff2b2b !important;
-  font-size: 22px;
-  font-weight: bold;
-  text-shadow: 0 0 8px rgba(255, 43, 43, 0.8);
-}
 .listen-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -693,28 +416,6 @@ footer {
   margin-bottom: 12px;
 }
 
-@media (max-width: 800px) {
-  .listen-container {
-    grid-template-columns: 1fr;
-  }
-}
-.checkbox-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  cursor: pointer;
-}
-
-.checkbox-row input {
-  width: 22px;
-  height: 22px;
-  margin-top: 3px;
-  flex-shrink: 0;
-}
-
-.checkbox-row span {
-  line-height: 1.4;
-}
 .spieler-zeile,
 .spieler-admin {
   display: flex;
@@ -736,6 +437,7 @@ footer {
   font-weight: 700;
   white-space: nowrap;
 }
+
 .liste-bezahlt h2 {
   color: #39ff5a;
   background: rgba(57, 255, 90, 0.12);
@@ -750,14 +452,17 @@ footer {
   padding: 6px 12px;
   border-radius: 8px;
   display: inline-block;
-}PS
+}
 
-/* APP-SEITEN: Startseite + Kalender sauber dunkel mit roten Akzenten */
+
+/* =========================
+   APP-SEITEN
+========================= */
 
 .app-header {
   text-align: center;
   padding: 25px;
-  background: #111;
+  background: #050505;
   color: white;
 }
 
@@ -768,7 +473,7 @@ footer {
 
 .app-container {
   padding: 15px;
-  padding-bottom: 90px;
+  padding-bottom: 95px;
 }
 
 .quick-grid {
@@ -801,38 +506,10 @@ footer {
   color: white;
 }
 
-.main-button {
-  display: inline-block;
-  margin-top: 10px;
-  background: #e00022;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 10px;
-  text-decoration: none;
-}
 
-.main-button:hover {
-  background: #ff002b;
-}
-
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background: #111;
-  display: flex;
-  justify-content: space-around;
-  padding: 10px 0;
-  border-top: 1px solid #333;
-}
-
-.bottom-nav a {
-  color: white;
-  text-decoration: none;
-  font-size: 12px;
-  text-align: center;
-}
+/* =========================
+   KALENDER
+========================= */
 
 .kalender-nav {
   display: flex;
@@ -918,156 +595,86 @@ footer {
   color: white;
 }
 
-/* LIGA-SEITE: Schwarz mit roten Akzenten */
-
-.liga-seite h1,
-.liga-seite h2,
-.liga-seite h3 {
-  color: white;
+.rueckmeldung-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 20px 0;
 }
+
+.rueckmeldung-summary div {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+}
+
+.rueckmeldung-person {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.admin-actions button {
+  width: auto;
+  padding: 6px 8px;
+  font-size: 11px;
+}
+
+
+/* =========================
+   LIGA
+========================= */
 
 .liga-seite h2 {
   border-left: 4px solid #e00022;
   padding-left: 10px;
 }
 
-.liga-seite .info-card {
-  background: #111;
-  border: 1px solid #333;
-}
-
-.liga-seite .main-button {
-  background: #e00022;
-  color: white;
-  border: none;
-}
-
-.liga-seite .main-button:hover {
-  background: #ff002b;
-}
-
 .liga-seite iframe {
   background: #111;
   border-radius: 12px;
+  width: 100%;
+  min-height: 520px;
+  border: none;
 }
 
-.liga-seite .bottom-nav {
-  background: #111;
-  border-top: 1px solid #333;
-}
 
-.liga-seite .bottom-nav a {
-  color: white;
-}
+/* =========================
+   KADER
+========================= */
+
 .kader-seite h2 {
   margin-top: 30px;
   border-left: 4px solid #e00022;
   padding-left: 10px;
 }
-.spieler-card {
-  background: rgba(255,255,255,0.05);
-  border-radius: 15px;
+
+.kader-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 18px;
   padding: 15px;
-  text-align: center;
-  border: 1px solid #222;
-  transition: 0.2s;
 }
-
-.spieler-card:hover {
-  transform: scale(1.03);
-  border-color: #e00022;
-}
-
-.spieler-bild {
-  width: 100%;
-  max-width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 3px solid #e00022;
-  margin-bottom: 10px;
-}
-.spieler-bild {
-  box-shadow: 0 0 15px rgba(224,0,34,0.6);
-}
-/* 🔥 KADER PRO STYLE */
 
 .spieler-card {
   position: relative;
   overflow: hidden;
-  border-radius: 15px;
   background: rgba(255,255,255,0.05);
+  border-radius: 18px;
+  padding: 20px;
+  text-align: center;
   border: 1px solid #222;
-
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-/* 🔥 HOVER EFFEKT */
-.spieler-card:hover {
-  transform: translateY(-6px) scale(1.04);
-  box-shadow: 0 0 30px rgba(224, 0, 34, 0.7);
-}
-
-
-/* BILD */
-.spieler-bild {
-  width: 100%;
-  max-width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 3px solid #e00022;
-
-  transition: 0.3s;
-  z-index: 2;
-  position: relative;
-}
-
-.spieler-card:hover .spieler-bild {
-  transform: scale(1.1);
-  box-shadow: 0 0 20px rgba(224, 0, 34, 0.8);
-}
-
-.spieler-bild {
-  display: block;
-  margin: 0 auto; /* ZENTRIERT */
-  
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-
-  border-radius: 50%;
-  border: 3px solid #e00022;
-
-  box-shadow: 0 0 20px rgba(224,0,34,0.6);
-}
-body.kader-seite {
-  padding-bottom: 140px; /* Platz für Navbar */
-}
-
-.spieler-card h3 {
-  margin-top: 10px;
-  text-align: center;
-}
-
-.rolle {
-  margin-top: 5px;
-  text-align: center;
-}
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background: #111;
-  display: flex;
-  justify-content: space-around;
-  padding: 10px 0;
-  border-top: 1px solid #333;
-  z-index: 9999;
-}
-/* KADER: Königsblauer Hover */
-
-.spieler-card {
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
@@ -1077,10 +684,16 @@ body.kader-seite {
   box-shadow: 0 0 28px rgba(0, 71, 171, 0.85);
 }
 
-.spieler-card:hover h3 {
-  color: #4da3ff;
-  transform: translateY(-3px);
-  text-shadow: 0 0 12px rgba(0, 71, 171, 0.9);
+.spieler-bild {
+  display: block;
+  margin: 0 auto 12px;
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #0047ab;
+  box-shadow: 0 0 20px rgba(0, 71, 171, 0.65);
+  transition: 0.3s;
 }
 
 .spieler-card:hover .spieler-bild {
@@ -1088,33 +701,55 @@ body.kader-seite {
   border-color: #0047ab;
   box-shadow: 0 0 25px rgba(0, 71, 171, 0.9);
 }
-/* KADER: Roten Bildring endgültig auf Königsblau setzen */
 
-.kader-seite .spieler-bild {
-  border: 3px solid #0047ab !important;
-  box-shadow: 0 0 20px rgba(0, 71, 171, 0.65) !important;
+.spieler-card h3 {
+  margin-top: 10px;
+  text-align: center;
 }
 
-.kader-seite .spieler-card:hover {
-  border-color: #0047ab !important;
-  box-shadow: 0 0 28px rgba(0, 71, 171, 0.85) !important;
+.spieler-card:hover h3 {
+  color: #4da3ff;
+  transform: translateY(-3px);
+  text-shadow: 0 0 12px rgba(0, 71, 171, 0.9);
 }
 
-.kader-seite .spieler-card:hover .spieler-bild {
-  border-color: #0047ab !important;
-  box-shadow: 0 0 25px rgba(0, 71, 171, 0.9) !important;
+.rolle {
+  margin-top: 5px;
+  text-align: center;
+  font-weight: bold;
 }
-/* 🔥 EINHEITLICHE BOTTOM-NAV AUF ALLEN SEITEN */
+
+.captain {
+  color: #ff2b2b;
+}
+
+.cocaptain {
+  color: #ff9900;
+}
+
+.spieler {
+  color: #ccc;
+}
+
+
+/* =========================
+   BOTTOM NAV — EINHEITLICH
+========================= */
+
 .bottom-nav {
   position: fixed;
   bottom: 0;
+  left: 0;
   width: 100%;
-  height: 85px;
-  padding: 10px 0 14px;
+
+  height: 68px;
+  padding: 6px 0;
+
   background: #111;
   display: flex;
   justify-content: space-around;
   align-items: center;
+
   border-top: 1px solid #333;
   z-index: 9999;
 }
@@ -1122,16 +757,66 @@ body.kader-seite {
 .bottom-nav a {
   color: white;
   text-decoration: none;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
   text-align: center;
-  line-height: 1.3;
+  line-height: 1.15;
+  margin: 0;
 }
 
 .bottom-nav a::first-line {
-  font-size: 26px;
+  font-size: 22px;
 }
 
-body {
-  padding-bottom: 110px;
+.bottom-nav a:active {
+  transform: scale(0.95);
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 800px) {
+  .navbar {
+    padding: 10px 20px;
+  }
+
+  .menu {
+    display: none;
+  }
+
+  .hero {
+    flex-direction: column;
+    padding: 35px 20px;
+  }
+
+  .info h1 {
+    font-size: 42px;
+  }
+
+  .anmeldung {
+    width: auto;
+  }
+
+  .karten {
+    flex-direction: column;
+  }
+
+  .stand,
+  .liste {
+    margin: 20px;
+  }
+
+  .listen-container {
+    grid-template-columns: 1fr;
+  }
+
+  .preise-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rueckmeldung-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
