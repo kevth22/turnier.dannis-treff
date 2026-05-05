@@ -1008,34 +1008,6 @@ footer {
   box-shadow: 0 0 30px rgba(224, 0, 34, 0.7);
 }
 
-/* 🔴 GLOW RING (läuft einmal durch) */
-.spieler-card::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  border-radius: 15px;
-  background: linear-gradient(120deg, transparent, #ff2b2b, transparent);
-  opacity: 0;
-  transition: 0.4s;
-}
-
-.spieler-card:hover::before {
-  opacity: 1;
-  animation: glowMove 2s linear infinite;
-}
-
-/* NAME ANIMATION */
-.spieler-card h3 {
-  position: relative;
-  z-index: 2;
-  transition: 0.25s;
-}
-
-.spieler-card:hover h3 {
-  color: #ff2b2b;
-  transform: scale(1.08);
-  text-shadow: 0 0 12px rgba(255, 43, 43, 0.9);
-}
 
 /* BILD */
 .spieler-bild {
