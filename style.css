@@ -1126,3 +1126,42 @@ body.kader-seite {
 
   padding-bottom: 1
 }
+/* Bottom-Nav nur für Turnier & Liga größer */
+.turnier-seite .bottom-nav,
+.liga-seite .bottom-nav {
+  height: 95px;
+  padding: 12px 0 18px;
+  align-items: center;
+}
+
+.turnier-seite .bottom-nav a,
+.liga-seite .bottom-nav a {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* Emoji/Icon oben größer */
+.turnier-seite .bottom-nav a::first-line,
+.liga-seite .bottom-nav a::first-line {
+  font-size: 24px;
+}
+/* 🔵 LIGA: größere Bottom Navigation */
+.liga-seite .bottom-nav {
+  height: 95px;
+  padding: 12px 0 18px;
+  display: flex;
+  align-items: center;
+}
+
+/* Text + Icons größer */
+.liga-seite .bottom-nav a {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Icons größer (erste Zeile = Emoji) */
+.liga-seite .bottom-nav a::first-line {
+  font-size: 26px;
+}
