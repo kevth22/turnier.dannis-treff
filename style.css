@@ -1190,11 +1190,11 @@ body.kader-seite {
 /* Nur wenn als App installiert geöffnet */
 @media (display-mode: standalone) and (max-width: 768px) {
   .bottom-nav {
-    height: 100px;
+    height: 40px;
     padding: 14px 0 22px;
   }
 
   body {
-    padding-bottom: 140px;
+    padding-bottom: 60px;
   }
 }
