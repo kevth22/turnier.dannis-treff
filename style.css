@@ -1024,11 +1024,6 @@ footer {
   animation: glowMove 2s linear infinite;
 }
 
-@keyframes glowMove {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
 /* NAME ANIMATION */
 .spieler-card h3 {
   position: relative;
