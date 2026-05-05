@@ -1104,163 +1104,34 @@ body.kader-seite {
   border-color: #0047ab !important;
   box-shadow: 0 0 25px rgba(0, 71, 171, 0.9) !important;
 }
-/* 🔥 NUR Turnier-Seite */
-.turnier-seite .bottom-nav {
-  height: 90px;
-  padding: 15px 0;
-}
-
-/* 🔥 Abstand damit nichts überlappt */
-.turnier-seite .app-container {
-  padding-bottom: 120px;
-}
-.liga-seite .bottom-nav {
-
-  height: 90px;
-
-  padding: 15px 0;
-
-}
-
-.liga-seite .app-container {
-
-  padding-bottom: 1
-}
-/* Bottom-Nav nur für Turnier & Liga größer */
-.turnier-seite .bottom-nav,
-.liga-seite .bottom-nav {
-  height: 95px;
-  padding: 12px 0 18px;
+/* 🔥 EINHEITLICHE BOTTOM-NAV AUF ALLEN SEITEN */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 85px;
+  padding: 10px 0 14px;
+  background: #111;
+  display: flex;
+  justify-content: space-around;
   align-items: center;
+  border-top: 1px solid #333;
+  z-index: 9999;
 }
 
-.turnier-seite .bottom-nav a,
-.liga-seite .bottom-nav a {
-  font-size: 30px;
+.bottom-nav a {
+  color: white;
+  text-decoration: none;
+  font-size: 13px;
   font-weight: 600;
+  text-align: center;
   line-height: 1.3;
 }
 
-/* Emoji/Icon oben größer */
-.turnier-seite .bottom-nav a::first-line,
-.liga-seite .bottom-nav a::first-line {
-  font-size: 50px;
-}
-/* 🔵 LIGA: größere Bottom Navigation */
-.liga-seite .bottom-nav {
-  height: 95px;
-  padding: 12px 0 18px;
-  display: flex;
-  align-items: center;
-}
-
-/* Text + Icons größer */
-.liga-seite .bottom-nav a {
-  font-size: 30px;
-  font-weight: 600;
-  text-align: center;
-}
-
-/* Icons größer (erste Zeile = Emoji) */
-.liga-seite .bottom-nav a::first-line {
-  font-size: 50px;
-}
-/* 🔥 STANDARD (für alle Seiten außer Home) */
-.bottom-nav {
-  height: 80px;
-  padding: 10px 0;
+.bottom-nav a::first-line {
+  font-size: 26px;
 }
 
 body {
-  padding-bottom: 100px;
-}
-
-
-/* 🏠 STARTSEITE kleiner halten */
-.home-seite .bottom-nav {
-  height: 65px;
-  padding: 8px 0;
-}
-
-.home-seite {
-  padding-bottom: 90px;
-}
-
-
-/* 📲 NUR APP größer */
-@media (display-mode: standalone) {
-
-  .bottom-nav {
-    height: 110px;
-    padding: 16px 0 24px;
-  }
-
-  body {
-    padding-bottom: 150px;
-  }
-
-  /* Home bleibt trotzdem etwas kleiner */
-  .home-seite .bottom-nav {
-    height: 90px;
-  }
-}
-/* Nur Handy / App Ansicht */
-@media (max-width: 768px) {
-  .bottom-nav {
-    height: 95px;
-    padding: 12px 0 18px;
-    align-items: center;
-  }
-
-  .bottom-nav a {
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1.3;
-  }
-
-  .bottom-nav a::first-line {
-    font-size: 26px;
-  }
-
-  body {
-    padding-bottom: 130px;
-  }
-}
-/* Nur wenn als App installiert geöffnet */
-@media (display-mode: standalone) and (max-width: 768px) {
-  .bottom-nav {
-    height: 40px;
-    padding: 14px 0 22px;
-  }
-
-  body {
-    padding-bottom: 60px;
-  }
-}
-/* 🔥 STANDARD (Browser + Desktop + Handy) */
-.bottom-nav {
-  height: 80px;
-  padding: 10px 0;
-}
-
-body {
-  padding-bottom: 100px;
-}
-
-
-/* 📲 NUR wenn als App installiert */
-@media (display-mode: standalone) {
-
-  .bottom-nav {
-    height: 110px;        /* 🔥 nur App größer */
-    padding: 16px 0 24px;
-  }
-
-  .bottom-nav a::first-line {
-    font-size: 28px;      /* Icons größer */
-  }
-
-  body {
-    padding-bottom: 150px;
-  }
+  padding-bottom: 110px;
 }
