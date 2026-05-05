@@ -1144,7 +1144,7 @@ body.kader-seite {
 /* Emoji/Icon oben größer */
 .turnier-seite .bottom-nav a::first-line,
 .liga-seite .bottom-nav a::first-line {
-  font-size: 24px;
+  font-size: 30px;
 }
 /* 🔵 LIGA: größere Bottom Navigation */
 .liga-seite .bottom-nav {
@@ -1163,5 +1163,5 @@ body.kader-seite {
 
 /* Icons größer (erste Zeile = Emoji) */
 .liga-seite .bottom-nav a::first-line {
-  font-size: 26px;
+  font-size: 30px;
 }
