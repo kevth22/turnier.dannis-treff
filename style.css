@@ -1104,3 +1104,13 @@ body.kader-seite {
   border-color: #0047ab !important;
   box-shadow: 0 0 25px rgba(0, 71, 171, 0.9) !important;
 }
+/* 🔥 NUR Turnier-Seite */
+.turnier-seite .bottom-nav {
+  height: 90px;
+  padding: 15px 0;
+}
+
+/* 🔥 Abstand damit nichts überlappt */
+.turnier-seite .app-container {
+  padding-bottom: 120px;
+}
