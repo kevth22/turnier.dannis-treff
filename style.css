@@ -1165,6 +1165,45 @@ body.kader-seite {
 .liga-seite .bottom-nav a::first-line {
   font-size: 50px;
 }
+/* 🔥 STANDARD (für alle Seiten außer Home) */
+.bottom-nav {
+  height: 80px;
+  padding: 10px 0;
+}
+
+body {
+  padding-bottom: 100px;
+}
+
+
+/* 🏠 STARTSEITE kleiner halten */
+.home-seite .bottom-nav {
+  height: 65px;
+  padding: 8px 0;
+}
+
+.home-seite {
+  padding-bottom: 90px;
+}
+
+
+/* 📲 NUR APP größer */
+@media (display-mode: standalone) {
+
+  .bottom-nav {
+    height: 110px;
+    padding: 16px 0 24px;
+  }
+
+  body {
+    padding-bottom: 150px;
+  }
+
+  /* Home bleibt trotzdem etwas kleiner */
+  .home-seite .bottom-nav {
+    height: 90px;
+  }
+}
 /* Nur Handy / App Ansicht */
 @media (max-width: 768px) {
   .bottom-nav {
