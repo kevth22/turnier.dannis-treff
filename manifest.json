@@ -1,0 +1,20 @@
+{
+  "name": "Dart11en",
+  "short_name": "Dart11en",
+  "start_url": "/turnier.dannis-treff/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#e00022",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
