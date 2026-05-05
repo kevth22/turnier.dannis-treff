@@ -1136,7 +1136,7 @@ body.kader-seite {
 
 .turnier-seite .bottom-nav a,
 .liga-seite .bottom-nav a {
-  font-size: 13px;
+  font-size: 30px;
   font-weight: 600;
   line-height: 1.3;
 }
@@ -1144,7 +1144,7 @@ body.kader-seite {
 /* Emoji/Icon oben größer */
 .turnier-seite .bottom-nav a::first-line,
 .liga-seite .bottom-nav a::first-line {
-  font-size: 30px;
+  font-size: 50px;
 }
 /* 🔵 LIGA: größere Bottom Navigation */
 .liga-seite .bottom-nav {
@@ -1156,12 +1156,12 @@ body.kader-seite {
 
 /* Text + Icons größer */
 .liga-seite .bottom-nav a {
-  font-size: 13px;
+  font-size: 30px;
   font-weight: 600;
   text-align: center;
 }
 
 /* Icons größer (erste Zeile = Emoji) */
 .liga-seite .bottom-nav a::first-line {
-  font-size: 30px;
+  font-size: 50px;
 }
