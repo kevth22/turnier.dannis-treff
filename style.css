@@ -1198,3 +1198,30 @@ body.kader-seite {
     padding-bottom: 60px;
   }
 }
+/* 🔥 STANDARD (Browser + Desktop + Handy) */
+.bottom-nav {
+  height: 80px;
+  padding: 10px 0;
+}
+
+body {
+  padding-bottom: 100px;
+}
+
+
+/* 📲 NUR wenn als App installiert */
+@media (display-mode: standalone) {
+
+  .bottom-nav {
+    height: 110px;        /* 🔥 nur App größer */
+    padding: 16px 0 24px;
+  }
+
+  .bottom-nav a::first-line {
+    font-size: 28px;      /* Icons größer */
+  }
+
+  body {
+    padding-bottom: 150px;
+  }
+}
