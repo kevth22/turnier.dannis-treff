@@ -1114,3 +1114,15 @@ body.kader-seite {
 .turnier-seite .app-container {
   padding-bottom: 120px;
 }
+.liga-seite .bottom-nav {
+
+  height: 90px;
+
+  padding: 15px 0;
+
+}
+
+.liga-seite .app-container {
+
+  padding-bottom: 1
+}
