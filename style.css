@@ -846,7 +846,7 @@ body {
 }
 
 .bottom-nav a::first-line {
-  font-size: 24px !important;
+  font-size: 28px !important;
 }
 
 body {
@@ -856,14 +856,14 @@ body {
 body .bottom-nav,
 body nav.bottom-nav {
   height: 76px !important;
-  min-height: 76px !important;
-  max-height: 76px !important;
+  min-height: 70px !important;
+  max-height: 90px !important;
   padding: 8px 0 !important;
 }
 
 body .bottom-nav a,
 body nav.bottom-nav a {
-  font-size: 12px !important;
+  font-size: 16px !important;
   line-height: 1.2 !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -871,7 +871,7 @@ body nav.bottom-nav a {
 
 body .bottom-nav a::first-line,
 body nav.bottom-nav a::first-line {
-  font-size: 24px !important;
+  font-size: 28px !important;
 }
 .bottom-nav {
   position: fixed !important;
@@ -880,7 +880,7 @@ body nav.bottom-nav a::first-line {
   right: 0 !important;
 
   width: auto !important;
-  height: 76px !important;
+  height: 90px !important;
 
   background: #111 !important;
   border-top: 1px solid #333 !important;
