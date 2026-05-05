@@ -852,3 +852,24 @@ body {
 body {
   padding-bottom: 90px !important;
 }
+/* DEBUG: Bottom Nav wirklich überall erzwingen */
+body .bottom-nav,
+body nav.bottom-nav {
+  height: 76px !important;
+  min-height: 76px !important;
+  max-height: 76px !important;
+  padding: 8px 0 !important;
+}
+
+body .bottom-nav a,
+body nav.bottom-nav a {
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body .bottom-nav a::first-line,
+body nav.bottom-nav a::first-line {
+  font-size: 24px !important;
+}
