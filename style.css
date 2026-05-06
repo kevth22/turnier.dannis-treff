@@ -1937,3 +1937,10 @@ footer {
 
   font-size: 24px;
 }
+/* Aktive Rückmeldung */
+
+.aktiv-status {
+  background: rgba(255,255,255,0.12) !important;
+
+  transform: scale(1.03);
+}
