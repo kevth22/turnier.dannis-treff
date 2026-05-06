@@ -19,6 +19,7 @@ import {
   updateDoc,
   doc,
   deleteDoc,
+  setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -35,6 +36,7 @@ const db = getFirestore(app);
 
 const spieltageRef = collection(db, "spieltage");
 const zusagenRef = collection(db, "zusagen");
+const urlaubeRef = collection(db, "urlaube");
 let zusagen = [];
 
 let aktuellerUser = JSON.parse(gespeicherterUser);
@@ -373,7 +375,10 @@ function gruppeAnzeigen(gruppe) {
 
     return `
       <div class="rueckmeldung-person">
-        <span>${z.name}</span>
+        <span>
+  ${z.name}
+  ${z.grund === "Urlaub" ? "<small class='urlaub-label'>🌴 Urlaub</small>" : ""}
+</span>
         ${adminButtons}
       </div>
     `;
@@ -415,25 +420,18 @@ window.abstimmen = async function (spieltagId, status) {
 
   const snapshot = await getDocs(q);
 
-  if (!snapshot.empty) {
-    snapshot.forEach(async (docSnap) => {
-      await updateDoc(doc(db, "zusagen", docSnap.id), {
-        status: status
-      });
-    });
+  const zusageId = `${spieltagId}_${aktuellerUser.benutzername}`;
 
-    alert("Rückmeldung geändert: " + status);
-  } else {
-    await addDoc(zusagenRef, {
-      spieltagId: spieltagId,
-      name: aktuellerUser.nickname,
-      benutzername: aktuellerUser.benutzername,
-      status: status,
-      erstelltAm: serverTimestamp()
-    });
+await setDoc(doc(db, "zusagen", zusageId), {
+  spieltagId: spieltagId,
+  name: aktuellerUser.nickname,
+  benutzername: aktuellerUser.benutzername,
+  status: status,
+  grund: "",
+  erstelltAm: serverTimestamp()
+});
 
-    alert("Rückmeldung gespeichert: " + status);
-  }
+alert("Rückmeldung gespeichert: " + status);
 }
 window.tagAuswaehlen = function (datumString) {
   const darfBearbeiten =
@@ -517,3 +515,46 @@ window.reminderSchliessen = function () {
     popup.style.display = "none";
   }
 };
+window.urlaubSpeichern = async function () {
+  const von = document.getElementById("urlaubVon").value;
+  const bis = document.getElementById("urlaubBis").value;
+
+  if (!von || !bis) {
+    alert("Bitte Von- und Bis-Datum auswählen.");
+    return;
+  }
+
+  if (bis < von) {
+    alert("Das Bis-Datum darf nicht vor dem Von-Datum liegen.");
+    return;
+  }
+
+  await addDoc(urlaubeRef, {
+    benutzername: aktuellerUser.benutzername,
+    nickname: aktuellerUser.nickname,
+    von: von,
+    bis: bis,
+    erstelltAm: serverTimestamp()
+  });
+
+  const betroffeneSpieltage = spieltage.filter(spieltag =>
+    spieltag.datum >= von && spieltag.datum <= bis
+  );
+
+  for (const spieltag of betroffeneSpieltage) {
+  const zusageId = `${spieltag.id}_${aktuellerUser.benutzername}`;
+
+  await setDoc(doc(db, "zusagen", zusageId), {
+    spieltagId: spieltag.id,
+    name: aktuellerUser.nickname,
+    benutzername: aktuellerUser.benutzername,
+    status: "Nein",
+    grund: "Urlaub",
+    erstelltAm: serverTimestamp()
+  });
+}
+
+alert(`Urlaub gespeichert. ${betroffeneSpieltage.length} Spieltag(e) wurden auf Nein gesetzt.`);
+
+document.getElementById("urlaubVon").value = "";
+document.getElementById("urlaubBis").value = "";
