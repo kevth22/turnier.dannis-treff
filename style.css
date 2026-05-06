@@ -1100,3 +1100,148 @@ footer {
   position: relative;
   z-index: 1;
 }
+/* =========================
+   KALENDER DESIGN UPGRADE
+========================= */
+
+.kalender-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.kalender-nav button {
+  height: 48px;
+  border-radius: 14px;
+  font-size: 18px;
+}
+
+.kalender-tag {
+  min-height: 72px;
+  padding: 8px;
+  border-radius: 14px;
+}
+
+.kalender-event {
+  margin-top: 8px;
+  padding: 8px 6px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.spieltag-card {
+  margin-top: 18px;
+  padding: 20px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid #333;
+}
+
+.spieltag-card h4 {
+  font-size: 26px;
+  margin-bottom: 12px;
+}
+
+.spieltag-meta {
+  display: grid;
+  gap: 8px;
+  color: #ddd;
+}
+
+.spieltag-actions button {
+  margin-top: 16px;
+  height: 54px;
+  border-radius: 14px;
+}
+
+/* Details-Box */
+#spieltagDetails {
+  margin-top: 30px;
+}
+
+#spieltagDetails h2 {
+  font-size: 36px;
+  margin-bottom: 18px;
+}
+
+#spieltagDetails p {
+  margin: 10px 0;
+  color: #ddd;
+}
+
+/* Rückmeldungs-Zahlen schöner */
+.rueckmeldung-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 18px 0 25px;
+}
+
+.rueckmeldung-summary div {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid #333;
+  border-radius: 14px;
+  padding: 14px 8px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.rueckmeldung-summary strong {
+  font-size: 24px;
+}
+
+/* Rückmeldungs-Gruppen */
+#rueckmeldungen h4 {
+  margin-top: 24px;
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.rueckmeldung-person {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid #333;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+/* Abstimm-Buttons untereinander mit Abstand */
+#spieltagDetails .main-button {
+  margin-top: 10px;
+  height: 56px;
+  border-radius: 16px;
+}
+
+/* Admin Buttons kleiner */
+.admin-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.admin-actions button {
+  height: 42px;
+  padding: 8px;
+  font-size: 12px;
+  border-radius: 10px;
+}
+
+/* Mobile Feinschliff */
+@media (max-width: 600px) {
+
+  .rueckmeldung-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  #spieltagDetails h2 {
+    font-size: 30px;
+  }
+
+  .spieltag-card h4 {
+    font-size: 24px;
+  }
+
+}
