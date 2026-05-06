@@ -132,17 +132,21 @@ window.spieltagSpeichern = async function () {
   alert("Spieltag gespeichert.");
 };
 
-onSnapshot(spieltageRef, (snapshot) => {
-  spieltage = [];
+onSnapshot(zusagenRef, (snapshot) => {
+  zusagen = [];
 
   snapshot.forEach((doc) => {
-    spieltage.push({
+    zusagen.push({
       id: doc.id,
       ...doc.data()
     });
   });
 
   kalenderZeichnen();
+
+  if (window.aktiverSpieltagId) {
+    rueckmeldungenAnzeigen(window.aktiverSpieltagId);
+  }
 });
 
 onSnapshot(zusagenRef, (snapshot) => {
