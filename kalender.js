@@ -191,7 +191,10 @@ function kalenderZeichnen() {
     eventsHeute.forEach((spieltag) => {
       const event = document.createElement("div");
       event.classList.add("kalender-event");
-      event.textContent = spieltag.liga;
+      event.innerHTML = `
+  <strong>${spieltag.liga}</strong><br>
+  <small>${spieltag.typ === "heim" ? "🏠 Heim" : "🚗 Auswärts"}</small>
+`;
       event.onclick = function () {
         zeigeSpieltag(spieltag.id);
       };
