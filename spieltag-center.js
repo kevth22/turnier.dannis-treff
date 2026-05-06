@@ -134,3 +134,37 @@ window.vorherigerSpieltag = function () {
     spieltagAnzeigen();
   }
 };
+/* =========================
+   SWIPE
+========================= */
+
+let touchStartX = 0;
+let touchEndX = 0;
+
+const spieltagBox = document.getElementById("spieltagAnzeige");
+
+if (spieltagBox) {
+
+  spieltagBox.addEventListener("touchstart", (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  });
+
+  spieltagBox.addEventListener("touchend", (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+
+    swipePruefen();
+  });
+
+}
+
+function swipePruefen() {
+
+  if (touchEndX < touchStartX - 50) {
+    naechsterSpieltag();
+  }
+
+  if (touchEndX > touchStartX + 50) {
+    vorherigerSpieltag();
+  }
+
+}
