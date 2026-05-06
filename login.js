@@ -120,7 +120,8 @@ window.passwortAendern = async function () {
     localStorage.setItem("dart11enLogin", JSON.stringify(aktuellerBenutzer));
     sessionStorage.setItem("user", JSON.stringify(aktuellerBenutzer));
 
-    window.location.replace("index.html");
+    localStorage.setItem("dart11enReminder", "true");
+window.location.replace("index.html");
 
   } catch (error) {
     fehler.textContent = "Fehler beim Passwort ändern: " + error.message;
