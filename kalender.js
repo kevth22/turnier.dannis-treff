@@ -271,6 +271,11 @@ if (feldDatum < new Date().setHours(0,0,0,0)) {
     eventsHeute.forEach((spieltag) => {
       const event = document.createElement("div");
       event.classList.add("kalender-event");
+      if (spieltag.typ === "heim") {
+  event.classList.add("heimspiel");
+} else {
+  event.classList.add("auswaertsspiel");
+}
       event.innerHTML = `
   <strong>${spieltag.liga}</strong><br>
   <small>${spieltag.typ === "heim" ? "🏠 Heim" : "🚗 Auswärts"}</small>
