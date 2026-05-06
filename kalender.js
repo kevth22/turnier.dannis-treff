@@ -1,3 +1,9 @@
+const gespeicherterUser = localStorage.getItem("dart11enLogin");
+
+if (!gespeicherterUser) {
+  alert("Du hast keinen Zugriff für diesen Bereich.");
+  window.location.href = "index.html";
+}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 
 import {
@@ -61,7 +67,7 @@ window.login = async function () {
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("kalenderBereich").style.display = "block";
 
-    if (if (
+    if (
   gefunden.rolle === "admin" ||
   gefunden.rolle === "captain"
 )) {
@@ -394,18 +400,29 @@ window.abstimmen = async function (spieltagId, status) {
     alert("Rückmeldung gespeichert: " + status);
   }
 };
-const gespeicherterUser = sessionStorage.getItem("user");
+aktuellerUser = JSON.parse(gespeicherterUser);
 
-if (gespeicherterUser) {
-  aktuellerUser = JSON.parse(gespeicherterUser);
+if (aktuellerUser) {
 
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("kalenderBereich").style.display = "block";
+  const loginBox = document.getElementById("loginBox");
+  if (loginBox) {
+    loginBox.style.display = "none";
+  }
+
+  const kalenderBereich = document.getElementById("kalenderBereich");
+  if (kalenderBereich) {
+    kalenderBereich.style.display = "block";
+  }
 
   if (
-  aktuellerUser.rolle === "admin" ||
-  aktuellerUser.rolle === "captain"
+    aktuellerUser.rolle === "admin" ||
+    aktuellerUser.rolle === "captain"
   ) {
-    document.getElementById("adminSpieltagBox").style.display = "block";
+
+    const adminBox = document.getElementById("adminSpieltagBox");
+
+    if (adminBox) {
+      adminBox.style.display = "block";
+    }
   }
 }
