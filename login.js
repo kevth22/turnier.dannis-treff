@@ -101,6 +101,9 @@ window.passwortAendern = async function () {
     mussPasswortAendern: false
   });
 
-  localStorage.setItem("dart11enLogin", JSON.stringify(daten));
+  localStorage.setItem(
+  "dart11enLogin",
+  JSON.stringify(aktuellerBenutzer)
+);
   window.location.href = "kalender.html";
 };
