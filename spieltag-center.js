@@ -11,7 +11,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import {
   getFirestore,
   collection,
-  onSnapshot
+  onSnapshot,
+  setDoc,
+  doc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -47,8 +49,9 @@ if (userInfo) {
 }
 
 const spieltageRef = collection(db, "spieltage");
-
+const zusagenRef = collection(db, "zusagen");
 let spieltage = [];
+let zusagen = [];
 let aktuellerIndex = 0;
 
 onSnapshot(spieltageRef, (snapshot) => {
@@ -66,6 +69,21 @@ onSnapshot(spieltageRef, (snapshot) => {
   );
 
   spieltagAnzeigen();
+});
+
+onSnapshot(zusagenRef, (snapshot) => {
+
+  zusagen = [];
+
+  snapshot.forEach((docSnap) => {
+    zusagen.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    });
+  });
+
+  rueckmeldungenAnzeigenCenter();
+
 });
 
 function spieltagAnzeigen() {
@@ -299,7 +317,7 @@ onclick="abstimmenAktuell('Dabei'); toggleRueckmeldungListe('Dabei')">
       </div>
 
       <div class="${window.aktuellerStatus === 'Nein' ? 'aktiv-status' : ''}"
-onclick=="abstimmenAktuell('Nein'); toggleRueckmeldungListe('Nein')">
+onclick="abstimmenAktuell('Nein'); toggleRueckmeldungListe('Nein')">
         👎<br>
         <strong>${nein.length}</strong>
       </div>
