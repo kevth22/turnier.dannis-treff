@@ -805,3 +805,130 @@ footer {
   }
 
 }
+
+/* =========================
+   ABLAUF / ZAHLUNG
+========================= */
+
+.info-zahlung {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  gap: 25px;
+
+  max-width: 1300px;
+
+  margin: 50px auto;
+  padding: 0 20px;
+}
+
+.ablauf,
+.zahlung-box {
+  background: rgba(255,255,255,0.05);
+
+  border: 1px solid #222;
+  border-radius: 18px;
+
+  padding: 25px;
+}
+
+.ablauf h2,
+.zahlung-box h2 {
+  margin-bottom: 25px;
+
+  font-size: 42px;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.step {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.nummer {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #e00022;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.step h3 {
+  margin-bottom: 6px;
+}
+
+.step p {
+  color: #bbb;
+  line-height: 1.5;
+}
+
+.paypal-btn {
+  display: block;
+
+  margin: 20px 0;
+
+  padding: 16px;
+
+  background: #0070ba;
+
+  border-radius: 12px;
+
+  text-align: center;
+
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.hinweis-zahlung {
+  margin-top: 20px;
+
+  padding: 16px;
+
+  border-radius: 12px;
+
+  background: rgba(255,255,255,0.04);
+}
+
+.hinweis-zahlung ul {
+  margin-top: 12px;
+  padding-left: 20px;
+}
+
+.hinweis-zahlung li {
+  margin-bottom: 10px;
+  color: #ccc;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 900px) {
+
+  .info-zahlung {
+    grid-template-columns: 1fr;
+  }
+
+  .ablauf h2,
+  .zahlung-box h2 {
+    font-size: 28px;
+  }
+
+}
