@@ -1641,3 +1641,24 @@ footer {
 .urlaub-item button:hover {
   background: rgba(255, 70, 70, 0.3);
 }
+.urlaub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  cursor: pointer;
+}
+
+.urlaub-header h2 {
+  margin: 0;
+}
+
+#urlaubToggleIcon {
+  font-size: 18px;
+  opacity: 0.8;
+  transition: transform 0.2s ease;
+}
+
+#urlaubContent {
+  margin-top: 15px;
+}
