@@ -1371,3 +1371,57 @@ footer {
 .heim-summary {
   grid-template-columns: repeat(2, 1fr) !important;
 }
+.reminder-popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.78);
+  z-index: 999999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+}
+
+.reminder-card {
+  width: 100%;
+  max-width: 420px;
+
+  background: #111;
+  border: 1px solid #e00022;
+  border-radius: 24px;
+
+  padding: 28px;
+
+  text-align: center;
+
+  box-shadow: 0 0 35px rgba(224,0,34,0.35);
+}
+
+.reminder-logo {
+  width: 90px;
+  margin: 0 auto 15px;
+  opacity: 0.9;
+}
+
+.reminder-card h2 {
+  margin-bottom: 18px;
+  color: #e00022;
+}
+
+.reminder-text {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.reminder-item {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid #333;
+  border-radius: 14px;
+  padding: 14px;
+  color: #ddd;
+  line-height: 1.45;
+  text-align: left;
+}
