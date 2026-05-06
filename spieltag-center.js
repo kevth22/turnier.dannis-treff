@@ -236,11 +236,6 @@ function swipePruefen() {
    ABSTIMMUNGEN
 ========================= */
 
-import {
-  setDoc,
-  doc
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
 window.abstimmenAktuell = async function (status) {
 window.aktuellerStatus = status;
   const spieltag = spieltage[aktuellerIndex];
