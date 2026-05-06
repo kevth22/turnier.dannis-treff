@@ -1368,3 +1368,6 @@ footer {
 .nein-button {
   background: #444 !important;
 }
+.heim-summary {
+  grid-template-columns: repeat(2, 1fr) !important;
+}
