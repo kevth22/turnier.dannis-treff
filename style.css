@@ -1957,3 +1957,21 @@ body.spieltag-page {
   color: #28ff5a !important;
   font-weight: bold;
 }
+body.spieltag-page {
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 100vh;
+  padding-bottom: 140px;
+}
+
+.spieltag-center-card {
+  overflow: visible !important;
+  margin-bottom: 140px;
+}
+
+#spieltagRueckmeldungen {
+  display: block !important;
+  margin-top: 20px;
+  position: relative;
+  z-index: 5;
+}
