@@ -1304,3 +1304,58 @@ footer {
 .kalender-tag:hover {
   border-color: #e00022;
 }
+/* =========================
+   SPIELTAG EINTRAGEN SCHÖNER
+========================= */
+
+#adminSpieltagBox {
+  margin-top: 20px;
+  padding: 22px;
+  border-radius: 22px;
+  background: rgba(255,255,255,0.055);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 0 25px rgba(0,0,0,0.35);
+}
+
+#adminSpieltagBox h2 {
+  font-size: 30px;
+  margin-bottom: 18px;
+}
+
+#adminSpieltagBox input,
+#adminSpieltagBox select {
+  height: 54px;
+  margin-bottom: 12px;
+  border-radius: 14px;
+  font-size: 16px;
+  background: rgba(0,0,0,0.35);
+}
+
+#adminSpieltagBox button {
+  height: 56px;
+  margin-top: 10px;
+  border-radius: 16px;
+  font-size: 15px;
+}
+
+#spieltagDatum {
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+
+  #adminSpieltagBox {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  #adminSpieltagBox h2 {
+    font-size: 26px;
+  }
+
+  #adminSpieltagBox input,
+  #adminSpieltagBox select {
+    height: 50px;
+    font-size: 15px;
+  }
+}
