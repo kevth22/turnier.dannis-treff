@@ -111,32 +111,33 @@ function spieltagAnzeigen() {
       ? "heim-center"
       : "auswaerts-center";
 
+  box.innerHTML = `
   <div class="spieltag-center-content ${spieltagKlasse}"
-onclick="toggleTeilnehmerListe()">
+       onclick="toggleTeilnehmerListe()">
 
-      <h2>${spieltag.liga}</h2>
+    <h2>${spieltag.liga}</h2>
 
-      <div class="spieltag-gegner">
-        ${gegnerText}
-      </div>
-
-      <div class="spieltag-details">
-        <p>📅 ${spieltag.datum}</p>
-        <p>🕒 Treffen: ${spieltag.treffen || "-"}</p>
-        <p>🎯 Anwurf: ${spieltag.anwurf}</p>
-        <p>📍 ${spieltag.ort}</p>
-
-        <a
-          class="maps-button"
-          target="_blank"
-          href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spieltag.ort)}"
-        >
-          🗺 Navigation starten
-        </a>
-      </div>
-
+    <div class="spieltag-gegner">
+      ${gegnerText}
     </div>
-  `;
+
+    <div class="spieltag-details">
+      <p>📅 ${spieltag.datum}</p>
+      <p>🕒 Treffen: ${spieltag.treffen || "-"}</p>
+      <p>🎯 Anwurf: ${spieltag.anwurf}</p>
+      <p>📍 ${spieltag.ort}</p>
+
+      <a
+        class="maps-button"
+        target="_blank"
+        href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spieltag.ort)}"
+      >
+        🗺 Navigation starten
+      </a>
+    </div>
+
+  </div>
+`;
 
   counter.textContent =
     `Spieltag ${aktuellerIndex + 1} / ${spieltage.length}`;
