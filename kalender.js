@@ -40,6 +40,7 @@ let zusagen = [];
 let aktuellerUser = JSON.parse(gespeicherterUser);
 let spieltage = [];
 let aktuellesDatum = new Date();
+let ausgewaehltesDatum = null;
 
   function spieltagListeAnzeigen() {
   const liste = document.getElementById("spieltagListe");
@@ -180,6 +181,10 @@ function kalenderZeichnen() {
     feld.classList.add("kalender-tag");
 
     feld.innerHTML = `<strong>${tag}</strong>`;
+
+    feld.onclick = function () {
+  tagAuswaehlen(datumString);
+};
 
     const eventsHeute = spieltage.filter((s) => s.datum === datumString);
 
@@ -362,3 +367,28 @@ window.abstimmen = async function (spieltagId, status) {
     alert("Rückmeldung gespeichert: " + status);
   }
 }
+window.tagAuswaehlen = function (datumString) {
+  const darfBearbeiten =
+    aktuellerUser &&
+    (
+      aktuellerUser.rolle === "admin" ||
+      aktuellerUser.rolle === "captain"
+    );
+
+  if (!darfBearbeiten) return;
+
+  const adminBox = document.getElementById("adminSpieltagBox");
+  const datumInput = document.getElementById("spieltagDatum");
+
+  if (!adminBox || !datumInput) return;
+
+  if (ausgewaehltesDatum === datumString && adminBox.style.display === "block") {
+    adminBox.style.display = "none";
+    ausgewaehltesDatum = null;
+    return;
+  }
+
+  ausgewaehltesDatum = datumString;
+  datumInput.value = datumString;
+  adminBox.style.display = "block";
+};
