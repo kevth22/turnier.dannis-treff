@@ -599,3 +599,19 @@ window.urlaubLoeschen = async function (urlaubId) {
 
   alert("Urlaub gelöscht.");
 };
+window.urlaubToggle = function () {
+  const content = document.getElementById("urlaubContent");
+  const icon = document.getElementById("urlaubToggleIcon");
+
+  if (!content || !icon) return;
+
+  const istOffen = content.style.display === "block";
+
+  if (istOffen) {
+    content.style.display = "none";
+    icon.textContent = "▼";
+  } else {
+    content.style.display = "block";
+    icon.textContent = "▲";
+  }
+};
