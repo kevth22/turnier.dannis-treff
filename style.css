@@ -1359,3 +1359,12 @@ footer {
     font-size: 15px;
   }
 }
+.abstimmung-buttons {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.nein-button {
+  background: #444 !important;
+}
