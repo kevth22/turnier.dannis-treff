@@ -171,7 +171,41 @@ onSnapshot(zusagenRef, (snapshot) => {
   }
   erinnerungenPruefen();
 });
+onSnapshot(urlaubeRef, (snapshot) => {
+  const urlaubListe = document.getElementById("urlaubListe");
 
+  if (!urlaubListe) return;
+
+  const meineUrlaube = [];
+
+  snapshot.forEach((docSnap) => {
+    const daten = docSnap.data();
+
+    if (daten.benutzername === aktuellerUser.benutzername) {
+      meineUrlaube.push({
+        id: docSnap.id,
+        ...daten
+      });
+    }
+  });
+
+  if (meineUrlaube.length === 0) {
+    urlaubListe.innerHTML = "<p>Keine Urlaube eingetragen.</p>";
+    return;
+  }
+
+  urlaubListe.innerHTML = meineUrlaube.map(urlaub => `
+    <div class="urlaub-item">
+      <div>
+        🌴 ${urlaub.von} bis ${urlaub.bis}
+      </div>
+
+      <button onclick="urlaubLoeschen('${urlaub.id}')">
+        ❌
+      </button>
+    </div>
+  `).join("");
+});
 
 function kalenderZeichnen() {
   const grid = document.getElementById("kalenderGrid");
@@ -558,3 +592,10 @@ alert(`Urlaub gespeichert. ${betroffeneSpieltage.length} Spieltag(e) wurden auf 
 
 document.getElementById("urlaubVon").value = "";
 document.getElementById("urlaubBis").value = "";
+window.urlaubLoeschen = async function (urlaubId) {
+  if (!confirm("Urlaub wirklich löschen?")) return;
+
+  await deleteDoc(doc(db, "urlaube", urlaubId));
+
+  alert("Urlaub gelöscht.");
+};
