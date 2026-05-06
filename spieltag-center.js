@@ -351,7 +351,7 @@ onclick="abstimmenAktuell('Nein'); toggleRueckmeldungListe('Nein')">
 
     </div>
   `;
-
+}
 }
 /* =========================
    NAMEN ANZEIGEN
