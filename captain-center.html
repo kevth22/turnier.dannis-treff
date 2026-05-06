@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Captain-Center</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="app-header">
+  <img src="dart11enlogo.png" class="logo" alt="Dart11en Logo">
+  <h1>Captain-Center</h1>
+  <p>Aufstellungen testen & Spielsystem planen</p>
+  <p id="userInfo" class="user-info"></p>
+</header>
+
+<main class="app-container">
+
+  <section class="info-card">
+    <h2>🎯 Spieltag auswählen</h2>
+
+    <select id="spieltagSelect" onchange="spieltagAuswaehlen()">
+      <option value="">Spieltag wählen</option>
+    </select>
+  </section>
+
+  <section class="info-card">
+    <h2>✅ Verfügbare Spieler</h2>
+    <div id="verfuegbareSpieler">
+      <p>Bitte Spieltag auswählen.</p>
+    </div>
+  </section>
+
+  <section class="info-card">
+    <h2>🧠 Aufstellung</h2>
+
+    <div id="teamRolleInfo">
+      <p>Noch kein Spieltag ausgewählt.</p>
+    </div>
+
+    <div class="aufstellung-grid" id="aufstellungGrid"></div>
+  </section>
+
+  <section class="info-card">
+    <h2>📋 Spielplan-Vorschau</h2>
+    <div id="spielplanVorschau">
+      <p>Aufstellung wählen, dann erscheint hier die Vorschau.</p>
+    </div>
+  </section>
+
+</main>
+
+<nav class="bottom-nav">
+  <a href="index.html">🏠<br>Home</a>
+  <a href="spieltag-center.html">🚌<br>Spieltag</a>
+  <a href="kalender.html">📅<br>Kalender</a>
+  <a href="liga.html">🏆<br>Liga</a>
+  <a href="kader.html">👥<br>Kader</a>
+</nav>
+
+<script type="module" src="captain-center.js"></script>
+
+</body>
+</html>
