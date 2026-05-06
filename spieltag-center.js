@@ -34,9 +34,7 @@ const erlaubteRollen = ["admin", "captain", "mitglied"];
 
 if (!erlaubteRollen.includes(aktuellerUser.rolle)) {
   alert("Kein Zugriff.");
-
   window.location.href = "index.html";
-
   throw new Error("Keine Berechtigung");
 }
 
@@ -50,9 +48,11 @@ if (userInfo) {
 
 const spieltageRef = collection(db, "spieltage");
 const zusagenRef = collection(db, "zusagen");
+
 let spieltage = [];
 let zusagen = [];
 let aktuellerIndex = 0;
+window.aktuellerStatus = "";
 
 onSnapshot(spieltageRef, (snapshot) => {
   spieltage = [];
@@ -72,7 +72,6 @@ onSnapshot(spieltageRef, (snapshot) => {
 });
 
 onSnapshot(zusagenRef, (snapshot) => {
-
   zusagen = [];
 
   snapshot.forEach((docSnap) => {
@@ -83,9 +82,7 @@ onSnapshot(zusagenRef, (snapshot) => {
   });
 
   rueckmeldungenAnzeigenCenter();
-
 });
-
 function spieltagAnzeigen() {
   const box = document.getElementById("spieltagAnzeige");
   const counter = document.getElementById("spieltagCounter");
@@ -94,64 +91,25 @@ function spieltagAnzeigen() {
 
   if (spieltage.length === 0) {
     box.innerHTML = "<h2>Keine Spieltage vorhanden</h2>";
+    counter.textContent = "Spieltag 0 / 0";
     return;
   }
 
-  const spieltag = spieltage[aktuellerIndex];
-const buttonBox =
-  document.getElementById("abstimmungButtons");
-
-if (buttonBox) {
-
-  if (spieltag.typ === "heim") {
-
-    buttonBox.innerHTML = `
-      <button class="main-button"
-        onclick="abstimmenAktuell('Dabei')">
-        ✅ Dabei
-      </button>
-
-      <button class="main-button nein-button"
-        onclick="abstimmenAktuell('Nein')">
-        ❌ Nein
-      </button>
-    `;
-
-  } else {
-
-    buttonBox.innerHTML = `
-      <button class="main-button"
-        onclick="abstimmenAktuell('Dabei')">
-        ✅ Dabei
-      </button>
-
-      <button class="main-button"
-        onclick="abstimmenAktuell('Fahrer')">
-        🚗 Fahrer
-      </button>
-
-      <button class="main-button"
-        onclick="abstimmenAktuell('Komme direkt')">
-        📍 Direkt
-      </button>
-
-      <button class="main-button nein-button"
-        onclick="abstimmenAktuell('Nein')">
-        ❌ Nein
-      </button>
-    `;
-
+  if (aktuellerIndex >= spieltage.length) {
+    aktuellerIndex = 0;
   }
 
-}
+  const spieltag = spieltage[aktuellerIndex];
+
   const gegnerText =
     spieltag.typ === "heim"
       ? `Dart11en : ${spieltag.ort}`
       : `${spieltag.ort} : Dart11en`;
+
   const spieltagKlasse =
-  spieltag.typ === "heim"
-    ? "heim-center"
-    : "auswaerts-center";
+    spieltag.typ === "heim"
+      ? "heim-center"
+      : "auswaerts-center";
 
   box.innerHTML = `
     <div class="spieltag-center-content ${spieltagKlasse}">
@@ -168,13 +126,13 @@ if (buttonBox) {
         <p>🎯 Anwurf: ${spieltag.anwurf}</p>
         <p>📍 ${spieltag.ort}</p>
 
-<a
-  class="maps-button"
-  target="_blank"
-  href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spieltag.ort)}"
->
-  🗺 Navigation starten
-</a>
+        <a
+          class="maps-button"
+          target="_blank"
+          href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spieltag.ort)}"
+        >
+          🗺 Navigation starten
+        </a>
       </div>
 
     </div>
@@ -182,7 +140,8 @@ if (buttonBox) {
 
   counter.textContent =
     `Spieltag ${aktuellerIndex + 1} / ${spieltage.length}`;
-rueckmeldungenAnzeigenCenter();
+
+  rueckmeldungenAnzeigenCenter();
 }
 
 window.naechsterSpieltag = function () {
@@ -198,6 +157,7 @@ window.vorherigerSpieltag = function () {
     spieltagAnzeigen();
   }
 };
+
 /* =========================
    SWIPE
 ========================= */
@@ -208,21 +168,17 @@ let touchEndX = 0;
 const spieltagBox = document.getElementById("spieltagAnzeige");
 
 if (spieltagBox) {
-
   spieltagBox.addEventListener("touchstart", (e) => {
     touchStartX = e.changedTouches[0].screenX;
   });
 
   spieltagBox.addEventListener("touchend", (e) => {
     touchEndX = e.changedTouches[0].screenX;
-
     swipePruefen();
   });
-
 }
 
 function swipePruefen() {
-
   if (touchEndX < touchStartX - 50) {
     naechsterSpieltag();
   }
@@ -230,14 +186,10 @@ function swipePruefen() {
   if (touchEndX > touchStartX + 50) {
     vorherigerSpieltag();
   }
-
 }
-/* =========================
-   ABSTIMMUNGEN
-========================= */
-
 window.abstimmenAktuell = async function (status) {
-window.aktuellerStatus = status;
+  window.aktuellerStatus = status;
+
   const spieltag = spieltage[aktuellerIndex];
 
   if (!spieltag) return;
@@ -257,6 +209,8 @@ window.aktuellerStatus = status;
     }
   );
 
+  rueckmeldungenAnzeigenCenter();
+
   alert("Rückmeldung gespeichert: " + status);
 };
 
@@ -265,7 +219,6 @@ window.aktuellerStatus = status;
 ========================= */
 
 function rueckmeldungenAnzeigenCenter() {
-
   const box =
     document.getElementById("spieltagRueckmeldungen");
 
@@ -276,89 +229,76 @@ function rueckmeldungenAnzeigenCenter() {
   if (!spieltag) return;
 
   const rueckmeldungen =
-    zusagen.filter(
-      z => z.spieltagId === spieltag.id
-    );
+    zusagen.filter(z => z.spieltagId === spieltag.id);
 
   const dabei =
-    rueckmeldungen.filter(
-      z => z.status === "Dabei"
-    );
+    rueckmeldungen.filter(z => z.status === "Dabei");
 
   const fahrer =
-    rueckmeldungen.filter(
-      z => z.status === "Fahrer"
-    );
+    rueckmeldungen.filter(z => z.status === "Fahrer");
 
   const direkt =
-    rueckmeldungen.filter(
-      z => z.status === "Komme direkt"
-    );
+    rueckmeldungen.filter(z => z.status === "Komme direkt");
 
   const nein =
-    rueckmeldungen.filter(
-      z => z.status === "Nein"
-    );
+    rueckmeldungen.filter(z => z.status === "Nein");
 
   if (spieltag.typ === "heim") {
+    box.innerHTML = `
+      <div class="matchday-statusbar">
 
-  box.innerHTML = `
-    <div class="matchday-statusbar">
+        <div class="${window.aktuellerStatus === 'Dabei' ? 'aktiv-status' : ''}"
+          onclick="abstimmenAktuell('Dabei'); toggleRueckmeldungListe('Dabei')">
+          👍<br>
+          <strong>${dabei.length}</strong>
+        </div>
 
-      <div class="${window.aktuellerStatus === 'Dabei' ? 'aktiv-status' : ''}"
-onclick="abstimmenAktuell('Dabei'); toggleRueckmeldungListe('Dabei')">
-        👍<br>
-        <strong>${dabei.length}</strong>
+        <div class="${window.aktuellerStatus === 'Nein' ? 'aktiv-status' : ''}"
+          onclick="abstimmenAktuell('Nein'); toggleRueckmeldungListe('Nein')">
+          👎<br>
+          <strong>${nein.length}</strong>
+        </div>
+
       </div>
+    `;
+  } else {
+    box.innerHTML = `
+      <div class="matchday-statusbar">
 
-      <div class="${window.aktuellerStatus === 'Nein' ? 'aktiv-status' : ''}"
-onclick="abstimmenAktuell('Nein'); toggleRueckmeldungListe('Nein')">
-        👎<br>
-        <strong>${nein.length}</strong>
+        <div class="${window.aktuellerStatus === 'Dabei' ? 'aktiv-status' : ''}"
+          onclick="abstimmenAktuell('Dabei'); toggleRueckmeldungListe('Dabei')">
+          👍<br>
+          <strong>${dabei.length}</strong>
+        </div>
+
+        <div class="${window.aktuellerStatus === 'Fahrer' ? 'aktiv-status' : ''}"
+          onclick="abstimmenAktuell('Fahrer'); toggleRueckmeldungListe('Fahrer')">
+          🚗<br>
+          <strong>${fahrer.length}</strong>
+        </div>
+
+        <div class="${window.aktuellerStatus === 'Komme direkt' ? 'aktiv-status' : ''}"
+          onclick="abstimmenAktuell('Komme direkt'); toggleRueckmeldungListe('Komme direkt')">
+          📍<br>
+          <strong>${direkt.length}</strong>
+        </div>
+
+        <div class="${window.aktuellerStatus === 'Nein' ? 'aktiv-status' : ''}"
+          onclick="abstimmenAktuell('Nein'); toggleRueckmeldungListe('Nein')">
+          👎<br>
+          <strong>${nein.length}</strong>
+        </div>
+
       </div>
-
-    </div>
-  `;
-
-} else {
-
-  box.innerHTML = `
-    <div class="matchday-statusbar">
-
-      <div class="${window.aktuellerStatus === 'Dabei' ? 'aktiv-status' : ''}"
-onclick="abstimmenAktuell('Dabei'); toggleRueckmeldungListe('Dabei')">
-        👍<br>
-        <strong>${dabei.length}</strong>
-      </div>
-
-      <div class="${window.aktuellerStatus === 'Fahrer' ? 'aktiv-status' : ''}"
-onclick="abstimmenAktuell('Fahrer'); toggleRueckmeldungListe('Fahrer')">
-        🚗<br>
-        <strong>${fahrer.length}</strong>
-      </div>
-
-      <div class="${window.aktuellerStatus === 'Komme direkt' ? 'aktiv-status' : ''}"
-onclick="abstimmenAktuell('Komme direkt'); toggleRueckmeldungListe('Komme direkt')">
-        📍<br>
-        <strong>${direkt.length}</strong>
-      </div>
-
-      <div class="${window.aktuellerStatus === 'Nein' ? 'aktiv-status' : ''}"
-onclick="abstimmenAktuell('Nein'); toggleRueckmeldungListe('Nein')">
-        👎<br>
-        <strong>${nein.length}</strong>
-      </div>
-
-    </div>
-  `;
+    `;
+  }
 }
-}
+
 /* =========================
    NAMEN ANZEIGEN
 ========================= */
 
 window.toggleRueckmeldungListe = function (status) {
-
   const spieltag = spieltage[aktuellerIndex];
 
   if (!spieltag) return;
@@ -375,7 +315,6 @@ window.toggleRueckmeldungListe = function (status) {
     );
 
   if (passendeSpieler.length === 0) {
-
     box.innerHTML = `
       <div class="namen-popup">
         <h4>${status}</h4>
