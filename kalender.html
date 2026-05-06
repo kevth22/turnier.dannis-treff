@@ -25,18 +25,31 @@
       <p>Hier siehst du alle Spieltage und Termine.</p>
     </div>
 <div class="info-card urlaub-box">
-  <h2>🌴 Urlaub eintragen</h2>
-  <p>Wenn du im Urlaub bist, werden Spieltage in diesem Zeitraum automatisch auf „Nein“ gesetzt.</p>
 
-  <label>Von</label>
-  <input id="urlaubVon" type="date">
+  <div class="urlaub-header" onclick="urlaubToggle()">
+    <h2>🌴 Urlaub eintragen</h2>
+    <span id="urlaubToggleIcon">▼</span>
+  </div>
 
-  <label>Bis</label>
-  <input id="urlaubBis" type="date">
+  <div id="urlaubContent" style="display:none;">
 
-  <button class="main-button" onclick="urlaubSpeichern()">
-    Urlaub speichern
-  </button>
+    <p>
+      Wenn du im Urlaub bist, werden Spieltage
+      automatisch auf „Nein“ gesetzt.
+    </p>
+
+    <label>Von</label>
+    <input id="urlaubVon" type="date">
+
+    <label>Bis</label>
+    <input id="urlaubBis" type="date">
+
+    <button class="main-button" onclick="urlaubSpeichern()">
+      Urlaub speichern
+    </button>
+
+  </div>
+
 </div>
  <div class="info-card">
   <h2>🌴 Meine Urlaube</h2>
