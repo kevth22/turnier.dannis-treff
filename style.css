@@ -1297,3 +1297,10 @@ footer {
   }
 
 }
+.kalender-tag {
+  cursor: pointer;
+}
+
+.kalender-tag:hover {
+  border-color: #e00022;
+}
