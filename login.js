@@ -65,7 +65,10 @@ window.login = async function () {
     return;
   }
 
-  localStorage.setItem("dart11enLogin", benutzername);
+  localStorage.setItem(
+  "dart11enLogin",
+  JSON.stringify(daten)
+);
   window.location.href = "kalender.html";
 };
 
