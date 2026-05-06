@@ -85,9 +85,13 @@ function spieltagAnzeigen() {
     spieltag.typ === "heim"
       ? `Dart11en : ${spieltag.ort}`
       : `${spieltag.ort} : Dart11en`;
+  const spieltagKlasse =
+  spieltag.typ === "heim"
+    ? "heim-center"
+    : "auswaerts-center";
 
   box.innerHTML = `
-    <div class="spieltag-center-content">
+    <div class="spieltag-center-content ${spieltagKlasse}">
 
       <h2>${spieltag.liga}</h2>
 
