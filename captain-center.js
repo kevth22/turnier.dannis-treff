@@ -303,3 +303,4 @@ window.spielplanAktualisieren = function () {
   `;
 
 }
+};
