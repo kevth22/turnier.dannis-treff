@@ -476,8 +476,23 @@ function erinnerungenPruefen() {
   });
 
   if (meldungen.length > 0) {
-    alert(meldungen.join("\n\n"));
+  const popup = document.getElementById("reminderPopup");
+  const textBox = document.getElementById("reminderText");
+
+  if (popup && textBox) {
+    textBox.innerHTML = meldungen
+      .map(m => `<div class="reminder-item">${m}</div>`)
+      .join("");
+
+    popup.style.display = "flex";
   }
+}
 
   localStorage.removeItem("dart11enReminder");
 }
+window.reminderSchliessen = function () {
+  const popup = document.getElementById("reminderPopup");
+  if (popup) {
+    popup.style.display = "none";
+  }
+};
