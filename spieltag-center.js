@@ -111,8 +111,8 @@ function spieltagAnzeigen() {
       ? "heim-center"
       : "auswaerts-center";
 
-  box.innerHTML = `
-    <div class="spieltag-center-content ${spieltagKlasse}">
+  <div class="spieltag-center-content ${spieltagKlasse}"
+onclick="toggleTeilnehmerListe()">
 
       <h2>${spieltag.liga}</h2>
 
@@ -333,6 +333,51 @@ window.toggleRueckmeldungListe = function (status) {
       ${passendeSpieler.map(spieler => `
         <div class="spieler-name">
           ${spieler.name}
+        </div>
+      `).join("")}
+
+    </div>
+  `;
+};
+window.toggleTeilnehmerListe = function () {
+
+  const box =
+    document.getElementById("rueckmeldungNamenListe");
+
+  if (!box) return;
+
+  if (box.innerHTML.trim() !== "") {
+    box.innerHTML = "";
+    return;
+  }
+
+  const spieltag = spieltage[aktuellerIndex];
+
+  if (!spieltag) return;
+
+  const rueckmeldungen =
+    zusagen.filter(z =>
+      z.spieltagId === spieltag.id
+    );
+
+  if (rueckmeldungen.length === 0) {
+
+    box.innerHTML = `
+      <div class="namen-popup">
+        Keine Rückmeldungen
+      </div>
+    `;
+
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="namen-popup">
+
+      ${rueckmeldungen.map(spieler => `
+        <div class="spieler-name">
+          ${spieler.name}
+          (${spieler.status})
         </div>
       `).join("")}
 
