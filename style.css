@@ -1581,3 +1581,31 @@ footer {
     pointer-events: none;
   }
 }
+.urlaub-box {
+  border: 1px solid rgba(255, 180, 0, 0.35);
+  box-shadow: 0 0 22px rgba(255, 180, 0, 0.12);
+}
+
+.urlaub-box h2 {
+  color: #ffb000;
+}
+
+.urlaub-box p {
+  color: #ccc;
+  line-height: 1.5;
+}
+
+.urlaub-box label {
+  display: block;
+  margin: 14px 0 6px;
+  color: #ddd;
+  font-weight: bold;
+}
+
+.urlaub-box input {
+  margin-bottom: 10px;
+}
+
+.urlaub-box button {
+  margin-top: 12px;
+}
