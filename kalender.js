@@ -132,6 +132,19 @@ window.spieltagSpeichern = async function () {
   alert("Spieltag gespeichert.");
 };
 
+onSnapshot(spieltageRef, (snapshot) => {
+  spieltage = [];
+
+  snapshot.forEach((doc) => {
+    spieltage.push({
+      id: doc.id,
+      ...doc.data()
+    });
+  });
+
+  kalenderZeichnen();
+});
+
 onSnapshot(zusagenRef, (snapshot) => {
   zusagen = [];
 
@@ -148,19 +161,6 @@ onSnapshot(zusagenRef, (snapshot) => {
     rueckmeldungenAnzeigen(window.aktiverSpieltagId);
   }
 });
-
-onSnapshot(zusagenRef, (snapshot) => {
-  zusagen = [];
-
-  snapshot.forEach((doc) => {
-    zusagen.push({
-      id: doc.id,
-      ...doc.data()
-    });
-  });
-if (window.aktiverSpieltagId) {
-  rueckmeldungenAnzeigen(window.aktiverSpieltagId);
-}});
 
 function kalenderZeichnen() {
   const grid = document.getElementById("kalenderGrid");
