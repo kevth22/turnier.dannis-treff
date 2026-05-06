@@ -209,7 +209,21 @@ function kalenderZeichnen() {
 
     const feld = document.createElement("div");
     feld.classList.add("kalender-tag");
+const heute = new Date();
 
+if (
+  tag === heute.getDate() &&
+  monat === heute.getMonth() &&
+  jahr === heute.getFullYear()
+) {
+  feld.classList.add("heute");
+}
+
+const feldDatum = new Date(jahr, monat, tag);
+
+if (feldDatum < new Date().setHours(0,0,0,0)) {
+  feld.classList.add("vergangen");
+}
     feld.innerHTML = `<strong>${tag}</strong>`;
 
     feld.onclick = function () {
