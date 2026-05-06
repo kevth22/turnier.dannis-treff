@@ -104,6 +104,14 @@ function spieltagAnzeigen() {
         <p>🕒 Treffen: ${spieltag.treffen || "-"}</p>
         <p>🎯 Anwurf: ${spieltag.anwurf}</p>
         <p>📍 ${spieltag.ort}</p>
+
+<a
+  class="maps-button"
+  target="_blank"
+  href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spieltag.ort)}"
+>
+  🗺 Navigation starten
+</a>
       </div>
 
     </div>
