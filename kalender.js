@@ -605,6 +605,7 @@ alert(`Urlaub gespeichert. ${betroffeneSpieltage.length} Spieltag(e) wurden auf 
 
 document.getElementById("urlaubVon").value = "";
 document.getElementById("urlaubBis").value = "";
+  };
 window.urlaubLoeschen = async function (urlaubId) {
   if (!confirm("Urlaub wirklich löschen?")) return;
 
