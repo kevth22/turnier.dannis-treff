@@ -70,7 +70,7 @@ window.login = async function () {
     if (
   gefunden.rolle === "admin" ||
   gefunden.rolle === "captain"
-)) {
+) {
       document.getElementById("adminSpieltagBox").style.display = "block";
     }
 
