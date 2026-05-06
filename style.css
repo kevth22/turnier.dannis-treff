@@ -1431,3 +1431,16 @@ footer {
   font-size: 0.95rem;
   opacity: 0.9;
 }
+.kalender-tag.heute {
+  border: 2px solid #e00022;
+  box-shadow: 0 0 18px rgba(224,0,34,0.45);
+  background: rgba(224,0,34,0.12);
+}
+
+.kalender-tag.vergangen {
+  opacity: 0.45;
+}
+
+.kalender-tag.heute strong {
+  color: #ff3b55;
+}
