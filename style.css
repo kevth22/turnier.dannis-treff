@@ -2049,3 +2049,67 @@ body.spieltag-page {
   margin-top: 22px;
   color: #e00022;
 }
+/* =========================
+   FEATURE CARDS
+========================= */
+
+.feature-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  padding: 18px;
+  margin-bottom: 18px;
+
+  border-radius: 22px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,0.08),
+      rgba(255,255,255,0.03)
+    );
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  text-decoration: none;
+  color: white;
+
+  transition: 0.2s;
+}
+
+.feature-card:active {
+  transform: scale(0.98);
+}
+
+.feature-icon {
+  width: 64px;
+  height: 64px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 18px;
+
+  font-size: 28px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #e00022,
+      #8a0015
+    );
+}
+
+.feature-text h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.feature-text p {
+  margin-top: 6px;
+  opacity: 0.75;
+  font-size: 14px;
+  line-height: 1.4;
+}
