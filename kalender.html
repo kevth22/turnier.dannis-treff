@@ -24,7 +24,20 @@
       <h2>📅 Vereinskalender</h2>
       <p>Hier siehst du alle Spieltage und Termine.</p>
     </div>
+<div class="info-card urlaub-box">
+  <h2>🌴 Urlaub eintragen</h2>
+  <p>Wenn du im Urlaub bist, werden Spieltage in diesem Zeitraum automatisch auf „Nein“ gesetzt.</p>
 
+  <label>Von</label>
+  <input id="urlaubVon" type="date">
+
+  <label>Bis</label>
+  <input id="urlaubBis" type="date">
+
+  <button class="main-button" onclick="urlaubSpeichern()">
+    Urlaub speichern
+  </button>
+</div>
     <div id="adminSpieltagBox" class="info-card" style="display:none;">
       <h2>➕ Spieltag eintragen</h2>
 
