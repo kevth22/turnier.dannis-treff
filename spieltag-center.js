@@ -80,7 +80,52 @@ function spieltagAnzeigen() {
   }
 
   const spieltag = spieltage[aktuellerIndex];
+const buttonBox =
+  document.getElementById("abstimmungButtons");
 
+if (buttonBox) {
+
+  if (spieltag.typ === "heim") {
+
+    buttonBox.innerHTML = `
+      <button class="main-button"
+        onclick="abstimmenAktuell('Dabei')">
+        ✅ Dabei
+      </button>
+
+      <button class="main-button nein-button"
+        onclick="abstimmenAktuell('Nein')">
+        ❌ Nein
+      </button>
+    `;
+
+  } else {
+
+    buttonBox.innerHTML = `
+      <button class="main-button"
+        onclick="abstimmenAktuell('Dabei')">
+        ✅ Dabei
+      </button>
+
+      <button class="main-button"
+        onclick="abstimmenAktuell('Fahrer')">
+        🚗 Fahrer
+      </button>
+
+      <button class="main-button"
+        onclick="abstimmenAktuell('Komme direkt')">
+        📍 Direkt
+      </button>
+
+      <button class="main-button nein-button"
+        onclick="abstimmenAktuell('Nein')">
+        ❌ Nein
+      </button>
+    `;
+
+  }
+
+}
   const gegnerText =
     spieltag.typ === "heim"
       ? `Dart11en : ${spieltag.ort}`
@@ -243,32 +288,83 @@ function rueckmeldungenAnzeigenCenter() {
     );
 
   box.innerHTML = `
-    <div class="rueckmeldung-summary">
+  <div class="rueckmeldung-summary">
 
-      <div>
-        ✅<br>
-        <strong>${dabei.length}</strong><br>
-        Dabei
-      </div>
+    <div onclick="toggleRueckmeldungListe('Dabei')">
+      ✅<br>
+      <strong>${dabei.length}</strong><br>
+      Dabei
+    </div>
 
-      <div>
+    ${spieltag.typ === "auswaerts" ? `
+      <div onclick="toggleRueckmeldungListe('Fahrer')">
         🚗<br>
         <strong>${fahrer.length}</strong><br>
         Fahrer
       </div>
 
-      <div>
+      <div onclick="toggleRueckmeldungListe('Komme direkt')">
         📍<br>
         <strong>${direkt.length}</strong><br>
         Direkt
       </div>
+    ` : ""}
 
-      <div>
-        ❌<br>
-        <strong>${nein.length}</strong><br>
-        Nein
+    <div onclick="toggleRueckmeldungListe('Nein')">
+      ❌<br>
+      <strong>${nein.length}</strong><br>
+      Nein
+    </div>
+
+  </div>
+
+  <div id="rueckmeldungNamenListe"></div>
+`;
+}
+/* =========================
+   NAMEN ANZEIGEN
+========================= */
+
+window.toggleRueckmeldungListe = function (status) {
+
+  const spieltag = spieltage[aktuellerIndex];
+
+  if (!spieltag) return;
+
+  const box =
+    document.getElementById("rueckmeldungNamenListe");
+
+  if (!box) return;
+
+  const passendeSpieler =
+    zusagen.filter(z =>
+      z.spieltagId === spieltag.id &&
+      z.status === status
+    );
+
+  if (passendeSpieler.length === 0) {
+
+    box.innerHTML = `
+      <div class="namen-popup">
+        <h4>${status}</h4>
+        <p>Keine Spieler</p>
       </div>
+    `;
+
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="namen-popup">
+
+      <h4>${status}</h4>
+
+      ${passendeSpieler.map(spieler => `
+        <div class="spieler-name">
+          ${spieler.name}
+        </div>
+      `).join("")}
 
     </div>
   `;
-}
+};
