@@ -61,7 +61,10 @@ window.login = async function () {
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("kalenderBereich").style.display = "block";
 
-    if (gefunden.rolle === "admin") {
+    if (if (
+  gefunden.rolle === "admin" ||
+  gefunden.rolle === "captain"
+)) {
       document.getElementById("adminSpieltagBox").style.display = "block";
     }
 
@@ -253,7 +256,10 @@ window.aktiverSpieltagId = spieltag.id;
     <p>📍 Ort: ${spieltag.ort}</p>
     <p>🏠 Typ: ${spieltag.typ === "heim" ? "Heimspiel" : "Auswärtsspiel"}</p>
 
-${aktuellerUser && aktuellerUser.rolle === "admin" ? `
+${aktuellerUser && (
+  aktuellerUser.rolle === "admin" ||
+  aktuellerUser.rolle === "captain"
+) ? `
   <button class="main-button" style="background:#555;" onclick="spieltagLoeschen('${spieltag.id}')">
     ❌ Spieltag löschen
   </button>
@@ -396,7 +402,10 @@ if (gespeicherterUser) {
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("kalenderBereich").style.display = "block";
 
-  if (aktuellerUser.rolle === "admin") {
+  if (
+  aktuellerUser.rolle === "admin" ||
+  aktuellerUser.rolle === "captain"
+  ) {
     document.getElementById("adminSpieltagBox").style.display = "block";
   }
 }
