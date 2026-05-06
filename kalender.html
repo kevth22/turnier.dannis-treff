@@ -10,7 +10,7 @@
 <body>
 
 <header class="app-header">
-  <img src="dart11enlogo.png" class="logo">
+  <img src="dart11enlogo.png" class="logo" alt="Dart11en Logo">
   <h1>Mitglieder-Kalender</h1>
   <p>Spieltage, Termine & Eintragungen</p>
 </header>
@@ -21,66 +21,67 @@
     <h2>🔒 Mitgliederbereich</h2>
     <p>Bitte melde dich mit deinen Mitgliedsdaten an.</p>
 
-<input id="loginUser" type="text" placeholder="Benutzername">
-<input id="loginPass" type="password" placeholder="Passwort">
+    <input id="loginUser" type="text" placeholder="Benutzername">
+    <input id="loginPass" type="password" placeholder="Passwort">
 
-<button class="main-button" onclick="login()">Login</button>
+    <button class="main-button" onclick="login()">Login</button>
 
-<p id="loginFehler" style="color:red; display:none;">
-  Falsche Login-Daten.
-</p>
+    <p id="loginFehler" style="color:red; display:none;">
+      Falsche Login-Daten.
+    </p>
   </section>
 
   <section id="kalenderBereich" style="display:none;">
 
-  <div class="info-card">
-    <h2>📅 Vereinskalender</h2>
-    <p>Hier siehst du alle Spieltage und Termine.</p>
-  </div>
-
-  <div id="adminSpieltagBox" class="info-card" style="display:none;">
-    <h2>➕ Spieltag eintragen</h2>
-
-    <input id="spieltagLiga" type="text" placeholder="Liga z.B. C2 Rhein Ruhr">
-    <input id="spieltagDatum" type="date">
-    <input id="spieltagTreffen" type="time">
-    <input id="spieltagAnwurf" type="time">
-    <input id="spieltagOrt" type="text" placeholder="Ort / Gegner">
-
-    <select id="spieltagTyp">
-      <option value="heim">Heimspiel</option>
-      <option value="auswaerts">Auswärtsspiel</option>
-    </select>
-
-    <button class="main-button" onclick="spieltagSpeichern()">Spieltag speichern</button>
-  </div>
-
-  <div class="info-card">
-    <h2 id="monatTitel">Kalender</h2>
-
-    <div class="kalender-nav">
-      <button onclick="monatZurueck()">◀</button>
-      <button onclick="monatVor()">▶</button>
+    <div class="info-card">
+      <h2>📅 Vereinskalender</h2>
+      <p>Hier siehst du alle Spieltage und Termine.</p>
     </div>
 
-    <div class="kalender-grid kalender-kopf">
-      <div>Mo</div>
-      <div>Di</div>
-      <div>Mi</div>
-      <div>Do</div>
-      <div>Fr</div>
-      <div>Sa</div>
-      <div>So</div>
+    <div id="adminSpieltagBox" class="info-card" style="display:none;">
+      <h2>➕ Spieltag eintragen</h2>
+
+      <input id="spieltagLiga" type="text" placeholder="Liga z.B. C2 Rhein Ruhr">
+      <input id="spieltagDatum" type="date">
+      <input id="spieltagTreffen" type="time">
+      <input id="spieltagAnwurf" type="time">
+      <input id="spieltagOrt" type="text" placeholder="Ort / Gegner">
+
+      <select id="spieltagTyp">
+        <option value="heim">Heimspiel</option>
+        <option value="auswaerts">Auswärtsspiel</option>
+      </select>
+
+      <button class="main-button" onclick="spieltagSpeichern()">Spieltag speichern</button>
     </div>
 
-    <div id="kalenderGrid" class="kalender-grid"></div>
-    <h3>Spieltage in diesem Monat</h3>
-    <div id="spieltagListe"></div>
-  </div>
+    <div class="info-card">
+      <h2 id="monatTitel">Kalender</h2>
 
-  <div id="spieltagDetails" class="info-card" style="display:none;"></div>
+      <div class="kalender-nav">
+        <button onclick="monatZurueck()">◀</button>
+        <button onclick="monatVor()">▶</button>
+      </div>
 
-</section>
+      <div class="kalender-grid kalender-kopf">
+        <div>Mo</div>
+        <div>Di</div>
+        <div>Mi</div>
+        <div>Do</div>
+        <div>Fr</div>
+        <div>Sa</div>
+        <div>So</div>
+      </div>
+
+      <div id="kalenderGrid" class="kalender-grid"></div>
+
+      <h3>Spieltage in diesem Monat</h3>
+      <div id="spieltagListe"></div>
+    </div>
+
+    <div id="spieltagDetails" class="info-card" style="display:none;"></div>
+
+  </section>
 
 </main>
 
@@ -91,8 +92,7 @@
   <a href="kader.html">👥<br>Kader</a>
 </nav>
 
-
-
 <script type="module" src="kalender.js"></script>
+
 </body>
 </html>
