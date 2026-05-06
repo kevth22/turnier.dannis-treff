@@ -1689,7 +1689,7 @@ footer {
   text-align: center;
   padding: 25px;
    height: calc(100vh - 220px);
-overflow: hidden;
+overflow: visible;
 }
 
 body.spieltag-page {
