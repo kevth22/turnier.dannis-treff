@@ -57,7 +57,7 @@ window.login = async function () {
     return;
   }
 
-  aktuellerBenutzer = benutzername;
+  aktuellerBenutzer = daten;
 
   if (daten.mussPasswortAendern === true) {
     document.getElementById("loginBox").style.display = "none";
@@ -94,13 +94,13 @@ window.passwortAendern = async function () {
     return;
   }
 
-  const userRef = doc(db, "mitglieder", aktuellerBenutzer);
+  const userRef = doc(db, "mitglieder", aktuellerBenutzer.benutzername);
 
   await updateDoc(userRef, {
     passwort: p1,
     mussPasswortAendern: false
   });
 
-  localStorage.setItem("dart11enLogin", aktuellerBenutzer);
+  localStorage.setItem("dart11enLogin", JSON.stringify(daten));
   window.location.href = "kalender.html";
 };
