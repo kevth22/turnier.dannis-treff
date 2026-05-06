@@ -119,6 +119,7 @@ function spieltagAnzeigen() {
 
   counter.textContent =
     `Spieltag ${aktuellerIndex + 1} / ${spieltage.length}`;
+rueckmeldungenAnzeigenCenter();
 }
 
 window.naechsterSpieltag = function () {
@@ -167,4 +168,107 @@ function swipePruefen() {
     vorherigerSpieltag();
   }
 
+}
+/* =========================
+   ABSTIMMUNGEN
+========================= */
+
+import {
+  setDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+window.abstimmenAktuell = async function (status) {
+
+  const spieltag = spieltage[aktuellerIndex];
+
+  if (!spieltag) return;
+
+  const zusageId =
+    `${spieltag.id}_${aktuellerUser.benutzername}`;
+
+  await setDoc(
+    doc(db, "zusagen", zusageId),
+    {
+      spieltagId: spieltag.id,
+      name: aktuellerUser.nickname,
+      benutzername: aktuellerUser.benutzername,
+      status: status,
+      grund: "",
+      erstelltAm: new Date()
+    }
+  );
+
+  alert("Rückmeldung gespeichert: " + status);
+};
+
+/* =========================
+   RÜCKMELDUNGEN ANZEIGEN
+========================= */
+
+function rueckmeldungenAnzeigenCenter() {
+
+  const box =
+    document.getElementById("spieltagRueckmeldungen");
+
+  if (!box) return;
+
+  const spieltag = spieltage[aktuellerIndex];
+
+  if (!spieltag) return;
+
+  const rueckmeldungen =
+    zusagen.filter(
+      z => z.spieltagId === spieltag.id
+    );
+
+  const dabei =
+    rueckmeldungen.filter(
+      z => z.status === "Dabei"
+    );
+
+  const fahrer =
+    rueckmeldungen.filter(
+      z => z.status === "Fahrer"
+    );
+
+  const direkt =
+    rueckmeldungen.filter(
+      z => z.status === "Komme direkt"
+    );
+
+  const nein =
+    rueckmeldungen.filter(
+      z => z.status === "Nein"
+    );
+
+  box.innerHTML = `
+    <div class="rueckmeldung-summary">
+
+      <div>
+        ✅<br>
+        <strong>${dabei.length}</strong><br>
+        Dabei
+      </div>
+
+      <div>
+        🚗<br>
+        <strong>${fahrer.length}</strong><br>
+        Fahrer
+      </div>
+
+      <div>
+        📍<br>
+        <strong>${direkt.length}</strong><br>
+        Direkt
+      </div>
+
+      <div>
+        ❌<br>
+        <strong>${nein.length}</strong><br>
+        Nein
+      </div>
+
+    </div>
+  `;
 }
