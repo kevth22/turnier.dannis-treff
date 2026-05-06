@@ -898,3 +898,25 @@ html, body {
   width: 100%;
   overflow-x: hidden;
 }
+@media (max-width: 900px) {
+
+.main-content {
+    flex-direction: column;
+}
+
+}
+.left-box,
+.right-box {
+    width: 100%;
+}
+@media (max-width: 900px) {
+
+.hero-title {
+    font-size: 70px;
+}
+
+.menu {
+    display: none;
+}
+
+}
