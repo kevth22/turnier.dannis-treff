@@ -1747,3 +1747,24 @@ footer {
   margin: 12px 0;
   font-size: 18px;
 }
+/* Heimspiel */
+
+.heim-center {
+  border: 2px solid #0047ab;
+
+  box-shadow:
+    0 0 20px rgba(0,71,171,0.4);
+
+  border-radius: 20px;
+}
+
+/* Auswärtsspiel */
+
+.auswaerts-center {
+  border: 2px solid #e00022;
+
+  box-shadow:
+    0 0 20px rgba(224,0,34,0.4);
+
+  border-radius: 20px;
+}
