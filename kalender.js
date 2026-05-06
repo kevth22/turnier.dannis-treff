@@ -52,6 +52,7 @@ let ausgewaehltesDatum = null;
   const monat = aktuellesDatum.getMonth() + 1;
 
   const relevanteSpieltage = spieltage.filter(s => {
+   
     const [y, m] = s.datum.split("-");
     return parseInt(y) === jahr && parseInt(m) === monat;
   });
@@ -62,18 +63,34 @@ let ausgewaehltesDatum = null;
   }
 
   relevanteSpieltage.forEach(spieltag => {
+     const rueckmeldungen = zusagen.filter(z => z.spieltagId === spieltag.id);
+
+const dabei = rueckmeldungen.filter(z => z.status === "Dabei").length;
+const fahrer = rueckmeldungen.filter(z => z.status === "Fahrer").length;
+const direkt = rueckmeldungen.filter(z => z.status === "Komme direkt").length;
+
+const zusagenGesamt = spieltag.typ === "auswaerts"
+  ? dabei + fahrer + direkt
+  : dabei;
     const card = document.createElement("div");
     card.classList.add("spieltag-card");
 
     card.innerHTML = `
       <h4>${spieltag.liga}</h4>
       <div class="spieltag-meta">
-        📅 ${spieltag.datum} <br>
-        ⏰ Anwurf: ${spieltag.anwurf} <br>
-        🕒 Treffen: ${spieltag.treffen || "-"} <br>
-        📍 ${spieltag.ort} <br>
-        ${spieltag.typ === "heim" ? "🏠 Heimspiel" : "🚗 Auswärtsspiel"}
-      </div>
+  📅 ${spieltag.datum} <br>
+  ⏰ Anwurf: ${spieltag.anwurf} <br>
+  🕒 Treffen: ${spieltag.treffen || "-"} <br>
+  ${spieltag.typ === "heim" ? "🏠 Heimspiel" : `🚗 Auswärtsspiel<br>📍 ${spieltag.ort}`} <br>
+  ✅ Zusagen: ${zusagenGesamt}
+
+  ${spieltag.typ === "auswaerts" ? `
+    <br>Davon:
+    <br>✅ Dabei: ${dabei}
+    <br>🚗 Fahrer: ${fahrer}
+    <br>📍 Direkt: ${direkt}
+  ` : ""}
+</div>
 
       <div class="spieltag-actions">
         <button onclick="zeigeSpieltag('${spieltag.id}')">Details</button>
@@ -195,9 +212,10 @@ function kalenderZeichnen() {
   <strong>${spieltag.liga}</strong><br>
   <small>${spieltag.typ === "heim" ? "🏠 Heim" : "🚗 Auswärts"}</small>
 `;
-      event.onclick = function () {
-        zeigeSpieltag(spieltag.id);
-      };
+      event.onclick = function (e) {
+  e.stopPropagation();
+  zeigeSpieltag(spieltag.id);
+};
 
       feld.appendChild(event);
     });
@@ -271,6 +289,8 @@ ${aktuellerUser && (
   rueckmeldungenAnzeigen(spieltag.id);
 };
 function rueckmeldungenAnzeigen(spieltagId) {
+    const spieltag = spieltage.find(s => s.id === spieltagId);
+  const istAuswaerts = spieltag && spieltag.typ === "auswaerts";
   const box = document.getElementById("rueckmeldungen");
   if (!box) return;
 
@@ -282,24 +302,30 @@ function rueckmeldungenAnzeigen(spieltagId) {
   const nein = rueckmeldungen.filter(z => z.status === "Nein");
 
   box.innerHTML = `
-    <div class="rueckmeldung-summary">
-      <div>✅<br><strong>${dabei.length}</strong><br>Dabei</div>
-      <div>🚗<br><strong>${fahrer.length}</strong><br>Fahrer</div>
-      <div>📍<br><strong>${direkt.length}</strong><br>Direkt</div>
-      <div>❌<br><strong>${nein.length}</strong><br>Nein</div>
-    </div>
+    <div class="rueckmeldung-summary ${istAuswaerts ? "" : "heim-summary"}">
+  <div>✅<br><strong>${dabei.length}</strong><br>Dabei</div>
 
-    <h4>🚗 Fahrer</h4>
-    ${gruppeAnzeigen(fahrer)}
+  ${istAuswaerts ? `
+    <div>🚗<br><strong>${fahrer.length}</strong><br>Fahrer</div>
+    <div>📍<br><strong>${direkt.length}</strong><br>Direkt</div>
+  ` : ""}
+
+  <div>❌<br><strong>${nein.length}</strong><br>Nein</div>
+</div>
 
     <h4>✅ Dabei</h4>
-    ${gruppeAnzeigen(dabei)}
+${gruppeAnzeigen(dabei)}
 
-    <h4>📍 Kommt direkt</h4>
-    ${gruppeAnzeigen(direkt)}
+${istAuswaerts ? `
+  <h4>🚗 Fahrer</h4>
+  ${gruppeAnzeigen(fahrer)}
 
-    <h4>❌ Nein</h4>
-    ${gruppeAnzeigen(nein)}
+  <h4>📍 Kommt direkt</h4>
+  ${gruppeAnzeigen(direkt)}
+` : ""}
+
+<h4>❌ Nein</h4>
+${gruppeAnzeigen(nein)}
   `;
 }
 function gruppeAnzeigen(gruppe) {
