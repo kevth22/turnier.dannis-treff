@@ -1609,3 +1609,35 @@ footer {
 .urlaub-box button {
   margin-top: 12px;
 }
+.urlaub-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 12px 14px;
+  margin-top: 10px;
+
+  border-radius: 14px;
+
+  background: rgba(255, 180, 0, 0.08);
+  border: 1px solid rgba(255, 180, 0, 0.15);
+}
+
+.urlaub-item button {
+  border: none;
+  background: rgba(255, 70, 70, 0.15);
+
+  color: #ff6b6b;
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 10px;
+
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.urlaub-item button:hover {
+  background: rgba(255, 70, 70, 0.3);
+}
