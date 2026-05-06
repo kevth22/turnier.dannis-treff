@@ -1944,3 +1944,9 @@ footer {
 
   transform: scale(1.03);
 }
+.bezahlt,
+.bezahlt-status,
+.bezahlt-haken {
+  color: #28ff5a !important;
+  font-weight: bold;
+}
