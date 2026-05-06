@@ -394,34 +394,7 @@ window.zeigeSpieltag = function (spieltagId) {
         ❌ Spieltag löschen
       </button>
     ` : ""}
-
-    <h3>Deine Rückmeldung</h3>
-
-    <div class="abstimmung-buttons">
-      <button class="main-button" onclick="abstimmen('${spieltag.id}', 'Dabei')">
-        ✅ Dabei
-      </button>
-
-      ${spieltag.typ === "auswaerts" ? `
-        <button class="main-button" onclick="abstimmen('${spieltag.id}', 'Fahrer')">
-          🚗 Fahrer
-        </button>
-
-        <button class="main-button" onclick="abstimmen('${spieltag.id}', 'Komme direkt')">
-          📍 Direkt
-        </button>
-      ` : ""}
-
-      <button class="main-button nein-button" onclick="abstimmen('${spieltag.id}', 'Nein')">
-        ❌ Nein
-      </button>
-    </div>
-
-    <h3>Rückmeldungen</h3>
-    <div id="rueckmeldungen"></div>
   `;
-
-  rueckmeldungenAnzeigen(spieltag.id);
 };
 /* =========================
    RÜCKMELDUNGEN
