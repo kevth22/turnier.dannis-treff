@@ -945,3 +945,91 @@ footer {
 .info-card .main-button {
   margin-top: 10px;
 }
+/* =========================
+   WELCOME PAGE
+========================= */
+
+.welcome-page {
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.9)),
+    url("images/darts-bg.jpg");
+
+  background-size: cover;
+  background-position: center;
+}
+
+.welcome-container {
+  width: 90%;
+  max-width: 420px;
+
+  padding: 40px 30px;
+
+  background: rgba(0,0,0,0.75);
+
+  border: 1px solid #222;
+  border-radius: 24px;
+
+  text-align: center;
+
+  backdrop-filter: blur(8px);
+
+  box-shadow: 0 0 35px rgba(224,0,34,0.2);
+}
+
+.welcome-logo {
+  width: 140px;
+  margin: 0 auto 20px;
+}
+
+.welcome-container h1 {
+  font-size: 52px;
+  margin-bottom: 10px;
+}
+
+.welcome-subtitle {
+  color: #bbb;
+  margin-bottom: 35px;
+  line-height: 1.5;
+}
+
+.welcome-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.welcome-btn {
+  display: block;
+
+  padding: 18px;
+
+  border-radius: 14px;
+
+  font-size: 18px;
+  font-weight: bold;
+
+  transition: 0.25s;
+}
+
+.welcome-btn.member {
+  background: #e00022;
+}
+
+.welcome-btn.member:hover {
+  background: #ff0033;
+}
+
+.welcome-btn.guest {
+  background: #222;
+  border: 1px solid #444;
+}
+
+.welcome-btn.guest:hover {
+  border-color: #e00022;
+}
