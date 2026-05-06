@@ -1,7 +1,7 @@
 {
   "name": "Dart11en",
   "short_name": "Dart11en",
-  "start_url": "/turnier.dannis-treff/",
+  "start_url": "/turnier.dannis-treff/welcome.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#e00022",
