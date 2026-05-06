@@ -160,7 +160,9 @@ onSnapshot(zusagenRef, (snapshot) => {
   if (window.aktiverSpieltagId) {
     rueckmeldungenAnzeigen(window.aktiverSpieltagId);
   }
+  erinnerungenPruefen();
 });
+
 
 function kalenderZeichnen() {
   const grid = document.getElementById("kalenderGrid");
@@ -437,3 +439,45 @@ window.tagAuswaehlen = function (datumString) {
   datumInput.value = datumString;
   adminBox.style.display = "block";
 };
+function erinnerungenPruefen() {
+  const reminderAktiv = localStorage.getItem("dart11enReminder");
+
+  if (reminderAktiv !== "true") return;
+  if (!aktuellerUser || !spieltage.length) return;
+
+  const heute = new Date();
+  heute.setHours(0, 0, 0, 0);
+
+  let meldungen = [];
+
+  spieltage.forEach(spieltag => {
+    const spielDatum = new Date(spieltag.datum);
+    spielDatum.setHours(0, 0, 0, 0);
+
+    const diffTage =
+      Math.round((spielDatum - heute) / (1000 * 60 * 60 * 24));
+
+    const eigeneRueckmeldung = zusagen.find(z =>
+      z.spieltagId === spieltag.id &&
+      z.benutzername === aktuellerUser.benutzername
+    );
+
+    if ((diffTage === 7 || diffTage === 3) && !eigeneRueckmeldung) {
+      meldungen.push(
+        `⚠️ ${spieltag.liga} am ${spieltag.datum}: Noch keine Rückmeldung abgegeben.`
+      );
+    }
+
+    if (diffTage === 2 && eigeneRueckmeldung) {
+      meldungen.push(
+        `📅 Erinnerung: ${spieltag.liga} in 2 Tagen.\nStatus: ${eigeneRueckmeldung.status}`
+      );
+    }
+  });
+
+  if (meldungen.length > 0) {
+    alert(meldungen.join("\n\n"));
+  }
+
+  localStorage.removeItem("dart11enReminder");
+}
