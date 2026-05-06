@@ -4,7 +4,12 @@
   <title>
 Dart11en – Dart Turniere, Liga & Spieltage | Dannis Treff
 </title>
-
+<script>
+  if (!sessionStorage.getItem("splashGesehen")) {
+    sessionStorage.setItem("splashGesehen", "ja");
+    window.location.href = "welcome.html";
+  }
+</script>
 <meta
   name="description"
   content="Dart11en Vereinsplattform mit Liga, Spieltag-Center, Turnieren und Dart-Events im Dannis Treff."
