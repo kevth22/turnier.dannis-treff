@@ -41,6 +41,13 @@ let aktuellerUser = JSON.parse(gespeicherterUser);
 let spieltage = [];
 let aktuellesDatum = new Date();
 let ausgewaehltesDatum = null;
+const userInfo = document.getElementById("userInfo");
+
+if (userInfo && aktuellerUser) {
+  userInfo.textContent =
+    "Eingeloggt als: " +
+    (aktuellerUser.nickname || aktuellerUser.benutzername);
+}
 
   function spieltagListeAnzeigen() {
   const liste = document.getElementById("spieltagListe");
