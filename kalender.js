@@ -379,7 +379,7 @@ window.abstimmen = async function (spieltagId, status) {
   } else {
     await addDoc(zusagenRef, {
       spieltagId: spieltagId,
-      name: aktuellerUser.name,
+      name: aktuellerUser.nickname,
       benutzername: aktuellerUser.benutzername,
       status: status,
       erstelltAm: serverTimestamp()
