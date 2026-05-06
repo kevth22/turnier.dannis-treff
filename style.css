@@ -932,3 +932,16 @@ footer {
   }
 
 }
+/* =========================
+   NÄCHSTES EVENT FIX
+========================= */
+
+.info-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-card .main-button {
+  margin-top: 10px;
+}
