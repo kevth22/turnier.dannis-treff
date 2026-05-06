@@ -1688,6 +1688,13 @@ footer {
 .spieltag-center-card {
   text-align: center;
   padding: 25px;
+   height: calc(100vh - 220px);
+overflow: hidden;
+}
+
+body.spieltag-page {
+  overflow: hidden;
+  height: 100vh;
 }
 
 .spieltag-nav {
