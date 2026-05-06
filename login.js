@@ -8,7 +8,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  // HIER DEINEN FIREBASE CONFIG BLOCK EINFÜGEN
+  apiKey: "AIzaSyDtQ3pECcZETIoI4QTV5G-7_QcoRvVGHL4",
+  authDomain: "dannistreffturnier.firebaseapp.com",
+  projectId: "dannistreffturnier",
+  storageBucket: "dannistreffturnier.firebasestorage.app",
+  messagingSenderId: "829873084116",
+  appId: "1:829873084116:web:683bbf1ea3e58f1a4ecd41"
 };
 
 const app = initializeApp(firebaseConfig);
