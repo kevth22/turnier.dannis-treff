@@ -1985,3 +1985,67 @@ body.spieltag-page {
   margin-bottom: 140px;
   padding-bottom: 180px;
 }
+/* =========================
+   CAPTAIN CENTER
+========================= */
+
+.aufstellung-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.aufstellung-slot {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.aufstellung-slot label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #e00022;
+}
+
+.aufstellung-slot select,
+#spieltagSelect,
+#systemSelect {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: #151515;
+  color: white;
+  font-weight: bold;
+}
+
+.spieler-chip {
+  display: inline-block;
+  margin: 6px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  font-weight: bold;
+}
+
+.spieler-chip small {
+  margin-left: 6px;
+  color: #28ff5a;
+}
+
+.spielplan-zeile {
+  padding: 12px 14px;
+  margin: 8px 0;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.06);
+  font-weight: bold;
+}
+
+#spielplanVorschau h3 {
+  margin-top: 22px;
+  color: #e00022;
+}
