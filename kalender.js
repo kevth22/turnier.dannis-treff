@@ -606,6 +606,51 @@ alert(`Urlaub gespeichert. ${betroffeneSpieltage.length} Spieltag(e) wurden auf 
 document.getElementById("urlaubVon").value = "";
 document.getElementById("urlaubBis").value = "";
   };
+window.urlaubSpeichern = async function () {
+  const von = document.getElementById("urlaubVon").value;
+  const bis = document.getElementById("urlaubBis").value;
+
+  if (!von || !bis) {
+    alert("Bitte Von- und Bis-Datum auswählen.");
+    return;
+  }
+
+  if (bis < von) {
+    alert("Das Bis-Datum darf nicht vor dem Von-Datum liegen.");
+    return;
+  }
+
+  await addDoc(urlaubeRef, {
+    benutzername: aktuellerUser.benutzername,
+    nickname: aktuellerUser.nickname,
+    von: von,
+    bis: bis,
+    erstelltAm: serverTimestamp()
+  });
+
+  const betroffeneSpieltage = spieltage.filter(spieltag =>
+    spieltag.datum >= von && spieltag.datum <= bis
+  );
+
+  for (const spieltag of betroffeneSpieltage) {
+    const zusageId = `${spieltag.id}_${aktuellerUser.benutzername}`;
+
+    await setDoc(doc(db, "zusagen", zusageId), {
+      spieltagId: spieltag.id,
+      name: aktuellerUser.nickname,
+      benutzername: aktuellerUser.benutzername,
+      status: "Nein",
+      grund: "Urlaub",
+      erstelltAm: serverTimestamp()
+    });
+  }
+
+  alert(`Urlaub gespeichert. ${betroffeneSpieltage.length} Spieltag(e) wurden auf Nein gesetzt.`);
+
+  document.getElementById("urlaubVon").value = "";
+  document.getElementById("urlaubBis").value = "";
+};
+
 window.urlaubLoeschen = async function (urlaubId) {
   if (!confirm("Urlaub wirklich löschen?")) return;
 
@@ -613,6 +658,7 @@ window.urlaubLoeschen = async function (urlaubId) {
 
   alert("Urlaub gelöscht.");
 };
+
 window.urlaubToggle = function () {
   const content = document.getElementById("urlaubContent");
   const icon = document.getElementById("urlaubToggleIcon");
