@@ -63,7 +63,16 @@ onSnapshot(spieltageRef, (snapshot) => {
       ...docSnap.data()
     });
   });
+  
+const heute = new Date();
+heute.setHours(0, 0, 0, 0);
 
+spieltage = spieltage.filter(spieltag => {
+  const spieltagDatum = new Date(spieltag.datum);
+  spieltagDatum.setHours(0, 0, 0, 0);
+
+  return spieltagDatum >= heute;
+});
   spieltage.sort((a, b) =>
     new Date(a.datum) - new Date(b.datum)
   );
