@@ -238,17 +238,29 @@ ${aktuellerUser && (
   </button>
 ` : ""}
 
-    <h3>Deine Rückmeldung</h3>
+   <h3>Deine Rückmeldung</h3>
 
-    <button class="main-button" onclick="abstimmen('${spieltag.id}', 'Dabei')">Dabei</button>
+<div class="abstimmung-buttons">
 
-    ${spieltag.typ === "auswaerts" ? `
-      <button class="main-button" onclick="abstimmen('${spieltag.id}', 'Fahrer')">Fahrer</button>
-      <button class="main-button" onclick="abstimmen('${spieltag.id}', 'Komme direkt')">Komme direkt</button>
-    ` : ""}
+  <button class="main-button" onclick="abstimmen('${spieltag.id}', 'Dabei')">
+    ✅ Dabei
+  </button>
 
-    <button class="main-button" onclick="abstimmen('${spieltag.id}', 'Nein')">Nein</button>
+  ${spieltag.typ === "auswaerts" ? `
+    <button class="main-button" onclick="abstimmen('${spieltag.id}', 'Fahrer')">
+      🚗 Fahrer
+    </button>
 
+    <button class="main-button" onclick="abstimmen('${spieltag.id}', 'Komme direkt')">
+      📍 Direkt
+    </button>
+  ` : ""}
+
+  <button class="main-button nein-button" onclick="abstimmen('${spieltag.id}', 'Nein')">
+    ❌ Nein
+  </button>
+
+</div>
     <h3>Rückmeldungen</h3>
     <div id="rueckmeldungen"></div>
   `;
