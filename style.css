@@ -1662,3 +1662,22 @@ footer {
 #urlaubContent {
   margin-top: 15px;
 }
+.kalender-event.heimspiel {
+  background: linear-gradient(
+    135deg,
+    #0047ab,
+    #0066ff
+  );
+
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.kalender-event.auswaertsspiel {
+  background: linear-gradient(
+    135deg,
+    #a80000,
+    #ff2d2d
+  );
+
+  border: 1px solid rgba(255,255,255,0.15);
+}
