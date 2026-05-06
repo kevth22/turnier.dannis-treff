@@ -3,6 +3,7 @@ const gespeicherterUser = localStorage.getItem("dart11enLogin");
 if (!gespeicherterUser) {
   alert("Du hast keinen Zugriff für diesen Bereich.");
   window.location.href = "index.html";
+  throw new Error("Kein Zugriff");
 }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 
@@ -36,49 +37,10 @@ const spieltageRef = collection(db, "spieltage");
 const zusagenRef = collection(db, "zusagen");
 let zusagen = [];
 
-let aktuellerUser = null;
+let aktuellerUser = JSON.parse(gespeicherterUser);
 let spieltage = [];
 let aktuellesDatum = new Date();
 
-window.login = async function () {
-  const userInput = document.getElementById("loginUser").value.trim();
-  const passInput = document.getElementById("loginPass").value.trim();
-
-  if (!userInput || !passInput) {
-    alert("Bitte Benutzername und Passwort eingeben");
-    return;
-  }
-
-  const snapshot = await getDocs(collection(db, "mitglieder"));
-  let gefunden = null;
-
-  snapshot.forEach((doc) => {
-    const data = doc.data();
-
-    if (data.benutzername === userInput && data.passwort === passInput) {
-      gefunden = data;
-    }
-  });
-
-  if (gefunden) {
-    aktuellerUser = gefunden;
-    sessionStorage.setItem("user", JSON.stringify(gefunden));
-
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("kalenderBereich").style.display = "block";
-
-    if (
-  gefunden.rolle === "admin" ||
-  gefunden.rolle === "captain"
-) {
-      document.getElementById("adminSpieltagBox").style.display = "block";
-    }
-
-    kalenderZeichnen();
-  } else {
-    document.getElementById("loginFehler").style.display = "block";
-  }
-};
   function spieltagListeAnzeigen() {
   const liste = document.getElementById("spieltagListe");
   if (!liste) return;
@@ -398,31 +360,5 @@ window.abstimmen = async function (spieltagId, status) {
     });
 
     alert("Rückmeldung gespeichert: " + status);
-  }
-};
-aktuellerUser = JSON.parse(gespeicherterUser);
-
-if (aktuellerUser) {
-
-  const loginBox = document.getElementById("loginBox");
-  if (loginBox) {
-    loginBox.style.display = "none";
-  }
-
-  const kalenderBereich = document.getElementById("kalenderBereich");
-  if (kalenderBereich) {
-    kalenderBereich.style.display = "block";
-  }
-
-  if (
-    aktuellerUser.rolle === "admin" ||
-    aktuellerUser.rolle === "captain"
-  ) {
-
-    const adminBox = document.getElementById("adminSpieltagBox");
-
-    if (adminBox) {
-      adminBox.style.display = "block";
-    }
   }
 }
