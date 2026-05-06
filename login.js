@@ -72,7 +72,7 @@ window.login = async function () {
     localStorage.setItem("dart11enLogin", JSON.stringify(aktuellerBenutzer));
     sessionStorage.setItem("user", JSON.stringify(aktuellerBenutzer));
 
-    window.location.replace("kalender.html");
+    window.location.replace("index.html");
 
   } catch (error) {
     fehler.textContent = "Fehler beim Login: " + error.message;
@@ -120,7 +120,7 @@ window.passwortAendern = async function () {
     localStorage.setItem("dart11enLogin", JSON.stringify(aktuellerBenutzer));
     sessionStorage.setItem("user", JSON.stringify(aktuellerBenutzer));
 
-    window.location.replace("kalender.html");
+    window.location.replace("index.html");
 
   } catch (error) {
     fehler.textContent = "Fehler beim Passwort ändern: " + error.message;
