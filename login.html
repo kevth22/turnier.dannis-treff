@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mitglieder Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="app-header">
+  <img src="dart11enlogo.png" class="logo">
+  <h1>Mitglieder Login</h1>
+  <p>Nur für Dart11en Mitglieder</p>
+</header>
+
+<main class="app-container">
+
+  <section id="loginBox" class="info-card">
+    <h2>🔐 Login</h2>
+
+    <input id="loginUser" type="text" placeholder="Benutzername">
+    <input id="loginPass" type="password" placeholder="Passwort">
+
+    <button onclick="login()">Einloggen</button>
+
+    <p id="loginFehler" style="color:red; display:none;">
+      Benutzername oder Passwort falsch.
+    </p>
+  </section>
+
+  <section id="passwortBox" class="info-card" style="display:none;">
+    <h2>🔁 Passwort ändern</h2>
+    <p>Bitte ändere dein Startpasswort.</p>
+
+    <input id="neuesPasswort" type="password" placeholder="Neues Passwort">
+    <input id="neuesPasswort2" type="password" placeholder="Passwort wiederholen">
+
+    <button onclick="passwortAendern()">Passwort speichern</button>
+
+    <p id="passwortFehler" style="color:red; display:none;"></p>
+  </section>
+
+</main>
+
+<nav class="bottom-nav">
+  <a href="index.html">🏠<br>Home</a>
+  <a href="turniere.html">🎯<br>Turniere</a>
+  <a href="liga.html">🏆<br>Liga</a>
+  <a href="kader.html">👥<br>Kader</a>
+</nav>
+
+<script type="module" src="login.js"></script>
+
+</body>
+</html>
