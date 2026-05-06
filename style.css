@@ -1425,3 +1425,9 @@ footer {
   line-height: 1.45;
   text-align: left;
 }
+.user-info {
+  margin-top: 8px;
+  color: #bbb;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
