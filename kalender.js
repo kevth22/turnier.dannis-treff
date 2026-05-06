@@ -39,7 +39,15 @@ const zusagenRef = collection(db, "zusagen");
 const urlaubeRef = collection(db, "urlaube");
 let zusagen = [];
 
-let aktuellerUser = JSON.parse(gespeicherterUser);
+const erlaubteRollen = ["admin", "captain", "mitglied"];
+
+if (!erlaubteRollen.includes(aktuellerUser.rolle)) {
+  alert("Kein Zugriff auf den Kalender.");
+
+  window.location.href = "index.html";
+
+  throw new Error("Keine Berechtigung");
+}
 let spieltage = [];
 let aktuellesDatum = new Date();
 let ausgewaehltesDatum = null;
