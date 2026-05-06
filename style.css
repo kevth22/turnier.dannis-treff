@@ -1753,6 +1753,7 @@ body.spieltag-page {
 .spieltag-details p {
   margin: 12px 0;
   font-size: 18px;
+  margin-bottom: 30px;
 }
 /* Heimspiel */
 
@@ -1827,6 +1828,11 @@ body.spieltag-page {
   background: rgba(255,255,255,0.08);
 
   font-weight: bold;
+}
+
+#spieltagRueckmeldungen {
+  position: relative;
+  z-index: 10;
 }
 
 @keyframes fadeIn {
