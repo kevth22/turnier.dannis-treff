@@ -287,39 +287,52 @@ function rueckmeldungenAnzeigenCenter() {
       z => z.status === "Nein"
     );
 
+  if (spieltag.typ === "heim") {
+
   box.innerHTML = `
-  <div class="rueckmeldung-summary">
+    <div class="matchday-statusbar">
 
-    <div onclick="toggleRueckmeldungListe('Dabei')">
-      ✅<br>
-      <strong>${dabei.length}</strong><br>
-      Dabei
+      <div onclick="abstimmenAktuell('Dabei'); toggleRueckmeldungListe('Dabei')">
+        👍<br>
+        <strong>${dabei.length}</strong>
+      </div>
+
+      <div onclick="abstimmenAktuell('Nein'); toggleRueckmeldungListe('Nein')">
+        👎<br>
+        <strong>${nein.length}</strong>
+      </div>
+
     </div>
+  `;
 
-    ${spieltag.typ === "auswaerts" ? `
-      <div onclick="toggleRueckmeldungListe('Fahrer')">
+} else {
+
+  box.innerHTML = `
+    <div class="matchday-statusbar">
+
+      <div onclick="abstimmenAktuell('Dabei'); toggleRueckmeldungListe('Dabei')">
+        👍<br>
+        <strong>${dabei.length}</strong>
+      </div>
+
+      <div onclick="abstimmenAktuell('Fahrer'); toggleRueckmeldungListe('Fahrer')">
         🚗<br>
-        <strong>${fahrer.length}</strong><br>
-        Fahrer
+        <strong>${fahrer.length}</strong>
       </div>
 
-      <div onclick="toggleRueckmeldungListe('Komme direkt')">
+      <div onclick="abstimmenAktuell('Komme direkt'); toggleRueckmeldungListe('Komme direkt')">
         📍<br>
-        <strong>${direkt.length}</strong><br>
-        Direkt
+        <strong>${direkt.length}</strong>
       </div>
-    ` : ""}
 
-    <div onclick="toggleRueckmeldungListe('Nein')">
-      ❌<br>
-      <strong>${nein.length}</strong><br>
-      Nein
+      <div onclick="abstimmenAktuell('Nein'); toggleRueckmeldungListe('Nein')">
+        👎<br>
+        <strong>${nein.length}</strong>
+      </div>
+
     </div>
+  `;
 
-  </div>
-
-  <div id="rueckmeldungNamenListe"></div>
-`;
 }
 /* =========================
    NAMEN ANZEIGEN
