@@ -1835,3 +1835,105 @@ footer {
   }
 
 }
+/* =========================
+   MATCHDAY STATUSBAR
+========================= */
+
+.matchday-statusbar {
+  display: flex;
+
+  justify-content: space-around;
+  align-items: center;
+
+  margin-top: 20px;
+
+  background: rgba(255,255,255,0.04);
+
+  border-radius: 20px;
+
+  overflow: hidden;
+}
+
+.matchday-statusbar div {
+  flex: 1;
+
+  padding: 18px 10px;
+
+  text-align: center;
+
+  font-size: 22px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+
+.matchday-statusbar div:last-child {
+  border-right: none;
+}
+
+.matchday-statusbar div:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.matchday-statusbar strong {
+  display: block;
+
+  margin-top: 8px;
+
+  font-size: 24px;
+}
+/* =========================
+   MATCHDAY STATUSBAR
+========================= */
+
+.matchday-statusbar {
+  display: flex;
+
+  justify-content: space-around;
+  align-items: center;
+
+  margin-top: 20px;
+
+  background: rgba(255,255,255,0.04);
+
+  border-radius: 20px;
+
+  overflow: hidden;
+}
+
+.matchday-statusbar div {
+  flex: 1;
+
+  padding: 18px 10px;
+
+  text-align: center;
+
+  font-size: 22px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+
+.matchday-statusbar div:last-child {
+  border-right: none;
+}
+
+.matchday-statusbar div:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.matchday-statusbar strong {
+  display: block;
+
+  margin-top: 8px;
+
+  font-size: 24px;
+}
