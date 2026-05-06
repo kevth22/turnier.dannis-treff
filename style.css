@@ -1981,3 +1981,7 @@ body.spieltag-page {
   position: relative;
   z-index: 5;
 }
+#rueckmeldungNamenListe {
+  margin-bottom: 140px;
+  padding-bottom: 180px;
+}
