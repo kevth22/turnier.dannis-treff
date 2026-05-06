@@ -1033,3 +1033,70 @@ footer {
 .welcome-btn.guest:hover {
   border-color: #e00022;
 }
+/* =========================
+   KALENDER FIX
+========================= */
+
+.kalender-grid {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  gap: 6px !important;
+}
+
+.kalender-kopf div {
+  text-align: center;
+  font-weight: bold;
+}
+
+.kalender-tag {
+  min-height: 70px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 6px;
+  font-size: 13px;
+}
+
+.kalender-tag.leer {
+  background: transparent;
+  border: none;
+}
+
+.kalender-event {
+  margin-top: 5px;
+  background: #e00022;
+  color: white;
+  border-radius: 6px;
+  padding: 4px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+/* =========================
+   KALENDER LOGO BACKGROUND
+========================= */
+
+#kalenderBereich {
+  position: relative;
+  overflow: hidden;
+}
+
+#kalenderBereich::before {
+  content: "";
+
+  position: fixed;
+  inset: 0;
+
+  background: url("dart11enlogo.png") center center no-repeat;
+  background-size: 65%;
+
+  opacity: 0.05;
+
+  pointer-events: none;
+  z-index: 0;
+}
+
+#kalenderBereich > * {
+  position: relative;
+  z-index: 1;
+}
