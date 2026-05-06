@@ -190,6 +190,8 @@ function zeile(text) {
 }
 
 window.spielplanAktualisieren = function () {
+  const system =
+  document.getElementById("systemSelect").value;
   if (!aktuellerSpieltag) return;
 
   const box = document.getElementById("spielplanVorschau");
@@ -199,6 +201,76 @@ window.spielplanAktualisieren = function () {
 
   const H = (nr) => rolle === "H" ? getSpieler(`H${nr}`) : `H${nr}`;
   const A = (nr) => rolle === "A" ? getSpieler(`A${nr}`) : `A${nr}`;
+
+  if (system === "rheinruhr") {
+
+  box.innerHTML = `
+    <h3>Block 1</h3>
+    ${zeile(`${H(1)} : ${A(1)}`)}
+    ${zeile(`${H(2)} : ${A(2)}`)}
+    ${zeile(`${H(3)} : ${A(3)}`)}
+    ${zeile(`${H(4)} : ${A(4)}`)}
+
+    <h3>Block 2</h3>
+    ${zeile(`${H(1)} : ${A(2)}`)}
+    ${zeile(`${H(2)} : ${A(1)}`)}
+    ${zeile(`${H(3)} : ${A(4)}`)}
+    ${zeile(`${H(4)} : ${A(3)}`)}
+
+    <h3>Doppel</h3>
+    ${zeile(`${H(5)} + ${H(6)} : ${A(5)} + ${A(6)}`)}
+    ${zeile(`${H(7)} + ${H(8)} : ${A(7)} + ${A(8)}`)}
+
+    <h3>Block 3</h3>
+    ${zeile(`${H(1)} : ${A(3)}`)}
+    ${zeile(`${H(2)} : ${A(4)}`)}
+    ${zeile(`${H(3)} : ${A(2)}`)}
+    ${zeile(`${H(4)} : ${A(1)}`)}
+
+    <h3>Block 4</h3>
+    ${zeile(`${H(1)} : ${A(3)}`)}
+    ${zeile(`${H(2)} : ${A(4)}`)}
+    ${zeile(`${H(3)} : ${A(1)}`)}
+    ${zeile(`${H(4)} : ${A(2)}`)}
+  `;
+
+} else if (system === "ruhrpott") {
+
+  box.innerHTML = `
+    <h3>Block 1</h3>
+    ${zeile(`${H(1)} : ${A(1)}`)}
+    ${zeile(`${H(2)} : ${A(2)}`)}
+    ${zeile(`${H(3)} : ${A(3)}`)}
+    ${zeile(`${H(4)} : ${A(4)}`)}
+
+    <h3>Block 2</h3>
+    ${zeile(`${H(1)} : ${A(2)}`)}
+    ${zeile(`${H(2)} : ${A(1)}`)}
+    ${zeile(`${H(3)} : ${A(4)}`)}
+    ${zeile(`${H(4)} : ${A(3)}`)}
+
+    <h3>Cricket</h3>
+    ${zeile(`${H(5)} : ${A(5)}`)}
+    ${zeile(`${H(6)} : ${A(6)}`)}
+
+    <h3>Doppel</h3>
+    ${zeile(`${H(7)} + ${H(8)} : ${A(7)} + ${A(8)}`)}
+    ${zeile(`${H(9)} + ${H(10)} : ${A(9)} + ${A(10)}`)}
+
+    <h3>Block 3</h3>
+    ${zeile(`${H(1)} : ${A(3)}`)}
+    ${zeile(`${H(2)} : ${A(4)}`)}
+    ${zeile(`${H(3)} : ${A(1)}`)}
+    ${zeile(`${H(4)} : ${A(2)}`)}
+
+    <h3>Block 4</h3>
+    ${zeile(`${H(1)} : ${A(4)}`)}
+    ${zeile(`${H(2)} : ${A(3)}`)}
+    ${zeile(`${H(3)} : ${A(2)}`)}
+    ${zeile(`${H(4)} : ${A(1)}`)}
+  `;
+
+} else if (system === "herner") {
 
   box.innerHTML = `
     <h3>Block 1</h3>
@@ -229,4 +301,5 @@ window.spielplanAktualisieren = function () {
     ${zeile(`${H(3)} : ${A(2)}`)}
     ${zeile(`${H(4)} : ${A(1)}`)}
   `;
-};
+
+}
