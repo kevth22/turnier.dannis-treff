@@ -93,10 +93,7 @@ onSnapshot(zusagenRef, (snapshot) => {
   });
 
   rueckmeldungenAnzeigenCenter();
-  
- if (offeneStatusListe) {
-  rueckmeldungListeAnzeigen(offeneStatusListe);
-} 
+
 });
 function spieltagAnzeigen() {
   const box = document.getElementById("spieltagAnzeige");
@@ -286,13 +283,13 @@ function rueckmeldungenAnzeigenCenter() {
       <div class="matchday-statusbar">
 
         <div class="${window.aktuellerStatus === 'Dabei' ? 'aktiv-status' : ''}"
-          onclick="abstimmenAktuell('Dabei'); toggleRueckmeldungListe('Dabei')">
+          onclick="abstimmenAktuell('Dabei')">
           👍<br>
           <strong>${dabei.length}</strong>
         </div>
 
         <div class="${window.aktuellerStatus === 'Nein' ? 'aktiv-status' : ''}"
-          onclick="abstimmenAktuell('Nein'); toggleRueckmeldungListe('Nein')">
+          onclick="abstimmenAktuell('Nein')">
           👎<br>
           <strong>${nein.length}</strong>
         </div>
@@ -304,25 +301,25 @@ function rueckmeldungenAnzeigenCenter() {
       <div class="matchday-statusbar">
 
         <div class="${window.aktuellerStatus === 'Dabei' ? 'aktiv-status' : ''}"
-          onclick="abstimmenAktuell('Dabei'); toggleRueckmeldungListe('Dabei')">
+          onclick="abstimmenAktuell('Dabei')">
           👍<br>
           <strong>${dabei.length}</strong>
         </div>
 
         <div class="${window.aktuellerStatus === 'Fahrer' ? 'aktiv-status' : ''}"
-          onclick="abstimmenAktuell('Fahrer'); toggleRueckmeldungListe('Fahrer')">
+          onclick="abstimmenAktuell('Fahrer')">
           🚗<br>
           <strong>${fahrer.length}</strong>
         </div>
 
         <div class="${window.aktuellerStatus === 'Komme direkt' ? 'aktiv-status' : ''}"
-          onclick="abstimmenAktuell('Komme direkt'); toggleRueckmeldungListe('Komme direkt')">
+          onclick="abstimmenAktuell('Komme direkt')">
           📍<br>
           <strong>${direkt.length}</strong>
         </div>
 
         <div class="${window.aktuellerStatus === 'Nein' ? 'aktiv-status' : ''}"
-          onclick="abstimmenAktuell('Nein'); toggleRueckmeldungListe('Nein')">
+          onclick="abstimmenAktuell('Nein')">
           👎<br>
           <strong>${nein.length}</strong>
         </div>
