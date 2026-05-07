@@ -118,6 +118,7 @@ window.passwortAendern = async function () {
     aktuellerBenutzer.mussPasswortAendern = false;
 
     localStorage.setItem("dart11enLogin", JSON.stringify(aktuellerBenutzer));
+    sessionStorage.setItem("splashGesehen", "ja");
     sessionStorage.setItem("user", JSON.stringify(aktuellerBenutzer));
 
     localStorage.setItem("dart11enReminder", "true");
