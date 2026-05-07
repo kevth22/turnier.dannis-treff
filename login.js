@@ -71,7 +71,7 @@ window.login = async function () {
 
     localStorage.setItem("dart11enLogin", JSON.stringify(aktuellerBenutzer));
     sessionStorage.setItem("user", JSON.stringify(aktuellerBenutzer));
-
+    sessionStorage.setItem("rolle", aktuellerBenutzer.rolle || "mitglied");
     window.location.replace("index.html");
 
   } catch (error) {
@@ -120,7 +120,7 @@ window.passwortAendern = async function () {
     localStorage.setItem("dart11enLogin", JSON.stringify(aktuellerBenutzer));
     sessionStorage.setItem("splashGesehen", "ja");
     sessionStorage.setItem("user", JSON.stringify(aktuellerBenutzer));
-
+    sessionStorage.setItem("rolle", aktuellerBenutzer.rolle || "mitglied");
     localStorage.setItem("dart11enReminder", "true");
 window.location.replace("index.html");
 
