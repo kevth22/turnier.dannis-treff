@@ -306,7 +306,12 @@ function rueckmeldungenAnzeigenCenter() {
 
   const rueckmeldungen =
     zusagen.filter(z => z.spieltagId === spieltag.id);
+  
+const eigeneZusage = rueckmeldungen.find(z =>
+  z.benutzername === aktuellerUser.benutzername
+);
 
+window.aktuellerStatus = eigeneZusage?.status || "";
   const dabei =
     rueckmeldungen.filter(z => z.status === "Dabei");
 
