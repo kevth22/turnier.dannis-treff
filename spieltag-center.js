@@ -159,6 +159,7 @@ function spieltagAnzeigen() {
     `Spieltag ${aktuellerIndex + 1} / ${spieltage.length}`;
 
   rueckmeldungenAnzeigenCenter();
+updateCountdown(spieltag);
 }
 
 window.naechsterSpieltag = function () {
@@ -471,74 +472,71 @@ window.toggleTeilnehmerListe = function () {
   `;
 };
 function updateCountdown(spieltag) {
-
-  const countdownBox =
-    document.getElementById("spieltagCountdown");
+  const countdownBox = document.getElementById("spieltagCountdown");
 
   if (!countdownBox) return;
 
-  if (!spieltag.treffen) {
-    countdownBox.innerHTML = "";
+  if (!spieltag.datum || !spieltag.treffen) {
+    countdownBox.textContent = "";
     return;
   }
 
-  const [jahr, monat, tag] =
-  spieltag.datum.split("-");
+  let tag, monat, jahr;
 
-const [stunden, minuten] =
-  spieltag.treffen.split(":");
+  // Format: 2026-05-09
+  if (spieltag.datum.includes("-")) {
+    [jahr, monat, tag] = spieltag.datum.split("-");
+  }
 
-const zielDatum = new Date(
-  jahr,
-  monat - 1,
-  tag,
-  stunden,
-  minuten
-);
+  // Format: 09.05.2026
+  if (spieltag.datum.includes(".")) {
+    [tag, monat, jahr] = spieltag.datum.split(".");
+  }
+
+  const treffenSauber = spieltag.treffen
+    .replace("Uhr", "")
+    .trim();
+
+  const [stunden, minuten] = treffenSauber.split(":");
+
+  const zielDatum = new Date(
+    Number(jahr),
+    Number(monat) - 1,
+    Number(tag),
+    Number(stunden),
+    Number(minuten || 0)
+  );
 
   function countdownBerechnen() {
-
     const jetzt = new Date();
+    const diff = zielDatum - jetzt;
 
-    const diff =
-      zielDatum - jetzt;
-
-    if (diff <= 0) {
-
-      countdownBox.innerHTML =
-        "🔥 Treffen läuft";
-
+    if (isNaN(zielDatum.getTime())) {
+      countdownBox.textContent = "Countdown nicht möglich";
       return;
     }
 
-    const tage =
-      Math.floor(diff / (1000 * 60 * 60 * 24));
+    if (diff <= 0) {
+      countdownBox.textContent = "Treffen läuft";
+      return;
+    }
 
-    const stunden =
-      Math.floor(
-        (diff / (1000 * 60 * 60)) % 24
-      );
-
-    const minuten =
-      Math.floor(
-        (diff / (1000 * 60)) % 60
-      );
+    const tage = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const stundenRest = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutenRest = Math.floor((diff / (1000 * 60)) % 60);
 
     if (tage > 0) {
-
-      countdownBox.innerHTML =
-        `⏳ Noch ${tage}T ${stunden}Std`;
-
+      countdownBox.textContent =
+        `Noch ${tage}T ${stundenRest}Std bis Treffen`;
     } else {
-
-      countdownBox.innerHTML =
-        `⏳ Noch ${stunden}Std ${minuten}Min`;
+      countdownBox.textContent =
+        `Noch ${stundenRest}Std ${minutenRest}Min bis Treffen`;
     }
   }
 
-  countdownBerechnen();
-
   clearInterval(window.spieltagCountdownInterval);
+
+  countdownBerechnen();
 
   window.spieltagCountdownInterval =
     setInterval(countdownBerechnen, 60000);
