@@ -482,8 +482,19 @@ function updateCountdown(spieltag) {
     return;
   }
 
-  const zielDatum =
-    new Date(`${spieltag.datum}T${spieltag.treffen}`);
+  const [jahr, monat, tag] =
+  spieltag.datum.split("-");
+
+const [stunden, minuten] =
+  spieltag.treffen.split(":");
+
+const zielDatum = new Date(
+  jahr,
+  monat - 1,
+  tag,
+  stunden,
+  minuten
+);
 
   function countdownBerechnen() {
 
