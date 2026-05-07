@@ -170,8 +170,27 @@ function aufstellungErstellen() {
       </div>
     `;
   }
-}
 
+  const extraFelder = [
+    "cricket1",
+    "cricket2",
+    "doppel1a",
+    "doppel1b",
+    "doppel2a",
+    "doppel2b"
+  ];
+
+  extraFelder.forEach(id => {
+    const feld = document.getElementById(id);
+
+    if (!feld) return;
+
+    feld.innerHTML = `
+      <option value="">Leer</option>
+      ${spielerOptionen()}
+    `;
+  });
+}
 function spielerOptionen() {
   return verfuegbareSpieler.map(spieler => `
     <option value="${spieler.name}">
@@ -198,7 +217,23 @@ window.spielplanAktualisieren = function () {
   if (!box) return;
 
   const rolle = aktuellerSpieltag.typ === "heim" ? "H" : "A";
+const cricket1 =
+  document.getElementById("cricket1")?.value || "Cricket 1";
 
+const cricket2 =
+  document.getElementById("cricket2")?.value || "Cricket 2";
+
+const doppel1a =
+  document.getElementById("doppel1a")?.value || "Doppel 1A";
+
+const doppel1b =
+  document.getElementById("doppel1b")?.value || "Doppel 1B";
+
+const doppel2a =
+  document.getElementById("doppel2a")?.value || "Doppel 2A";
+
+const doppel2b =
+  document.getElementById("doppel2b")?.value || "Doppel 2B";
   const H = (nr) => rolle === "H" ? getSpieler(`H${nr}`) : `H${nr}`;
   const A = (nr) => rolle === "A" ? getSpieler(`A${nr}`) : `A${nr}`;
 
@@ -218,8 +253,8 @@ window.spielplanAktualisieren = function () {
     ${zeile(`${H(4)} : ${A(3)}`)}
 
     <h3>Doppel</h3>
-    ${zeile(`${H(5)} + ${H(6)} : ${A(5)} + ${A(6)}`)}
-    ${zeile(`${H(7)} + ${H(8)} : ${A(7)} + ${A(8)}`)}
+    ${zeile(`${doppel1a} + ${doppel1b} : A5 + A6`)}
+    ${zeile(`${doppel2a} + ${doppel2b} : A7 + A8`)}
 
     <h3>Block 3</h3>
     ${zeile(`${H(1)} : ${A(3)}`)}
@@ -250,12 +285,12 @@ window.spielplanAktualisieren = function () {
     ${zeile(`${H(4)} : ${A(3)}`)}
 
     <h3>Cricket</h3>
-    ${zeile(`${H(5)} : ${A(5)}`)}
-    ${zeile(`${H(6)} : ${A(6)}`)}
+    ${zeile(`${cricket1} : A5`)}
+    ${zeile(`${cricket2} : A5`)}
 
     <h3>Doppel</h3>
-    ${zeile(`${H(7)} + ${H(8)} : ${A(7)} + ${A(8)}`)}
-    ${zeile(`${H(9)} + ${H(10)} : ${A(9)} + ${A(10)}`)}
+    ${zeile(`${doppel1a} + ${doppel1b} : A5 + A6`)}
+    ${zeile(`${doppel2a} + ${doppel2b} : A7 + A8`)}
 
     <h3>Block 3</h3>
     ${zeile(`${H(1)} : ${A(3)}`)}
@@ -286,8 +321,8 @@ window.spielplanAktualisieren = function () {
     ${zeile(`${H(4)} : ${A(3)}`)}
 
     <h3>Doppel</h3>
-    ${zeile(`${H(5)} + ${H(6)} : ${A(5)} + ${A(6)}`)}
-    ${zeile(`${H(7)} + ${H(8)} : ${A(7)} + ${A(8)}`)}
+    ${zeile(`${doppel1a} + ${doppel1b} : A5 + A6`)}
+    ${zeile(`${doppel2a} + ${doppel2b} : A7 + A8`)}
 
     <h3>Block 3</h3>
     ${zeile(`${H(1)} : ${A(3)}`)}
