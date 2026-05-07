@@ -2302,3 +2302,19 @@ body.spieltag-page {
 
   cursor:pointer;
 }
+.aktiv-status{
+  background:linear-gradient(
+    135deg,
+    #003cff,
+    #005eff
+  ) !important;
+
+  color:white !important;
+
+  box-shadow:
+    0 0 18px rgba(0,94,255,0.45);
+
+  transform:scale(1.05);
+
+  transition:0.2s;
+}
