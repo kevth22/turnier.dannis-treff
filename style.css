@@ -2116,3 +2116,52 @@ body.spieltag-page {
   font-size: 14px;
   line-height: 1.4;
 }
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  backdrop-filter: blur(4px);
+}
+
+.popup-box {
+  width: 90%;
+  max-width: 360px;
+  background: #1b1b1b;
+  border: 2px solid #ffcc00;
+  border-radius: 18px;
+  padding: 24px;
+  text-align: center;
+  color: white;
+}
+
+.popup-box h2 {
+  margin-bottom: 12px;
+}
+
+.popup-box p {
+  line-height: 1.5;
+}
+
+.popup-box button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.popup-box button:first-of-type {
+  background: #ffcc00;
+  color: black;
+}
+
+.close-btn {
+  background: #444;
+  color: white;
+}
