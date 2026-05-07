@@ -69,33 +69,42 @@ spieltage = spieltage
 
   if (spieltage.length === 0) return;
 
-  const naechsterSpieltag = spieltage[0];
-const popupText = document.getElementById("votePopupText");
+  let offenerSpieltag = null;
 
-if (popupText) {
-  const gegnerText =
-    naechsterSpieltag.typ === "heim"
-      ? `Dart11en : ${naechsterSpieltag.ort}`
-      : `${naechsterSpieltag.ort} : Dart11en`;
-
-  popupText.innerHTML = `
-    Du hast für diesen Spieltag noch keine Verfügbarkeit angegeben:<br><br>
-    <strong>${naechsterSpieltag.liga}</strong><br>
-    ${gegnerText}<br>
-    ${naechsterSpieltag.datum}<br>
-Treffen: ${naechsterSpieltag.treffen || "-"}<br>
-Anwurf: ${naechsterSpieltag.anwurf}
-  `;
-}
+for (const spieltag of spieltage) {
   const zusageId =
-    `${naechsterSpieltag.id}_${user.benutzername}`;
+    `${spieltag.id}_${user.benutzername}`;
 
   const zusageRef = doc(db, "zusagen", zusageId);
   const zusageSnap = await getDoc(zusageRef);
 
   if (!zusageSnap.exists()) {
-    popup.style.display = "flex";
+    offenerSpieltag = spieltag;
+    break;
   }
+}
+
+if (!offenerSpieltag) return;
+
+const popupText = document.getElementById("votePopupText");
+
+if (popupText) {
+  const gegnerText =
+    offenerSpieltag.typ === "heim"
+      ? `Dart11en : ${offenerSpieltag.ort}`
+      : `${offenerSpieltag.ort} : Dart11en`;
+
+  popupText.innerHTML = `
+    Du hast für diesen Spieltag noch keine Verfügbarkeit angegeben:<br><br>
+    <strong>${offenerSpieltag.liga}</strong><br>
+    ${gegnerText}<br>
+    ${offenerSpieltag.datum}<br>
+    Treffen: ${offenerSpieltag.treffen || "-"}<br>
+    Anwurf: ${offenerSpieltag.anwurf}
+  `;
+}
+
+popup.style.display = "flex";
 }
 
 document.addEventListener("DOMContentLoaded", checkVotePopup);
