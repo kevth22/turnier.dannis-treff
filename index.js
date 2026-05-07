@@ -54,13 +54,18 @@ async function checkVotePopup() {
   const heute = new Date();
   heute.setHours(0, 0, 0, 0);
 
-  spieltage = spieltage
-    .filter(spieltag => {
-      const datum = new Date(spieltag.datum);
-      datum.setHours(0, 0, 0, 0);
-      return datum >= heute;
-    })
-    .sort((a, b) => new Date(a.datum) - new Date(b.datum));
+  const in7Tagen = new Date();
+in7Tagen.setDate(heute.getDate() + 7);
+in7Tagen.setHours(23, 59, 59, 999);
+
+spieltage = spieltage
+  .filter(spieltag => {
+    const datum = new Date(spieltag.datum);
+    datum.setHours(0, 0, 0, 0);
+
+    return datum >= heute && datum <= in7Tagen;
+  })
+  .sort((a, b) => new Date(a.datum) - new Date(b.datum));
 
   if (spieltage.length === 0) return;
 
