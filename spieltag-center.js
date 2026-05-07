@@ -527,10 +527,10 @@ function updateCountdown(spieltag) {
 
     if (tage > 0) {
       countdownBox.textContent =
-        `Noch ${tage}T ${stundenRest}Std bis Treffen`;
+        `Noch ${tage} Tag(e) ${stundenRest} Std.`;
     } else {
       countdownBox.textContent =
-        `Noch ${stundenRest}Std ${minutenRest}Min bis Treffen`;
+        ``⏳ Noch ${stundenRest} Std. ${minutenRest} Min.`;
     }
   }
 
