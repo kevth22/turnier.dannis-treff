@@ -13,7 +13,8 @@ import {
   collection,
   onSnapshot,
   setDoc,
-  doc
+  doc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -201,24 +202,36 @@ function swipePruefen() {
   }
 }
 window.abstimmenAktuell = async function (status) {
-  window.aktuellerStatus = status;
-
   const spieltag = spieltage[aktuellerIndex];
 
   if (!spieltag) return;
 
   const zusageId =
     `${spieltag.id}_${aktuellerUser.benutzername}`;
-  
-if (
-  bestehendeZusage &&
-  bestehendeZusage.status === status
-) {
-  status = "";
-}
-  
+
+  const zusageRef = doc(db, "zusagen", zusageId);
+
+  const bestehendeZusage = zusagen.find(z =>
+    z.spieltagId === spieltag.id &&
+    z.benutzername === aktuellerUser.benutzername
+  );
+
+  // Wenn gleicher Button nochmal geklickt wird: Stimme löschen
+  if (
+    bestehendeZusage &&
+    bestehendeZusage.status === status
+  ) {
+    await deleteDoc(zusageRef);
+
+    window.aktuellerStatus = "";
+
+    rueckmeldungenAnzeigenCenter();
+    return;
+  }
+
+  // Sonst neue/andere Stimme speichern
   await setDoc(
-    doc(db, "zusagen", zusageId),
+    zusageRef,
     {
       spieltagId: spieltag.id,
       name: aktuellerUser.nickname,
@@ -229,9 +242,9 @@ if (
     }
   );
 
-  rueckmeldungenAnzeigenCenter();
+  window.aktuellerStatus = status;
 
-  alert("Rückmeldung gespeichert: " + status);
+  rueckmeldungenAnzeigenCenter();
 };
 
 /* =========================
