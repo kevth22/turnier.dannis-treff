@@ -139,6 +139,7 @@ function spieltagAnzeigen() {
     <div class="spieltag-details">
       <p>📅 ${spieltag.datum}</p>
       <p>🕒 Treffen: ${spieltag.treffen || "-"}</p>
+      <p id="spieltagCountdown"></p>
       <p>🎯 Anwurf: ${spieltag.anwurf}</p>
       <p>📍 ${spieltag.ort}</p>
 
