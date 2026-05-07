@@ -53,6 +53,7 @@ const zusagenRef = collection(db, "zusagen");
 let spieltage = [];
 let zusagen = [];
 let aktuellerIndex = 0;
+let offeneStatusListe = "";
 window.aktuellerStatus = "";
 
 onSnapshot(spieltageRef, (snapshot) => {
@@ -92,6 +93,10 @@ onSnapshot(zusagenRef, (snapshot) => {
   });
 
   rueckmeldungenAnzeigenCenter();
+  
+ if (offeneStatusListe) {
+  rueckmeldungListeAnzeigen(offeneStatusListe);
+} 
 });
 function spieltagAnzeigen() {
   const box = document.getElementById("spieltagAnzeige");
@@ -332,12 +337,26 @@ function rueckmeldungenAnzeigenCenter() {
 ========================= */
 
 window.toggleRueckmeldungListe = function (status) {
+  const box = document.getElementById("rueckmeldungNamenListe");
+
+  if (!box) return;
+
+  if (offeneStatusListe === status && box.innerHTML.trim() !== "") {
+    box.innerHTML = "";
+    offeneStatusListe = "";
+    return;
+  }
+
+  offeneStatusListe = status;
+  rueckmeldungListeAnzeigen(status);
+};
+
+function rueckmeldungListeAnzeigen(status) {
   const spieltag = spieltage[aktuellerIndex];
 
   if (!spieltag) return;
 
-  const box =
-    document.getElementById("rueckmeldungNamenListe");
+  const box = document.getElementById("rueckmeldungNamenListe");
 
   if (!box) return;
 
@@ -354,13 +373,11 @@ window.toggleRueckmeldungListe = function (status) {
         <p>Keine Spieler</p>
       </div>
     `;
-
     return;
   }
 
   box.innerHTML = `
     <div class="namen-popup">
-
       <h4>${status}</h4>
 
       ${passendeSpieler.map(spieler => `
@@ -368,10 +385,9 @@ window.toggleRueckmeldungListe = function (status) {
           ${spieler.name}
         </div>
       `).join("")}
-
     </div>
   `;
-};
+}
 window.toggleTeilnehmerListe = function () {
 
   const box =
