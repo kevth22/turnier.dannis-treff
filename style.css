@@ -2318,3 +2318,74 @@ body.spieltag-page {
 
   transition:0.2s;
 }
+.heim-center{
+  background:
+    linear-gradient(
+      135deg,
+      rgba(140,0,35,0.22),
+      rgba(25,25,25,0.96)
+    );
+
+  border:1px solid rgba(196,0,48,0.35);
+
+  box-shadow:
+    0 0 22px rgba(196,0,48,0.12);
+}
+
+.auswaerts-center{
+  background:
+    linear-gradient(
+      135deg,
+      rgba(0,60,170,0.22),
+      rgba(25,25,25,0.96)
+    );
+
+  border:1px solid rgba(0,94,255,0.28);
+
+  box-shadow:
+    0 0 22px rgba(0,94,255,0.10);
+}
+.spieltag-slide-out-left {
+  animation: slideOutLeft 0.18s ease forwards;
+}
+
+.spieltag-slide-out-right {
+  animation: slideOutRight 0.18s ease forwards;
+}
+
+.spieltag-slide-in {
+  animation: slideIn 0.22s ease forwards;
+}
+
+@keyframes slideOutLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(35px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
