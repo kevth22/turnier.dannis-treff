@@ -104,6 +104,22 @@ Dart11en – Dart Turniere, Liga & Spieltage | Dannis Treff
   <a href="turniere.html">🎯<br>Turniere</a>
   <a href="kader.html">👥<br>Kader</a>
 </nav>
+<div id="votePopup" class="popup-overlay" style="display:none;">
+  <div class="popup-box">
+    <h2>🗳️ Abstimmung offen</h2>
 
+    <p>
+      Du hast für den kommenden Spieltag noch keine Verfügbarkeit angegeben.
+    </p>
+
+    <button onclick="window.location.href='aufstellung.html'">
+      Jetzt abstimmen
+    </button>
+
+    <button class="close-btn" onclick="closeVotePopup()">
+      Später
+    </button>
+  </div>
+</div>
 </body>
 </html>
