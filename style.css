@@ -2270,10 +2270,11 @@ body.spieltag-page {
 
   color:white;
 
-  background:linear-gradient(
-    135deg,
-    #8f001f,
-    #c40030
+  background: linear-gradient(
+  135deg,
+  #8f001f,
+  #c40030
+);
   );
 
   box-shadow:
