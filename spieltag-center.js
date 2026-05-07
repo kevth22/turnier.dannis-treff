@@ -109,7 +109,10 @@ function spieltagAnzeigen() {
   }
 
   const spieltag = spieltage[aktuellerIndex];
-
+  const bestehendeZusage = zusagen.find(z =>
+  z.spieltagId === spieltag.id &&
+  z.benutzername === aktuellerUser.benutzername
+);
   const gegnerText =
     spieltag.typ === "heim"
       ? `Dart11en : ${spieltag.ort}`
@@ -206,7 +209,14 @@ window.abstimmenAktuell = async function (status) {
 
   const zusageId =
     `${spieltag.id}_${aktuellerUser.benutzername}`;
-
+  
+if (
+  bestehendeZusage &&
+  bestehendeZusage.status === status
+) {
+  status = "";
+}
+  
   await setDoc(
     doc(db, "zusagen", zusageId),
     {
