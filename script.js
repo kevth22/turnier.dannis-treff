@@ -151,9 +151,13 @@ document.getElementById("belegt").textContent = belegte + " / 32";
 
 document.getElementById("wartend").textContent = wartend;
 
-// Bei unbegrenzten Plätzen macht Prozent-Balken keinen Sinn
-document.getElementById("barBelegt").style.width = "100%";
-document.getElementById("barWartend").style.width = "100%";  
+const maxPlaetze = 32;
+
+const prozentBelegt = (belegte / maxPlaetze) * 100;
+const prozentWartend = Math.min((wartend / maxPlaetze) * 100, 100);
+
+document.getElementById("barBelegt").style.width = prozentBelegt + "%";
+document.getElementById("barWartend").style.width = prozentWartend + "%";
   const anzahlAnzeige = document.getElementById("anzahl");  
   if (anzahlAnzeige) {  
     anzahlAnzeige.textContent = spieler.length;  
