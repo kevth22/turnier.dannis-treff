@@ -256,7 +256,7 @@ function listeLeeren() {
   location.reload();
 }
 function starteCountdown() {
-  const zielDatum = new Date("2026-05-24T11:30:00"); // dein Turnierstart
+  const zielDatum = new Date("2026-06-27T18:30:00"); // dein Turnierstart
 
   function updateCountdown() {
     const jetzt = new Date();
