@@ -147,8 +147,7 @@ const wartendeSpieler = spieler.filter((person) => person.bezahlt !== true);
 const belegte = bezahlteSpieler.length;
 const wartend = wartendeSpieler.length;
 
-document.getElementById("belegt").innerHTML =
-  belegte + ' / <span class="infinity-status">∞</span>';
+document.getElementById("belegt").textContent = belegte + " / 32";
 
 document.getElementById("wartend").textContent = wartend;
 
