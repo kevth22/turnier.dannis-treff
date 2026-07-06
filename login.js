@@ -130,3 +130,10 @@ window.location.replace("index.html");
     console.error(error);
   }
 };
+window.gastWeiter = function () {
+  localStorage.removeItem("dart11enLogin");
+  sessionStorage.removeItem("user");
+  sessionStorage.removeItem("rolle");
+  sessionStorage.setItem("splashGesehen", "ja");
+
+  window.location.replace("index.html");};
