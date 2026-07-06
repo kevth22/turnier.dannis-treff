@@ -33,12 +33,17 @@ onclick="sessionStorage.setItem('splashGesehen','ja')">
       🔐 Mitglied Login
     </a>
 
-    <a href="index.html"
+   <a href="index.html"
    class="welcome-btn guest"
-   onclick="sessionStorage.setItem('splashGesehen','ja')">
-
+   onclick="
+     localStorage.removeItem('dart11enLogin');
+     localStorage.removeItem('dart11enReminder');
+     localStorage.setItem('dart11enGast','true');
+     sessionStorage.removeItem('user');
+     sessionStorage.removeItem('rolle');
+     sessionStorage.setItem('splashGesehen','ja');
+   ">
   🌐 Als Gast fortfahren
-
 </a>
 
   </div>
