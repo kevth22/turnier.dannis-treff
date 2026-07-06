@@ -34,11 +34,17 @@ async function checkVotePopup() {
   const gespeicherterUser = localStorage.getItem("dart11enLogin");
   if (!gespeicherterUser) return;
 
-  const user = JSON.parse(gespeicherterUser);
+  let user = null;
 
-  const erlaubteRollen = ["mitglied", "captain", "admin"];
+try {
+  user = JSON.parse(gespeicherterUser);
+} catch (e) {
+  return;
+}
 
-  if (!erlaubteRollen.includes(user.rolle)) return;
+const erlaubteRollen = ["mitglied", "captain", "admin"];
+
+if (!user || !erlaubteRollen.includes(user.rolle)) return;
 
   const spieltageSnap = await getDocs(collection(db, "spieltage"));
 
