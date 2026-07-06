@@ -29,9 +29,12 @@
   <div class="welcome-buttons">
 
     <a href="login.html" class="welcome-btn member"
-onclick="sessionStorage.setItem('splashGesehen','ja')">
-      🔐 Mitglied Login
-    </a>
+onclick="
+  localStorage.removeItem('dart11enGast');
+  sessionStorage.setItem('splashGesehen','ja');
+">
+  🔐 Mitglied Login
+</a>
 
    <a href="index.html"
    class="welcome-btn guest"
