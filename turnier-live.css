@@ -331,3 +331,14 @@ body {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+.admin-only {
+  display: none !important;
+}
+
+body.is-admin .admin-only {
+  display: block !important;
+}
+
+body.is-admin .admin-dashboard {
+  display: block !important;
+}
