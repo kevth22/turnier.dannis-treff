@@ -1,38 +1,4 @@
-const gespeicherterUser = localStorage.getItem("dart11enLogin");
-
-if (!gespeicherterUser) {
-  window.location.replace("index.html");
-  throw new Error("Kein Login vorhanden");
-}
-
-let userCheck = null;
-
-try {
-  userCheck = JSON.parse(gespeicherterUser);
-} catch (e) {
-  localStorage.removeItem("dart11enLogin");
-  window.location.replace("index.html");
-  throw new Error("Ungültiger Login");
-}
-
-const rolleCheck = (userCheck?.rolle || "").toLowerCase().trim();
-const erlaubteRollenCheck = ["mitglied", "captain", "admin"];
-
-if (!erlaubteRollenCheck.includes(rolleCheck)) {
-  localStorage.removeItem("dart11enLogin");
-  window.location.replace("index.html");
-  throw new Error("Keine Berechtigung");
-}
-const gespeicherterUser = localStorage.getItem("dart11enLogin");
-
-if (!gespeicherterUser) {
-  alert("Bitte einloggen.");
-  window.location.href = "index.html";
-  throw new Error("Kein Zugriff");
-}
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-
 import {
   getFirestore,
   collection,
@@ -41,6 +7,32 @@ import {
   doc,
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const gespeicherterUser = localStorage.getItem("dart11enLogin");
+
+if (!gespeicherterUser) {
+  window.location.replace("index.html");
+  throw new Error("Kein Login vorhanden");
+}
+
+let aktuellerUser = null;
+
+try {
+  aktuellerUser = JSON.parse(gespeicherterUser);
+} catch (e) {
+  localStorage.removeItem("dart11enLogin");
+  window.location.replace("index.html");
+  throw new Error("Ungültiger Login");
+}
+
+const rolle = (aktuellerUser?.rolle || "").toLowerCase().trim();
+const erlaubteRollen = ["mitglied", "captain", "admin"];
+
+if (!erlaubteRollen.includes(rolle)) {
+  localStorage.removeItem("dart11enLogin");
+  window.location.replace("index.html");
+  throw new Error("Keine Berechtigung");
+}
 
 const firebaseConfig = {
   apiKey: "AIzaSyDtQ3pECcZETIoI4QTV5G-7_QcoRvVGHL4",
@@ -54,16 +46,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const aktuellerUser = JSON.parse(gespeicherterUser);
-
-const erlaubteRollen = ["admin", "captain", "mitglied"];
-
-if (!erlaubteRollen.includes(aktuellerUser.rolle)) {
-  alert("Kein Zugriff.");
-  window.location.href = "index.html";
-  throw new Error("Keine Berechtigung");
-}
-
 const userInfo = document.getElementById("userInfo");
 
 if (userInfo) {
@@ -71,7 +53,6 @@ if (userInfo) {
     "Eingeloggt als: " +
     (aktuellerUser.nickname || aktuellerUser.benutzername);
 }
-
 const spieltageRef = collection(db, "spieltage");
 const zusagenRef = collection(db, "zusagen");
 
