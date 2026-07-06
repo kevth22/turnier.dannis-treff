@@ -132,8 +132,13 @@ window.location.replace("index.html");
 };
 window.gastWeiter = function () {
   localStorage.removeItem("dart11enLogin");
+  localStorage.removeItem("dart11enReminder");
+
   sessionStorage.removeItem("user");
   sessionStorage.removeItem("rolle");
+
+  localStorage.setItem("dart11enGast", "true");
   sessionStorage.setItem("splashGesehen", "ja");
 
-  window.location.replace("index.html");};
+  window.location.href = "index.html?v=" + Date.now();
+};
