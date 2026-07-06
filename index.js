@@ -32,19 +32,30 @@ async function checkVotePopup() {
   if (!popup) return;
 
   const gespeicherterUser = localStorage.getItem("dart11enLogin");
-  if (!gespeicherterUser) return;
 
-  let user = null;
+if (!gespeicherterUser) return;
+
+let user = null;
 
 try {
   user = JSON.parse(gespeicherterUser);
 } catch (e) {
+  localStorage.removeItem("dart11enLogin");
   return;
 }
 
+const rolle = (user?.rolle || "").toLowerCase().trim();
+const benutzername = (user?.benutzername || "").trim();
+
 const erlaubteRollen = ["mitglied", "captain", "admin"];
 
-if (!user || !erlaubteRollen.includes(user.rolle)) return;
+if (!benutzername || !erlaubteRollen.includes(rolle)) {
+  localStorage.removeItem("dart11enLogin");
+  return;
+}
+
+user.rolle = rolle;
+user.benutzername = benutzername;
 
   const spieltageSnap = await getDocs(collection(db, "spieltage"));
 
