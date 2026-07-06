@@ -1,0 +1,333 @@
+body {
+  background:
+    radial-gradient(circle at top, rgba(224, 0, 34, 0.25), transparent 35%),
+    linear-gradient(180deg, #050505, #0b0b12);
+  color: #fff;
+}
+
+.app-header {
+  text-align: center;
+  padding: 24px 16px 16px;
+  background: linear-gradient(135deg, rgba(224,0,34,.22), rgba(0,71,171,.15));
+  border-bottom: 1px solid rgba(224,0,34,.45);
+}
+
+.logo {
+  max-width: 180px;
+  height: auto;
+  object-fit: contain;
+}
+
+.turnier-center {
+  padding-bottom: 100px;
+}
+
+.dashboard-card,
+.content-card,
+.admin-dashboard {
+  background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 14px 35px rgba(0,0,0,.45);
+}
+
+.dashboard-card h2,
+.content-card h2,
+.admin-dashboard h2 {
+  margin-top: 0;
+}
+
+.turnier-status {
+  display: inline-block;
+  margin: 8px 0 16px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(69,255,122,.12);
+  color: #45ff7a;
+  font-weight: 800;
+  border: 1px solid rgba(69,255,122,.3);
+}
+
+.dashboard-grid,
+.auslosung-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.status-card {
+  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  padding: 14px 10px;
+  text-align: center;
+}
+
+.status-card h3 {
+  margin: 0;
+  font-size: 28px;
+  color: #fff;
+}
+
+.status-card p {
+  margin: 5px 0 0;
+  color: #bdbdbd;
+  font-size: 13px;
+}
+
+.section-text {
+  color: #bdbdbd;
+  line-height: 1.45;
+}
+
+#spielerSuche {
+  width: 100%;
+  box-sizing: border-box;
+  background: #101116;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 15px;
+  padding: 15px 16px;
+  font-size: 16px;
+  outline: none;
+}
+
+#spielerSuche:focus {
+  border-color: #e00022;
+  box-shadow: 0 0 0 3px rgba(224,0,34,.22);
+}
+
+.turnier-output,
+#spielerAuswahl,
+#spielerInfos {
+  margin-top: 16px;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.admin-box {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02)),
+    rgba(0,0,0,.35);
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 18px;
+  color: #fff;
+  padding: 18px 12px;
+  text-align: left;
+  cursor: pointer;
+  min-height: 135px;
+  box-shadow: 0 10px 25px rgba(0,0,0,.35);
+}
+
+.admin-box:hover {
+  border-color: #e00022;
+  transform: translateY(-2px);
+}
+
+.admin-icon {
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+.admin-box h3 {
+  margin: 0 0 6px;
+}
+
+.admin-box p {
+  margin: 0;
+  color: #bdbdbd;
+  font-size: 13px;
+}
+
+.main-button {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  background: linear-gradient(135deg, #e00022, #8f0015);
+  color: #fff;
+  border: none;
+  border-radius: 15px;
+  padding: 15px 16px;
+  margin-top: 10px;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.secondary-button {
+  background: linear-gradient(135deg, #0047ab, #002b6b);
+}
+
+.action-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.board-control {
+  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  padding: 15px;
+}
+
+.board-control label {
+  display: block;
+  margin-bottom: 8px;
+  color: #bdbdbd;
+}
+
+.board-control select {
+  width: 100%;
+  background: #101116;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 12px;
+  padding: 13px;
+}
+
+.tv-preview {
+  margin-top: 16px;
+  background:
+    linear-gradient(135deg, rgba(224,0,34,.18), rgba(0,71,171,.18)),
+    rgba(0,0,0,.4);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  padding: 16px;
+  text-align: center;
+}
+
+/* Spieler-Auswahl später */
+.spieler-auswahl-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  padding: 12px;
+  cursor: pointer;
+}
+
+.player-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 2px solid #e00022;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  background: #111;
+}
+
+/* TV Vollbild */
+.tv-screen {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(224,0,34,.28), transparent 38%),
+    linear-gradient(180deg, #030303, #080812);
+  color: #fff;
+  padding: 30px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.tv-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid rgba(224,0,34,.7);
+  padding-bottom: 18px;
+}
+
+.tv-header img {
+  max-width: 210px;
+}
+
+.tv-header span {
+  font-size: 34px;
+  font-weight: 900;
+  color: #ff263d;
+}
+
+.tv-slide {
+  display: none;
+  padding-top: 40px;
+}
+
+.tv-slide.active {
+  display: block;
+}
+
+.tv-slide h2 {
+  font-size: 54px;
+  margin: 0 0 25px;
+}
+
+.werbung-box {
+  font-size: 34px;
+  line-height: 1.6;
+}
+
+.winner-popup {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.86);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  animation: winnerZoom .45s ease-out;
+}
+
+.winner-title {
+  color: #ff263d;
+  font-size: 54px;
+  font-weight: 900;
+}
+
+#winnerName {
+  font-size: 96px;
+  font-weight: 1000;
+  margin: 18px 0;
+}
+
+#winnerResult {
+  font-size: 38px;
+  color: #ddd;
+}
+
+@keyframes winnerZoom {
+  from {
+    transform: scale(.75);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (min-width: 850px) {
+  .dashboard-grid,
+  .auslosung-info {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .admin-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .action-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
