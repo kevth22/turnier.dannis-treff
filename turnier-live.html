@@ -4,11 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Dart11en | Live-Turnier</title>
-
-  <meta name="description" content="Live-Turnierbereich von Dart11en mit Spieleransicht, Admin-Bereich und TV-Ansicht.">
+  <title>Dart11en | Turnier-Center</title>
 
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="turnier-live.css">
   <link rel="manifest" href="manifest.json">
 
   <meta name="theme-color" content="#e00022">
@@ -23,49 +22,302 @@
 
 <header class="app-header">
   <img src="dart11enlogo.png" class="logo" alt="Dart11en Logo">
-  <h1>Live-Turnier</h1>
-  <p>Turnierbaum, Ergebnisse & TV-Ansicht</p>
+  <p>Turnier-Center</p>
 </header>
 
-<main class="app-container">
+<main class="turnier-center app-container">
 
-  <section class="info-card">
-    <h2>🎯 Aktuelles Turnier</h2>
-    <p><strong>Doppel-KO Turnier</strong></p>
-    <p>Live-Ansichten für Spieler, Admin und TV.</p>
+  <!-- Dashboard -->
+  <section id="dashboard" class="dashboard-card">
+
+    <h2>🏆 Dart11en-Turnier</h2>
+
+    <div class="turnier-status">
+      <span id="status">🟢 Vorbereitung</span>
+    </div>
+
+    <div class="dashboard-grid">
+
+      <div class="status-card">
+        <h3 id="gesamtSpieler">0</h3>
+        <p>Anmeldungen</p>
+      </div>
+
+      <div class="status-card">
+        <h3 id="bezahltSpieler">0</h3>
+        <p>Bezahlt</p>
+      </div>
+
+      <div class="status-card">
+        <h3 id="anwesendSpieler">0</h3>
+        <p>Anwesend</p>
+      </div>
+
+      <div class="status-card">
+        <h3 id="freilose">0</h3>
+        <p>Freilose</p>
+      </div>
+
+    </div>
+
   </section>
 
-  <section class="quick-grid">
+  <!-- Turnierstatistik -->
+  <section id="statistikBereich" class="content-card">
 
-    <a href="turnier-spieler.html" class="quick-card">
-      📱
-      <h3>Spieler-Ansicht</h3>
-      <p>Suche deinen Namen und sieh deinen Turnierverlauf.</p>
+    <h2>📈 Turnierstatistik</h2>
+
+    <div class="dashboard-grid">
+
+      <div class="status-card">
+        <h3 id="spieleBeendet">0</h3>
+        <p>Spiele beendet</p>
+      </div>
+
+      <div class="status-card">
+        <h3 id="spieleOffen">0</h3>
+        <p>Spiele offen</p>
+      </div>
+
+      <div class="status-card">
+        <h3 id="gewinnerbaumSpieler">0</h3>
+        <p>Gewinnerbaum</p>
+      </div>
+
+      <div class="status-card">
+        <h3 id="verliererbaumSpieler">0</h3>
+        <p>Verliererbaum</p>
+      </div>
+
+      <div class="status-card">
+        <h3 id="ausgeschiedeneSpieler">0</h3>
+        <p>Ausgeschieden</p>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- Spielerbereich -->
+  <section id="spielerBereich" class="content-card">
+
+    <h2>📱 Spieler verfolgen</h2>
+
+    <p class="section-text">
+      Suche einen Spieler aus und verfolge seinen Weg durch das Turnier.
+    </p>
+
+    <input
+      type="text"
+      id="spielerSuche"
+      placeholder="Spitzname suchen...">
+
+    <div id="spielerAuswahl"></div>
+
+    <div id="spielerInfos"></div>
+
+  </section>
+
+  <!-- Admin Dashboard -->
+  <section id="adminDashboard" class="admin-dashboard admin-only">
+
+    <h2>🛠 Turnierverwaltung</h2>
+
+    <div class="admin-grid">
+
+      <button class="admin-box" data-target="teilnehmerBereich">
+        <div class="admin-icon">👥</div>
+        <h3>Teilnehmer</h3>
+        <p>Warteschlange verwalten</p>
+      </button>
+
+      <button class="admin-box" data-target="auslosungBereich">
+        <div class="admin-icon">🎲</div>
+        <h3>Auslosung</h3>
+        <p>Turnier erstellen</p>
+      </button>
+
+      <button class="admin-box" data-target="ergebnisBereich">
+        <div class="admin-icon">🎯</div>
+        <h3>Ergebnisse</h3>
+        <p>Spiele verwalten</p>
+      </button>
+
+      <button class="admin-box" data-target="tvBereich">
+        <div class="admin-icon">📺</div>
+        <h3>TV</h3>
+        <p>Live-Anzeige starten</p>
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- Teilnehmer verwalten -->
+  <section id="teilnehmerBereich" class="content-card admin-only">
+
+    <h2>👥 Teilnehmer verwalten</h2>
+
+    <p class="section-text">
+      Hier steuerst du bezahlt, anwesend und wer später ins Turnier übernommen wird.
+    </p>
+
+    <div class="action-row">
+      <button id="warteschlangeLadenBtn" class="main-button">
+        👥 Warteschlange laden
+      </button>
+
+      <button id="teilnehmerUebernehmenBtn" class="main-button secondary-button">
+        ✅ Bezahlte & anwesende übernehmen
+      </button>
+    </div>
+
+    <div id="teilnehmerListe" class="turnier-output"></div>
+
+  </section>
+
+  <!-- Turnierauslosung -->
+  <section id="auslosungBereich" class="content-card admin-only">
+
+    <h2>🎲 Turnier auslosen</h2>
+
+    <p class="section-text">
+      Spieler werden zufällig gelost. Freilose werden fair verteilt und dürfen nicht gegeneinander spielen.
+    </p>
+
+    <div class="auslosung-info">
+
+      <div class="status-card">
+        <h3 id="auslosungTeilnehmer">0</h3>
+        <p>Teilnehmer</p>
+      </div>
+
+      <div class="status-card">
+        <h3 id="auslosungFeldgroesse">0</h3>
+        <p>Turnierfeld</p>
+      </div>
+
+      <div class="status-card">
+        <h3 id="auslosungFreilose">0</h3>
+        <p>Freilose</p>
+      </div>
+
+    </div>
+
+    <button id="turnierAuslosenBtn" class="main-button">
+      🎲 Live-Auslosung starten
+    </button>
+
+    <div id="auslosungAnimation" class="turnier-output"></div>
+
+  </section>
+
+  <!-- Ergebnisse verwalten -->
+  <section id="ergebnisBereich" class="content-card admin-only">
+
+    <h2>🎯 Ergebnisse verwalten</h2>
+
+    <p class="section-text">
+      Ergebnisse eintragen oder korrigieren. Boards können auch während des Turniers angepasst werden.
+    </p>
+
+    <div class="board-control">
+
+      <label for="boardAnzahl">Aktive Boards</label>
+
+      <select id="boardAnzahl">
+        <option value="6">6 Boards</option>
+        <option value="5">5 Boards</option>
+        <option value="4">4 Boards</option>
+        <option value="3">3 Boards</option>
+        <option value="2">2 Boards</option>
+        <option value="1">1 Board</option>
+      </select>
+
+    </div>
+
+    <div id="spieleListe" class="turnier-output"></div>
+
+  </section>
+
+  <!-- TV Steuerung -->
+  <section id="tvBereich" class="content-card admin-only">
+
+    <h2>📺 TV-Modus</h2>
+
+    <p class="section-text">
+      Öffnet die Live-Ansicht für euren zweiten Monitor im Dannis Treff.
+    </p>
+
+    <a href="turnier-live.html?tv=true" class="main-button">
+      📺 TV-Ansicht öffnen
     </a>
 
-    <a href="turnier-admin.html" class="quick-card" id="adminLink">
-      🛠️
-      <h3>Admin-Bereich</h3>
-      <p>Ergebnisse eintragen und Spiele verwalten.</p>
-    </a>
+    <div id="tvVorschau" class="tv-preview">
 
-    <a href="turnier-screen.html" class="quick-card">
-      📺
-      <h3>TV-Ansicht</h3>
-      <p>Live-Anzeige für die Gaststätte.</p>
-    </a>
+      <h3>TV-Rotation</h3>
+
+      <p>🎯 Aktuelle Spiele</p>
+      <p>⏭️ Nächste Spiele</p>
+      <p>🌳 Turnierbaum</p>
+      <p>📢 Werbung</p>
+      <p>🏆 Siegeranimation nach Ergebnis</p>
+
+    </div>
 
   </section>
 
 </main>
 
+<!-- TV Vollbildansicht -->
+<section id="tvAnsicht" class="tv-screen" style="display:none;">
+
+  <div class="tv-header">
+    <img src="dart11enlogo.png" alt="Dart11en Logo">
+    <span>LIVE TURNIER</span>
+  </div>
+
+  <div class="tv-slide active" id="slideAktuelleSpiele">
+    <h2>🎯 Aktuelle Spiele</h2>
+    <div id="tvAktuelleSpiele"></div>
+  </div>
+
+  <div class="tv-slide" id="slideNaechsteSpiele">
+    <h2>⏭️ Nächste Spiele</h2>
+    <div id="tvNaechsteSpiele"></div>
+  </div>
+
+  <div class="tv-slide" id="slideTurnierbaum">
+    <h2>🌳 Turnierbaum</h2>
+    <div id="tvTurnierbaum"></div>
+  </div>
+
+  <div class="tv-slide" id="slideWerbung">
+    <h2>📢 Dannis Treff</h2>
+    <div class="werbung-box">
+      <p>🍻 Danke an alle Teilnehmer</p>
+      <p>🎯 Nächstes Dart11en-Turnier: 01.08.2026</p>
+      <p>📍 Emil-Zimmermann-Allee 10, Gelsenkirchen</p>
+    </div>
+  </div>
+
+  <div id="winnerPopup" class="winner-popup">
+    <div class="winner-title">🏆 SIEGER</div>
+    <div id="winnerName">Spieler</div>
+    <div id="winnerResult">gewinnt das Spiel</div>
+  </div>
+
+</section>
+
 <nav class="bottom-nav">
-  <a href="spieltag-center.html">🚌<br>Spieltag</a>
-  <a href="kalender.html">📅<br>Kalender</a>
-  <a href="liga.html">🏆<br>Liga</a>
+  <a href="index.html">🏠<br>Home</a>
   <a href="turniere.html">🎯<br>Turniere</a>
+  <a href="liga.html">🏆<br>Liga</a>
+  <a href="kalender.html">📅<br>Kalender</a>
   <a href="kader.html">👥<br>Kader</a>
 </nav>
+
+<script type="module" src="turnier-live.js"></script>
 
 </body>
 </html>
