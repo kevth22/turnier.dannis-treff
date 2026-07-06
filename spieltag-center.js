@@ -1,6 +1,31 @@
 const gespeicherterUser = localStorage.getItem("dart11enLogin");
 
 if (!gespeicherterUser) {
+  window.location.replace("index.html");
+  throw new Error("Kein Login vorhanden");
+}
+
+let userCheck = null;
+
+try {
+  userCheck = JSON.parse(gespeicherterUser);
+} catch (e) {
+  localStorage.removeItem("dart11enLogin");
+  window.location.replace("index.html");
+  throw new Error("Ungültiger Login");
+}
+
+const rolleCheck = (userCheck?.rolle || "").toLowerCase().trim();
+const erlaubteRollenCheck = ["mitglied", "captain", "admin"];
+
+if (!erlaubteRollenCheck.includes(rolleCheck)) {
+  localStorage.removeItem("dart11enLogin");
+  window.location.replace("index.html");
+  throw new Error("Keine Berechtigung");
+}
+const gespeicherterUser = localStorage.getItem("dart11enLogin");
+
+if (!gespeicherterUser) {
   alert("Bitte einloggen.");
   window.location.href = "index.html";
   throw new Error("Kein Zugriff");
