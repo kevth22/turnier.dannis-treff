@@ -9,11 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (gespeicherterUser) {
     try {
       aktuellerUser = JSON.parse(gespeicherterUser);
-
-      const rolle = (aktuellerUser?.rolle || "")
-        .toLowerCase()
-        .trim();
-
+      const rolle = (aktuellerUser?.rolle || "").toLowerCase().trim();
       istAdmin = rolle === "admin";
     } catch (e) {
       localStorage.removeItem("dart11enLogin");
@@ -25,8 +21,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.classList.add("is-admin");
   } else {
     document.body.classList.remove("is-admin");
+
+    document.querySelectorAll(".admin-only").forEach((el) => {
+      el.style.display = "none";
+    });
   }
 
-  console.log("Aktueller User:", aktuellerUser);
-  console.log("Ist Admin:", istAdmin);
+  console.log("User:", aktuellerUser);
+  console.log("Admin:", istAdmin);
 });
