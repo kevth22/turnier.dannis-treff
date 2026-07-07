@@ -7,7 +7,7 @@
   <title>Dart11en | Turnier-Center</title>
 
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="turnier-live.css?v=3">
+  <link rel="stylesheet" href="turnier-live.css?v=11">
   <link rel="manifest" href="manifest.json">
 
   <meta name="theme-color" content="#e00022">
@@ -67,7 +67,7 @@
 
     <h2>📈 Turnierstatistik</h2>
 
-    <div class="dashboard-grid">
+    <div class="dashboard-grid statistik-grid">
 
       <div class="status-card">
         <h3 id="spieleBeendet">0</h3>
@@ -118,6 +118,14 @@
 
   </section>
 
+  <section id="turnierBaumBereich" class="content-card">
+    <h2>Doppel-K.-o.-Turnierbaum</h2>
+    <p id="baumStatus" class="section-text">Der Turnierbaum wird nach der Auslosung angezeigt.</p>
+    <div class="bracket-block"><h3>Gewinnerbaum</h3><div id="gewinnerBaum" class="bracket-scroll"></div></div>
+    <div class="bracket-block"><h3>Verliererbaum</h3><div id="verliererBaum" class="bracket-scroll"></div></div>
+    <div class="bracket-block"><h3>Finale</h3><div id="finalBaum" class="bracket-scroll"></div></div>
+  </section>
+
   <!-- Admin Dashboard -->
   <section id="adminDashboard" class="admin-dashboard admin-only">
 
@@ -162,6 +170,21 @@
       Hier steuerst du bezahlt, anwesend und wer später ins Turnier übernommen wird.
     </p>
 
+    <form id="spielerHinzufuegenForm" class="spieler-hinzufuegen-form">
+      <h3>Spieler manuell hinzufügen</h3>
+      <div class="spieler-form-grid">
+        <label>Spitzname *<input id="neuerSpielerNickname" type="text" maxlength="30" required></label>
+        <label>Vorname<input id="neuerSpielerVorname" type="text" maxlength="30"></label>
+        <label>Nachname<input id="neuerSpielerNachname" type="text" maxlength="30"></label>
+      </div>
+      <div class="spieler-form-status">
+        <label><input id="neuerSpielerBezahlt" type="checkbox"> Bezahlt</label>
+        <label><input id="neuerSpielerAnwesend" type="checkbox"> Anwesend</label>
+      </div>
+      <button class="main-button" type="submit">Spieler hinzufügen</button>
+      <p id="spielerHinzufuegenMeldung" class="section-text" role="status"></p>
+    </form>
+
     <div class="action-row">
       <button id="warteschlangeLadenBtn" class="main-button">
         👥 Warteschlange laden
@@ -184,6 +207,12 @@
     <p class="section-text">
       Spieler werden zufällig gelost. Freilose werden fair verteilt und dürfen nicht gegeneinander spielen.
     </p>
+
+    <div class="turniergroesse-control">
+      <label for="turnierGroesse">Größe des Turnierfelds</label>
+      <select id="turnierGroesse"><option value="16">16 Teilnehmer</option><option value="32" selected>32 Teilnehmer</option><option value="64">64 Teilnehmer</option></select>
+      <p id="turnierGroesseHinweis" class="section-text"></p>
+    </div>
 
     <div class="auslosung-info">
 
@@ -208,6 +237,10 @@
       🎲 Live-Auslosung starten
     </button>
 
+    <button id="turnierZuruecksetzenBtn" class="main-button reset-turnier-button" type="button">
+      Turnierbaum zurücksetzen
+    </button>
+
     <div id="auslosungAnimation" class="turnier-output"></div>
 
   </section>
@@ -220,6 +253,12 @@
     <p class="section-text">
       Ergebnisse eintragen oder korrigieren. Boards können auch während des Turniers angepasst werden.
     </p>
+
+    <div class="match-format-control">
+      <label for="matchFormat">Spielmodus</label>
+      <select id="matchFormat"><option value="3">Best of 3</option><option value="5">Best of 5</option></select>
+      <small id="matchFormatInfo">2 gewonnene Legs werden zum Sieg benötigt.</small>
+    </div>
 
     <div class="board-control">
 
@@ -236,6 +275,13 @@
 
     </div>
 
+    <div class="ergebnis-werkzeuge">
+      <button id="ergebnisZurueckBtn" class="undo-button" type="button" disabled>
+        ↶ Letzte Eingabe rückgängig
+      </button>
+      <small id="ergebnisZurueckInfo">Noch keine Änderung zum Zurücknehmen.</small>
+    </div>
+
     <div id="spieleListe" class="turnier-output"></div>
 
   </section>
@@ -249,7 +295,7 @@
       Öffnet die Live-Ansicht für euren zweiten Monitor im Dannis Treff.
     </p>
 
-    <a href="turnier-live.html?tv=true" class="main-button">
+    <a href="turnier-live.html?tv=true" class="main-button" target="_blank" rel="noopener">
       📺 TV-Ansicht öffnen
     </a>
 
@@ -274,8 +320,14 @@
 
   <div class="tv-header">
     <img src="dart11enlogo.png" alt="Dart11en Logo">
-    <span>LIVE TURNIER</span>
+    <div class="tv-live-kopf">
+      <span><i></i> LIVE TURNIER</span>
+      <small id="tvUhrzeit"></small>
+    </div>
+    <button id="tvVollbildBtn" class="tv-vollbild-button" type="button">⛶ Vollbild</button>
   </div>
+
+  <div id="tvRotationStatus" class="tv-rotation-status" aria-hidden="true"></div>
 
   <div class="tv-slide active" id="slideAktuelleSpiele">
     <h2>🎯 Aktuelle Spiele</h2>
@@ -292,6 +344,16 @@
     <div id="tvTurnierbaum"></div>
   </div>
 
+  <div class="tv-slide tv-bracket-slide" id="slideGewinnerbaum">
+    <h2>🏆 Gewinnerbaum</h2>
+    <div id="tvGewinnerbaum" class="tv-bracket"></div>
+  </div>
+
+  <div class="tv-slide tv-bracket-slide" id="slideVerliererbaum">
+    <h2>🔥 Verliererbaum</h2>
+    <div id="tvVerliererbaum" class="tv-bracket"></div>
+  </div>
+
   <div class="tv-slide" id="slideWerbung">
     <h2>📢 Dannis Treff</h2>
     <div class="werbung-box">
@@ -301,13 +363,17 @@
     </div>
   </div>
 
-  <div id="winnerPopup" class="winner-popup">
-    <div class="winner-title">🏆 SIEGER</div>
-    <div id="winnerName">Spieler</div>
-    <div id="winnerResult">gewinnt das Spiel</div>
-  </div>
-
 </section>
+
+<div id="winnerPopup" class="winner-popup">
+    <div class="winner-inhalt">
+      <div class="winner-trophy">🏆</div>
+      <div class="winner-title">SPIELSIEGER</div>
+      <div id="winnerName">Spieler</div>
+      <div id="winnerResult">gewinnt das Spiel</div>
+      <div id="winnerNext" class="winner-next">Als Nächstes wird gleich angezeigt.</div>
+    </div>
+</div>
 
 <nav class="bottom-nav">
   <a href="index.html">🏠<br>Home</a>
@@ -317,7 +383,8 @@
   <a href="kader.html">👥<br>Kader</a>
 </nav>
 
-<script type="module" src="turnier-live.js?v=3"></script>
+<script type="module" src="turnier-live.js?v=19"></script>
+<script src="pwa.js" defer></script>
 
 </body>
 </html>
