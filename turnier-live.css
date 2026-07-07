@@ -812,6 +812,28 @@ body.tv-mode .tv-screen {
     radial-gradient(circle at 90% 100%, rgba(0,71,171,.23), transparent 34%),
     linear-gradient(145deg, #07080c, #020305 68%);
 }
+body.tv-mode .pwa-install-button { display: none !important; }
+.tv-vorstart { display: none; }
+body.tv-mode .tv-vorstart {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6vh 7vw;
+  text-align: center;
+  color: #fff;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(0,71,171,.38), transparent 34%),
+    linear-gradient(145deg, #05070d, #101827 58%, #05070d);
+}
+body.tv-mode.tv-started .tv-vorstart { display: none; }
+body.tv-mode .tv-vorstart img { width: min(420px, 36vw); max-height: 25vh; object-fit: contain; filter: drop-shadow(0 0 35px rgba(255,255,255,.16)); }
+body.tv-mode .tv-vorstart p { margin: 5vh 0 1.5vh; color: #ffbe2d; font-size: clamp(28px, 3vw, 52px); font-weight: 1000; letter-spacing: .2em; }
+body.tv-mode .tv-vorstart h1 { max-width: 1400px; margin: 0; font-size: clamp(55px, 7vw, 125px); line-height: 1.03; text-wrap: balance; }
+body.tv-mode .tv-vorstart span { margin-top: 3vh; color: #aebdd2; font-size: clamp(24px, 2.3vw, 42px); font-weight: 800; }
 
 body.tv-mode .tv-screen::before {
   position: absolute;
