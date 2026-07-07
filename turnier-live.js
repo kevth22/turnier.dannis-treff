@@ -463,7 +463,8 @@ document.addEventListener("DOMContentLoaded", () => {
   async function turnierOnlineSpeichern(daten) {
     try {
       await setDoc(doc(db, "turnierLive", "aktuellesTurnier"), {
-        daten,
+        daten: null,
+        datenJson: daten ? JSON.stringify(daten) : null,
         aktualisiert: Date.now()
       });
     } catch (fehler) {
@@ -752,8 +753,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   let auslosungTimer = null;
+  let tvDiashowIntervall = null;
+  let tvDiashowStarten = () => {};
+  let tvVorstartAnzeigen = () => {};
   function tvAuslosungAnzeigen(daten) {
     if (!istTvModus || !Array.isArray(daten?.paarungen) || !daten.paarungen.length) return;
+    tvDiashowStarten();
     const popup = document.getElementById("drawPopup");
     const matchId = document.getElementById("drawMatchId");
     const playerA = document.getElementById("drawPlayerA");
@@ -851,8 +856,23 @@ document.addEventListener("DOMContentLoaded", () => {
       slides.forEach((slide, i) => slide.classList.toggle("active", i === index));
       punkte.forEach((punkt, i) => punkt.classList.toggle("active", i === index));
     };
-    slideZeigen(0);
-    setInterval(() => slideZeigen(index + 1), 10000);
+    tvDiashowStarten = () => {
+      document.body.classList.add("tv-started");
+      if (status) status.style.display = "flex";
+      if (tvDiashowIntervall) return;
+      slideZeigen(0);
+      tvDiashowIntervall = setInterval(() => slideZeigen(index + 1), 10000);
+    };
+    tvVorstartAnzeigen = () => {
+      document.body.classList.remove("tv-started");
+      if (status) status.style.display = "none";
+      slides.forEach(slide => slide.classList.remove("active"));
+      if (tvDiashowIntervall) clearInterval(tvDiashowIntervall);
+      tvDiashowIntervall = null;
+      index = 0;
+    };
+    tvVorstartAnzeigen();
+    if (turnierDaten) tvDiashowStarten();
 
     const uhr = document.getElementById("tvUhrzeit");
     const uhrAktualisieren = () => {
@@ -872,6 +892,8 @@ document.addEventListener("DOMContentLoaded", () => {
           if (turnierDaten) bestOf = turnierDaten.bestOf || bestOf;
           tvSpieleRendern();
           tvTurnierbaumRendern();
+          if (turnierDaten) tvDiashowStarten();
+          else tvVorstartAnzeigen();
         } catch (fehler) {
           console.error("TV-Ansicht konnte nicht aktualisiert werden:", fehler);
         }
@@ -910,6 +932,11 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("dart11enDoppelKo");
     turnierAnsichtRendern();
     turnierOnlineSpeichern(null);
+    setDoc(doc(db, "turnierLive", "auslosungEvent"), {
+      id: null,
+      zeit: Date.now(),
+      paarungen: []
+    }).catch(fehler => console.error("Die TV-Auslosung konnte nicht zurückgesetzt werden:", fehler));
 
     if (baumStatus) {
       baumStatus.textContent = "Der Turnierbaum wurde zurückgesetzt. Du kannst neu auslosen.";
@@ -1069,7 +1096,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (istAdmin && !istTvModus) return;
     if (!snapshot.exists()) return;
 
-    const onlineDaten = snapshot.data()?.daten || null;
+    const snapshotDaten = snapshot.data() || {};
+    let onlineDaten = snapshotDaten.daten || null;
+    if (snapshotDaten.datenJson) {
+      try { onlineDaten = JSON.parse(snapshotDaten.datenJson); }
+      catch (fehler) { console.error("Der öffentliche Turnierstand ist ungültig:", fehler); }
+    }
     turnierDaten = onlineDaten;
     if (turnierDaten) {
       bestOf = turnierDaten.bestOf || bestOf;
@@ -1079,6 +1111,10 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.removeItem("dart11enDoppelKo");
     }
     turnierAnsichtRendern();
+    if (istTvModus) {
+      if (turnierDaten) tvDiashowStarten();
+      else tvVorstartAnzeigen();
+    }
   }, (fehler) => {
     console.error("Der öffentliche Turnierstand konnte nicht geladen werden:", fehler);
   });
@@ -1096,8 +1132,12 @@ document.addEventListener("DOMContentLoaded", () => {
   onSnapshot(doc(db, "turnierLive", "auslosungEvent"), (snapshot) => {
     if (!istTvModus || !snapshot.exists()) return;
     const daten = snapshot.data();
-    if (!daten?.id || Date.now() - Number(daten.zeit || 0) > 30000) return;
-    tvAuslosungAnzeigen(daten);
+    if (!daten?.id) {
+      tvVorstartAnzeigen();
+      return;
+    }
+    tvDiashowStarten();
+    if (Date.now() - Number(daten.zeit || 0) <= 30000) tvAuslosungAnzeigen(daten);
   }, (fehler) => {
     console.error("Die TV-Auslosung konnte nicht geladen werden:", fehler);
   });
