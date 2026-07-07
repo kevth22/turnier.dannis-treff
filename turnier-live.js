@@ -732,6 +732,70 @@ document.addEventListener("DOMContentLoaded", () => {
     catch (fehler) { console.error("Die Live-Meldung konnte nicht gespeichert werden:", fehler); }
   }
 
+  async function auslosungEventOnlineSpeichern() {
+    if (!turnierDaten?.w?.[0]) return;
+    const paarungen = turnierDaten.w[0].map(match => ({
+      matchId: match.id,
+      spielerA: match.a || "Offen",
+      spielerB: match.b || "Offen",
+      board: match.board || null
+    }));
+    try {
+      await setDoc(doc(db, "turnierLive", "auslosungEvent"), {
+        id: `auslosung-${Date.now()}`,
+        zeit: Date.now(),
+        paarungen
+      });
+    } catch (fehler) {
+      console.error("Die TV-Auslosung konnte nicht gestartet werden:", fehler);
+    }
+  }
+
+  let auslosungTimer = null;
+  function tvAuslosungAnzeigen(daten) {
+    if (!istTvModus || !Array.isArray(daten?.paarungen) || !daten.paarungen.length) return;
+    const popup = document.getElementById("drawPopup");
+    const matchId = document.getElementById("drawMatchId");
+    const playerA = document.getElementById("drawPlayerA");
+    const playerB = document.getElementById("drawPlayerB");
+    const board = document.getElementById("drawBoard");
+    const progress = document.getElementById("drawProgress");
+    if (!popup || !matchId || !playerA || !playerB || !board || !progress) return;
+
+    clearTimeout(auslosungTimer);
+    let index = 0;
+    popup.style.display = "flex";
+    popup.classList.add("show");
+
+    const naechstePaarung = () => {
+      const paarung = daten.paarungen[index];
+      popup.classList.remove("reveal");
+      void popup.offsetWidth;
+      matchId.textContent = paarung.matchId || `PARTIE ${index + 1}`;
+      playerA.textContent = paarung.spielerA || "Offen";
+      playerB.textContent = paarung.spielerB || "Offen";
+      board.textContent = paarung.board
+        ? `BOARD ${paarung.board}`
+        : (paarung.spielerA === "Freilos" || paarung.spielerB === "Freilos")
+          ? "FREILOS · KEIN BOARD"
+          : "BOARD WIRD SPÄTER ZUGETEILT";
+      board.classList.toggle("wartet", !paarung.board);
+      progress.textContent = `${index + 1} / ${daten.paarungen.length}`;
+      popup.classList.add("reveal");
+      index += 1;
+
+      if (index < daten.paarungen.length) {
+        auslosungTimer = setTimeout(naechstePaarung, 2600);
+      } else {
+        auslosungTimer = setTimeout(() => {
+          popup.classList.remove("show", "reveal");
+          setTimeout(() => { popup.style.display = "none"; }, 450);
+        }, 3200);
+      }
+    };
+    naechstePaarung();
+  }
+
   function siegPopupAnzeigen(daten) {
     if (istAdmin && !istTvModus) return;
     if (!daten?.sieger) return;
@@ -834,6 +898,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (namen.length > turnierGroesse) { alert("Es sind mehr Personen anwesend als das Turnierfeld Plätze hat."); return; }
     ergebnisHistorieLeeren();
     turnierDaten = turnierErstellen(namen); wegeBerechnen(); turnierSpeichernUndRendern();
+    auslosungEventOnlineSpeichern();
   });
 
   turnierZuruecksetzenBtn?.addEventListener("click", () => {
@@ -1026,6 +1091,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (Date.now() - Number(daten.zeit || 0) <= 15000) siegPopupAnzeigen(daten);
   }, (fehler) => {
     console.error("Live-Meldungen konnten nicht geladen werden:", fehler);
+  });
+
+  onSnapshot(doc(db, "turnierLive", "auslosungEvent"), (snapshot) => {
+    if (!istTvModus || !snapshot.exists()) return;
+    const daten = snapshot.data();
+    if (!daten?.id || Date.now() - Number(daten.zeit || 0) > 30000) return;
+    tvAuslosungAnzeigen(daten);
+  }, (fehler) => {
+    console.error("Die TV-Auslosung konnte nicht geladen werden:", fehler);
   });
 
   onSnapshot(collection(db, "warteschlange"), (snapshot) => {
