@@ -8,28 +8,30 @@
   }
 
   let installPrompt = null;
-  window.addEventListener('beforeinstallprompt', event => {
-    event.preventDefault();
-    installPrompt = event;
+  const istStartseite = /(?:^|\/)index\.html$/.test(location.pathname) || location.pathname.endsWith('/');
+  const button = istStartseite ? document.getElementById('pwaInstallButton') : null;
 
-    if (document.querySelector('.pwa-install-button')) return;
-    const button = document.createElement('button');
-    button.className = 'pwa-install-button';
-    button.type = 'button';
-    button.textContent = 'App installieren';
-    button.setAttribute('aria-label', 'Dart11en App installieren');
-    button.addEventListener('click', async () => {
-      if (!installPrompt) return;
+  button?.addEventListener('click', async () => {
+    if (installPrompt) {
       installPrompt.prompt();
       await installPrompt.userChoice;
       installPrompt = null;
-      button.remove();
-    });
-    document.body.appendChild(button);
+      return;
+    }
+
+    const istIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    alert(istIOS
+      ? 'Tippe unten auf „Teilen“ und anschließend auf „Zum Home-Bildschirm“.'
+      : 'Öffne das Browsermenü und wähle „App installieren“ oder „Zum Startbildschirm hinzufügen“.');
+  });
+
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    installPrompt = event;
   });
 
   window.addEventListener('appinstalled', () => {
-    document.querySelector('.pwa-install-button')?.remove();
+    button?.remove();
     installPrompt = null;
   });
 })();
