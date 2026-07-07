@@ -1,20 +1,22 @@
 {
-  "name": "Dart11en",
+  "id": "./",
+  "name": "Dart11en Vereins-App",
   "short_name": "Dart11en",
-  "start_url": "./index.html"
+  "description": "Vereins-App für Turniere, Liga, Spieltage und Dart-Events im Dannis Treff.",
+  "lang": "de-DE",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#000000",
+  "orientation": "portrait-primary",
+  "background_color": "#050505",
   "theme_color": "#e00022",
   "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    {"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ],
+  "shortcuts": [
+    {"name":"Turnier-Center","short_name":"Live","url":"./turnier-live.html","icons":[{"src":"icon-192.png","sizes":"192x192"}]},
+    {"name":"Turnieranmeldung","short_name":"Anmelden","url":"./turniere.html","icons":[{"src":"icon-192.png","sizes":"192x192"}]},
+    {"name":"Spieltag-Center","short_name":"Spieltag","url":"./spieltag-center.html","icons":[{"src":"icon-192.png","sizes":"192x192"}]}
   ]
 }
