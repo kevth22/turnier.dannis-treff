@@ -472,6 +472,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  async function einstellungenOnlineSpeichern() {
+    if (!istAdmin || istTvModus) return;
+    try {
+      await setDoc(doc(db, "turnierLive", "einstellungen"), {
+        turnierGroesse,
+        boardAnzahl,
+        bestOf,
+        aktualisiert: Date.now()
+      }, { merge: true });
+    } catch (fehler) {
+      console.error("Die Turniereinstellungen konnten nicht gespeichert werden:", fehler);
+    }
+  }
+
   ergebnisZurueckBtn?.addEventListener("click", () => {
     const vorherigerStand = ergebnisHistorie.pop();
     if (!vorherigerStand) return;
@@ -905,11 +919,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!istAdmin) return;
     boardAnzahl = Number(boardAnzahlAuswahl.value);
     localStorage.setItem("dart11enBoardAnzahl", String(boardAnzahl));
+    einstellungenOnlineSpeichern();
     if (turnierDaten) turnierSpeichernUndRendern();
   });
 
   matchFormatAuswahl?.addEventListener("change", () => {
     if (!istAdmin) return; bestOf = Number(matchFormatAuswahl.value); localStorage.setItem("dart11enBestOf", String(bestOf)); formatInfoAktualisieren();
+    einstellungenOnlineSpeichern();
     if (turnierDaten) { turnierDaten.bestOf = bestOf; [...turnierDaten.w.flat(), ...turnierDaten.l.flat(), ...turnierDaten.finale].forEach(m => { m.scoreA = null; m.scoreB = null; }); wegeBerechnen(); turnierSpeichernUndRendern(); }
   });
 
@@ -946,6 +962,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (turnierDaten) { bestOf = turnierDaten.bestOf || bestOf; if (matchFormatAuswahl) matchFormatAuswahl.value = String(bestOf); formatInfoAktualisieren(); wegeBerechnen(); turnierSpeichernUndRendern(); }
   else statistikAktualisieren();
   if (istTvModus) tvModusStarten();
+  if (istAdmin && !istTvModus) einstellungenOnlineSpeichern();
 
   function turnierZahlenAktualisieren() {
     const freilose = Math.max(turnierGroesse - anwesendeAnzahl, 0);
@@ -967,6 +984,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!istAdmin) return;
     turnierGroesse = Number(turnierGroesseAuswahl.value);
     localStorage.setItem("dart11enTurnierGroesse", String(turnierGroesse));
+    einstellungenOnlineSpeichern();
     turnierZahlenAktualisieren();
   });
 
@@ -1105,6 +1123,7 @@ document.addEventListener("DOMContentLoaded", () => {
     turnierDaten = onlineDaten;
     if (turnierDaten) {
       bestOf = turnierDaten.bestOf || bestOf;
+      turnierGroesse = turnierDaten.maxGroesse || turnierDaten.groesse || turnierGroesse;
       localStorage.setItem("dart11enDoppelKo", JSON.stringify(turnierDaten));
       wegeBerechnen();
     } else {
@@ -1117,6 +1136,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }, (fehler) => {
     console.error("Der öffentliche Turnierstand konnte nicht geladen werden:", fehler);
+  });
+
+  onSnapshot(doc(db, "turnierLive", "einstellungen"), (snapshot) => {
+    if (!snapshot.exists()) return;
+    const daten = snapshot.data() || {};
+    const neueGroesse = Number(daten.turnierGroesse);
+    const neueBoardAnzahl = Number(daten.boardAnzahl);
+    const neuesBestOf = Number(daten.bestOf);
+    if ([16, 32, 64].includes(neueGroesse)) turnierGroesse = neueGroesse;
+    if (neueBoardAnzahl >= 1 && neueBoardAnzahl <= 6) boardAnzahl = neueBoardAnzahl;
+    if ([1, 3, 5, 7].includes(neuesBestOf)) bestOf = neuesBestOf;
+    if (turnierGroesseAuswahl) turnierGroesseAuswahl.value = String(turnierGroesse);
+    if (boardAnzahlAuswahl) boardAnzahlAuswahl.value = String(boardAnzahl);
+    if (matchFormatAuswahl) matchFormatAuswahl.value = String(bestOf);
+    formatInfoAktualisieren();
+    turnierZahlenAktualisieren();
+  }, (fehler) => {
+    console.error("Die Turniereinstellungen konnten nicht geladen werden:", fehler);
   });
 
   onSnapshot(doc(db, "turnierLive", "liveEvent"), (snapshot) => {
