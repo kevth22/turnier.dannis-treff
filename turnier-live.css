@@ -1045,6 +1045,38 @@ body.tv-mode .werbung-box {
 
 .winner-popup { opacity: 0; transition: opacity .45s ease; }
 .winner-popup.show { opacity: 1; }
+.draw-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(0,71,171,.42), transparent 38%),
+    linear-gradient(135deg, #05070d 0%, #101827 55%, #05070d 100%);
+  opacity: 0;
+  transition: opacity .45s ease;
+}
+.draw-popup.show { opacity: 1; }
+body:not(.tv-mode) .draw-popup { display: none !important; }
+.draw-inhalt { width: min(1500px, 92vw); text-align: center; }
+.draw-kicker { color: #ffbe2d; font-size: clamp(26px, 3vw, 52px); font-weight: 1000; letter-spacing: .18em; }
+.draw-match-id { margin-top: 22px; color: #8fbfff; font-size: clamp(22px, 2vw, 36px); font-weight: 900; letter-spacing: .12em; }
+.draw-paarung { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: clamp(25px, 4vw, 70px); margin: 46px 0; }
+.draw-paarung strong { font-size: clamp(54px, 7vw, 125px); line-height: 1; text-shadow: 0 0 34px rgba(255,255,255,.16); }
+.draw-paarung span { color: #e00022; font-size: clamp(36px, 4vw, 70px); font-weight: 1000; }
+.draw-board { display: inline-block; padding: 18px 38px; border-radius: 18px; color: #07101f; background: #ffbe2d; box-shadow: 0 0 45px rgba(255,190,45,.38); font-size: clamp(34px, 4vw, 72px); font-weight: 1000; letter-spacing: .06em; }
+.draw-board.wartet { color: #d9e4f7; background: #263247; box-shadow: none; font-size: clamp(24px, 2.4vw, 42px); }
+.draw-progress { margin-top: 34px; color: #8090a8; font-size: clamp(18px, 1.7vw, 30px); font-weight: 900; letter-spacing: .16em; }
+.draw-popup.reveal .draw-paarung strong:first-child { animation: drawLeft .65s cubic-bezier(.2,.9,.25,1.15) both; }
+.draw-popup.reveal .draw-paarung strong:last-child { animation: drawRight .65s cubic-bezier(.2,.9,.25,1.15) both; }
+.draw-popup.reveal .draw-board { animation: drawBoard .55s .35s ease-out both; }
+@keyframes drawLeft { from { opacity: 0; transform: translateX(-18vw) scale(.85); } to { opacity: 1; transform: none; } }
+@keyframes drawRight { from { opacity: 0; transform: translateX(18vw) scale(.85); } to { opacity: 1; transform: none; } }
+@keyframes drawBoard { from { opacity: 0; transform: translateY(30px) scale(.8); } to { opacity: 1; transform: none; } }
 .winner-inhalt { position: relative; z-index: 2; padding: 50px; animation: winnerZoom .55s cubic-bezier(.2,.9,.25,1.25); }
 .winner-trophy { font-size: clamp(100px, 13vw, 220px); filter: drop-shadow(0 0 35px rgba(255,190,45,.55)); animation: trophyFloat 1.8s ease-in-out infinite; }
 body.tv-mode .winner-title { font-size: clamp(45px, 5vw, 85px); letter-spacing: .1em; }
