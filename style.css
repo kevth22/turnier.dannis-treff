@@ -14,6 +14,23 @@ body {
   overflow-x: hidden;
 }
 
+.pwa-install-button {
+  position: fixed;
+  right: 18px;
+  bottom: 104px;
+  z-index: 10000;
+  width: auto;
+  padding: 13px 18px;
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #e00022, #9d0018);
+  color: #fff;
+  box-shadow: 0 12px 35px rgba(0,0,0,.45);
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 body {
   font-family: Arial, sans-serif;
   background: #050505;
