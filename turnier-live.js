@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let letzteTeilnehmer = [];
   let anwesendeAnzahl = 0;
-  let turnierGroesse = Number(localStorage.getItem("dart11enTurnierGroesse")) || 32;
+  let turnierGroesse = Number(localStorage.getItem("dart11enTurnierGroesse")) || 16;
   let turnierDaten = JSON.parse(localStorage.getItem("dart11enDoppelKo") || "null");
   let bestOf = Number(localStorage.getItem("dart11enBestOf")) || 3;
   let boardAnzahl = Number(localStorage.getItem("dart11enBoardAnzahl")) || 6;
