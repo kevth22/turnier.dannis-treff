@@ -7,7 +7,7 @@
   <title>Dart11en | Turnier-Center</title>
 
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="turnier-live.css?v=11">
+  <link rel="stylesheet" href="turnier-live.css?v=12">
   <link rel="manifest" href="manifest.json">
 
   <meta name="theme-color" content="#e00022">
@@ -365,6 +365,20 @@
 
 </section>
 
+<div id="drawPopup" class="draw-popup" aria-live="polite">
+  <div class="draw-inhalt">
+    <div class="draw-kicker">LIVE-AUSLOSUNG</div>
+    <div id="drawMatchId" class="draw-match-id">PARTIE</div>
+    <div class="draw-paarung">
+      <strong id="drawPlayerA">Spieler A</strong>
+      <span>VS</span>
+      <strong id="drawPlayerB">Spieler B</strong>
+    </div>
+    <div id="drawBoard" class="draw-board">BOARD WIRD ZUGETEILT</div>
+    <div id="drawProgress" class="draw-progress"></div>
+  </div>
+</div>
+
 <div id="winnerPopup" class="winner-popup">
     <div class="winner-inhalt">
       <div class="winner-trophy">🏆</div>
@@ -383,7 +397,7 @@
   <a href="kader.html">👥<br>Kader</a>
 </nav>
 
-<script type="module" src="turnier-live.js?v=19"></script>
+<script type="module" src="turnier-live.js?v=20"></script>
 <script src="pwa.js" defer></script>
 
 </body>
