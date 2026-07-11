@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="turnier-live.css?v=13">
   <link rel="stylesheet" href="turnier-tv-fit.css?v=10">
-  <link rel="stylesheet" href="gruppen-turnier.css?v=1">
+  <link rel="stylesheet" href="gruppen-turnier.css?v=20">
   <link rel="manifest" href="manifest.json">
 
   <meta name="theme-color" content="#e00022">
@@ -214,7 +214,7 @@
   <!-- Turnierauslosung -->
   <section id="auslosungBereich" class="content-card admin-only">
 
-    <h2>🎲 Turnier auslosen</h2>
+    <div class="v2-title-row"><h2>🎲 Turnier auslosen</h2><span class="v2-badge">VERSION 2.0</span></div>
 
     <p class="section-text">
       Spieler werden zufällig gelost. Freilose werden fair verteilt und dürfen nicht gegeneinander spielen.
@@ -239,6 +239,7 @@
       <p class="section-text">Die beiden K.-o.-Bäume benötigen keinen eigenen Namen. Spieler derselben Gruppe werden bei der Erzeugung möglichst auf verschiedene Bereiche verteilt.</p>
     </div>
 
+    <div id="doppelKoKonfiguration" class="doppelko-config">
     <div class="turniergroesse-control">
       <label for="turnierGroesse">Größe des Doppel-K.-o.-Turnierfelds</label>
       <select id="turnierGroesse"><option value="16">16 Teilnehmer</option><option value="32" selected>32 Teilnehmer</option><option value="64">64 Teilnehmer</option></select>
@@ -261,6 +262,8 @@
         <h3 id="auslosungFreilose">0</h3>
         <p>Freilose</p>
       </div>
+
+    </div>
 
     </div>
 
@@ -451,9 +454,9 @@
   <a href="kader.html">👥<br>Kader</a>
 </nav>
 
-<script type="module" src="turnier-live.js?v=24"></script>
-<script type="module" src="gruppen-turnier.js?v=1"></script>
-<script src="turnier-tv-fit.js?v=10" defer></script>
+<script type="module" src="turnier-live.js?v=25"></script>
+<script type="module" src="gruppen-turnier.js?v=20"></script>
+<script src="turnier-tv-fit.js?v=11" defer></script>
 <script src="pwa.js" defer></script>
 
 </body>
