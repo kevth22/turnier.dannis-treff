@@ -1,5 +1,5 @@
 .tv-bracket {
-  overflow: hidden;
+  overflow: auto;
   padding: clamp(8px, .9vw, 16px);
   border: 1px solid rgba(255,255,255,.08);
   border-radius: 22px;
@@ -22,33 +22,6 @@
   transform: scale(var(--tv-scale));
   transform-origin: top left;
   transition: transform .35s ease;
-}
-
-.tv-bracket-grid.auto-pan {
-  animation: tvBracketAutoPan var(--tv-pan-duration) linear infinite;
-  will-change: transform;
-}
-
-@keyframes tvBracketAutoPan {
-  0%, 10% {
-    transform: translate(0, 0) scale(var(--tv-scale));
-  }
-
-  27% {
-    transform: translate(0, calc(-1 * var(--tv-pan-y))) scale(var(--tv-scale));
-  }
-
-  50%, 58% {
-    transform: translate(calc(-1 * var(--tv-pan-x)), calc(-1 * var(--tv-pan-y))) scale(var(--tv-scale));
-  }
-
-  75% {
-    transform: translate(calc(-1 * var(--tv-pan-x)), 0) scale(var(--tv-scale));
-  }
-
-  92%, 100% {
-    transform: translate(0, 0) scale(var(--tv-scale));
-  }
 }
 
 .tv-bracket-round {
