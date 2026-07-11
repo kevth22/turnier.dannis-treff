@@ -76,3 +76,20 @@
 .tv-bracket.dichte-sehr-kompakt .tv-bracket-player b {
   font-size: .9em;
 }
+
+body.tv-mode,
+body.tv-mode .tv-screen,
+body.tv-mode .tv-slide,
+body.tv-mode .tv-bracket {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+body.tv-mode::-webkit-scrollbar,
+body.tv-mode .tv-screen::-webkit-scrollbar,
+body.tv-mode .tv-slide::-webkit-scrollbar,
+body.tv-mode .tv-bracket::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
