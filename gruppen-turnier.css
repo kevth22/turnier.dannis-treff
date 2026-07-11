@@ -10,3 +10,35 @@
 @media(max-width:700px){.gruppen-score,.gruppen-bracket-score{grid-template-columns:1fr 55px 14px 55px 1fr;font-size:.86rem}.gruppe-spieler-zeile{grid-template-columns:1fr}.tv-gruppen-grid{grid-template-columns:1fr}}
 
 .v2-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.v2-title-row h2{margin:0}.v2-badge{display:inline-flex;align-items:center;padding:7px 11px;border-radius:999px;background:linear-gradient(135deg,#d90022,#7f0014);color:#fff;font-size:.72rem;font-weight:900;letter-spacing:.08em;box-shadow:0 0 18px rgba(217,0,34,.35)}.doppelko-config{display:contents}#turnierModus{font-weight:800;border-color:rgba(217,0,34,.65);box-shadow:0 0 0 1px rgba(217,0,34,.18)}
+
+/* Version 2.1: mobile Konfiguration */
+.v2-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.v2-title-row h2{margin:0;min-width:0}
+.v2-badge{flex:0 0 auto;white-space:nowrap}
+.qualifier-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.qualifier-head h4{margin:4px 0 0}
+.ko-modus-label{display:grid!important;gap:5px!important;min-width:170px;font-size:.85rem;color:#bbb}
+.ko-modus-label select{padding:9px!important}
+.qualifier-hint{margin:8px 0 12px;color:#aaa;font-size:.92rem}
+.qualifier-options{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px!important}
+.qualifier-options label{display:flex!important;align-items:center!important;justify-content:flex-start;gap:9px!important;min-width:0;padding:10px 9px;border-radius:11px;background:#191919;border:1px solid rgba(255,255,255,.09);font-weight:700!important;line-height:1.2}
+.qualifier-options input[type="checkbox"]{width:22px!important;height:22px!important;min-width:22px;margin:0;accent-color:#0a84ff}
+.qualifier-presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.qualifier-presets button{border:1px solid rgba(255,255,255,.15);background:#232323;color:#fff;border-radius:999px;padding:8px 12px;font-weight:700}
+.qualifier-presets button:active{transform:scale(.98)}
+.qualifier-warning{margin:10px 0 0;color:#ffb3bd;font-size:.88rem}
+
+@media (max-width:700px){
+  .gruppen-config{padding:14px;gap:14px}
+  .gruppen-config-grid{grid-template-columns:1fr}
+  .qualifier-box{padding:14px 12px}
+  .qualifier-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .qualifier-options label{font-size:1rem;padding:11px 10px}
+  .qualifier-head{display:grid;grid-template-columns:1fr;width:100%}
+  .ko-modus-label{width:100%;min-width:0}
+  .v2-title-row{align-items:flex-start}
+}
+
+@media (max-width:390px){
+  .qualifier-options{grid-template-columns:1fr}
+}

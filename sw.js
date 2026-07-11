@@ -1,4 +1,4 @@
-const VERSION = 'dart11en-turnier-center-2-0-v41';
+const VERSION = 'dart11en-turnier-center-2-1-v42';
 const APP_SHELL = [
   './', './index.html', './style.css', './pwa.js', './manifest.json',
   './turniere.html', './turnier-live.html', './turnier-live.css', './turnier-tv-fit.css', './turnier-tv-fit.js', './gruppen-turnier.css', './gruppen-turnier.js',
