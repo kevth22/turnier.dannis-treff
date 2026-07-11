@@ -2,6 +2,8 @@
   const istTv = new URLSearchParams(window.location.search).get("tv") === "true";
   if (!istTv) return;
 
+  let skalierungGeplant = false;
+
   function bracketSkalieren(container) {
     const grid = container?.querySelector(".tv-bracket-grid");
     if (!container || !grid) return;
@@ -30,21 +32,28 @@
     bracketSkalieren(document.getElementById("tvVerliererbaum"));
   }
 
+  function skalierungPlanen() {
+    if (skalierungGeplant) return;
+    skalierungGeplant = true;
+    requestAnimationFrame(() => {
+      skalierungGeplant = false;
+      alleBracketSlidesSkalieren();
+    });
+  }
+
   function starten() {
-    alleBracketSlidesSkalieren();
-    window.addEventListener("resize", alleBracketSlidesSkalieren, { passive: true });
+    skalierungPlanen();
+    window.addEventListener("resize", skalierungPlanen, { passive: true });
 
     const tvAnsicht = document.getElementById("tvAnsicht");
     if (tvAnsicht) {
-      new MutationObserver(() => alleBracketSlidesSkalieren()).observe(tvAnsicht, {
+      new MutationObserver(() => skalierungPlanen()).observe(tvAnsicht, {
         childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ["class", "style"]
+        subtree: true
       });
     }
 
-    setInterval(alleBracketSlidesSkalieren, 2500);
+    setInterval(skalierungPlanen, 2500);
   }
 
   if (document.readyState === "loading") {
