@@ -1,121 +1,102 @@
+/* TV-Ansicht V2: volle Breite, vertikale Kamerafahrt und separates Grand Final */
 .tv-bracket {
-  overflow: auto;
-  padding: clamp(8px, .9vw, 16px);
-  border: 1px solid rgba(255,255,255,.08);
+  overflow: hidden;
+  padding: clamp(8px, .8vw, 14px);
+  border: 1px solid rgba(255,255,255,.10);
   border-radius: 22px;
-  background:
-    radial-gradient(circle at 20% 0%, rgba(0,71,171,.14), transparent 34%),
-    linear-gradient(145deg, rgba(7,9,14,.72), rgba(3,4,8,.92));
+  background: linear-gradient(145deg, rgba(7,9,14,.78), rgba(3,4,8,.94));
   --tv-scale: 1;
-  --tv-round-width: 300px;
-  scroll-behavior: auto;
 }
 
-/* Der Baum erhält genug natürliche Breite für gut lesbare Karten.
-   JavaScript skaliert ihn danach exakt auf die verfügbare TV-Breite. */
 .tv-bracket-grid {
-  grid-template-columns: repeat(var(--tv-rounds), var(--tv-round-width)) !important;
-  width: max-content;
-  min-width: 100%;
+  display: grid !important;
+  grid-template-columns: repeat(var(--tv-rounds), minmax(180px, 1fr)) !important;
+  gap: clamp(8px, .8vw, 16px) !important;
+  width: calc(100% / var(--tv-scale)) !important;
+  min-width: calc(100% / var(--tv-scale)) !important;
+  height: max-content !important;
   min-height: calc(100% / var(--tv-scale));
-  height: auto !important;
   transform: scale(var(--tv-scale));
   transform-origin: top left;
-  transition: transform .25s ease;
 }
 
 .tv-bracket-round {
-  grid-template-rows: auto auto !important;
+  display: grid;
+  grid-template-rows: auto 1fr !important;
+  min-width: 0;
+  padding: clamp(7px, .65vw, 12px) !important;
 }
 
 .tv-bracket-matches {
-  justify-content: flex-start !important;
+  justify-content: space-around !important;
+  gap: clamp(6px, .55vw, 10px) !important;
 }
 
-.tv-bracket.dichte-kompakt { --tv-round-width: 270px; }
-.tv-bracket.dichte-sehr-kompakt { --tv-round-width: 245px; }
+.tv-bracket-match { min-height: 62px !important; }
+.tv-bracket-player { font-size: clamp(10px, .82vw, 15px) !important; }
+.tv-bracket-player span { max-width: calc(100% - 28px); }
 
-.tv-bracket-match {
-  min-height: 74px;
+/* Grand Final ist bewusst kein Teil des Gewinnerbaums. */
+.tv-finale-bereich {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: clamp(18px, 2vw, 32px);
+  min-height: calc(100vh - 285px);
+  padding: clamp(20px, 2.2vw, 38px);
+  border: 1px solid rgba(255,190,45,.28);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255,190,45,.16), transparent 35%),
+    linear-gradient(145deg, rgba(12,15,24,.96), rgba(4,5,9,.98));
+  box-shadow: inset 0 0 60px rgba(255,190,45,.05);
 }
 
-.tv-bracket.dichte-kompakt .tv-bracket-round,
-.tv-bracket.dichte-sehr-kompakt .tv-bracket-round {
-  padding: 11px;
-  border-radius: 16px;
+.tv-finale-herkunft {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+  align-items: center;
+  gap: clamp(18px, 3vw, 55px);
 }
-
-.tv-bracket.dichte-kompakt .tv-bracket-round > h3,
-.tv-bracket.dichte-sehr-kompakt .tv-bracket-round > h3 {
-  margin-bottom: 9px;
-  padding-bottom: 9px;
-  font-size: clamp(12px, 1vw, 18px);
-}
-
-.tv-bracket.dichte-kompakt .tv-bracket-round > h3 small,
-.tv-bracket.dichte-sehr-kompakt .tv-bracket-round > h3 small {
-  min-width: 24px;
-  height: 24px;
-}
-
-.tv-bracket.dichte-kompakt .tv-bracket-matches,
-.tv-bracket.dichte-sehr-kompakt .tv-bracket-matches {
+.tv-finale-herkunft > div {
+  display: grid;
   gap: 8px;
+  padding: clamp(14px, 1.5vw, 24px);
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 18px;
+  background: rgba(255,255,255,.055);
+  text-align: center;
 }
+.tv-finale-herkunft span { color: #9da4b1; font-size: clamp(14px, 1.2vw, 22px); font-weight: 900; text-transform: uppercase; }
+.tv-finale-herkunft strong { overflow: hidden; color: #fff; font-size: clamp(24px, 2.5vw, 48px); text-overflow: ellipsis; white-space: nowrap; }
+.tv-finale-herkunft > b { color: #e00022; font-size: clamp(30px, 3.2vw, 58px); }
 
-.tv-bracket.dichte-kompakt .tv-bracket-match,
-.tv-bracket.dichte-sehr-kompakt .tv-bracket-match {
-  min-height: 70px;
-  border-radius: 12px;
+.tv-finale-spiele { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); align-items: center; gap: clamp(22px, 3vw, 50px); }
+.tv-grand-final-match,
+.tv-reset-hinweis {
+  overflow: hidden;
+  border: 2px solid rgba(255,190,45,.52);
+  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(40,34,15,.62), rgba(12,13,18,.98));
+  box-shadow: 0 20px 55px rgba(0,0,0,.36), 0 0 28px rgba(255,190,45,.08);
 }
-
-.tv-bracket.dichte-kompakt .tv-bracket-match > small,
-.tv-bracket.dichte-sehr-kompakt .tv-bracket-match > small {
-  padding: 4px 9px;
-  font-size: clamp(10px, .82vw, 14px);
-}
-
-.tv-bracket.dichte-kompakt .tv-bracket-player,
-.tv-bracket.dichte-sehr-kompakt .tv-bracket-player {
-  padding: 6px 9px;
-  font-size: clamp(13px, 1.05vw, 19px);
-}
-
-.tv-bracket.dichte-sehr-kompakt .tv-bracket-player b {
-  font-size: .9em;
-}
-
-/* Der aktive Gewinner- oder Verliererbaum nutzt die gesamte verbleibende Höhe. */
-body.tv-mode .tv-bracket-slide.active {
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 150px);
-  min-height: 0;
-}
-
-body.tv-mode .tv-bracket-slide.active > h2 {
-  flex: 0 0 auto;
-}
-
-body.tv-mode .tv-bracket-slide.active .tv-bracket {
-  flex: 1 1 auto;
-  height: auto;
-  min-height: 0;
-}
+.tv-grand-final-match.reset { border-color: rgba(224,0,34,.55); }
+.tv-grand-final-kopf { display:flex; justify-content:space-between; padding:14px 20px; color:#ffca4f; font-size:clamp(16px,1.5vw,28px); font-weight:1000; text-transform:uppercase; }
+.tv-grand-final-kopf small { color:#8c919c; }
+.tv-grand-final-spieler { display:flex; justify-content:space-between; gap:18px; padding:clamp(16px,1.8vw,28px) 22px; border-top:1px solid rgba(255,255,255,.1); font-size:clamp(25px,2.8vw,52px); font-weight:900; }
+.tv-grand-final-spieler span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tv-grand-final-spieler.winner { color:#50ef7c; background:rgba(69,255,122,.10); }
+.tv-reset-hinweis { display:grid; place-content:center; gap:14px; min-height:220px; padding:30px; border-style:dashed; text-align:center; }
+.tv-reset-hinweis strong { color:#aeb2bb; font-size:clamp(22px,2vw,38px); }
+.tv-reset-hinweis span { color:#777d89; font-size:clamp(15px,1.3vw,24px); }
+.tv-finale-status { display:grid; gap:7px; text-align:center; }
+.tv-finale-status span { color:#ffbe2d; font-size:clamp(16px,1.3vw,24px); font-weight:1000; letter-spacing:.18em; }
+.tv-finale-status strong { color:#fff; font-size:clamp(28px,3.4vw,62px); }
 
 body.tv-mode,
 body.tv-mode .tv-screen,
 body.tv-mode .tv-slide,
-body.tv-mode .tv-bracket {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
+body.tv-mode .tv-bracket { scrollbar-width:none; -ms-overflow-style:none; }
 body.tv-mode::-webkit-scrollbar,
 body.tv-mode .tv-screen::-webkit-scrollbar,
 body.tv-mode .tv-slide::-webkit-scrollbar,
-body.tv-mode .tv-bracket::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-  display: none;
-}
+body.tv-mode .tv-bracket::-webkit-scrollbar { display:none; width:0; height:0; }

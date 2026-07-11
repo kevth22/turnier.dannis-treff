@@ -653,6 +653,7 @@ document.addEventListener("DOMContentLoaded", () => {
     container.replaceChildren();
     tvEinzelBaumRendern(document.getElementById("tvGewinnerbaum"), turnierDaten?.w || [], "Gewinnerrunde");
     tvEinzelBaumRendern(document.getElementById("tvVerliererbaum"), turnierDaten?.l || [], "Verliererrunde");
+    tvFinaleRendern();
     if (!turnierDaten) {
       container.innerHTML = '<div class="tv-leer">Der Turnierbaum erscheint nach der Auslosung.</div>';
       return;
@@ -680,6 +681,74 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!gruppe.namen.length) liste.innerHTML = '<small>Keine Spieler</small>';
       spalte.append(titel, liste); container.appendChild(spalte);
     });
+  }
+
+  function tvFinaleRendern() {
+    const container = document.getElementById("tvFinale");
+    if (!container) return;
+    container.replaceChildren();
+
+    if (!turnierDaten?.finale?.length) {
+      container.innerHTML = '<div class="tv-leer">Das Grand Final erscheint nach der Auslosung.</div>';
+      return;
+    }
+
+    const finale1 = turnierDaten.finale[0];
+    const finale2 = turnierDaten.finale[1];
+    const erg1 = ergebnisVon(finale1);
+    const erg2 = ergebnisVon(finale2);
+
+    const kopf = document.createElement("div");
+    kopf.className = "tv-finale-herkunft";
+    kopf.innerHTML = `
+      <div><span>Gewinner Gewinnerbaum</span><strong>${finale1.a || "Noch offen"}</strong></div>
+      <b>VS</b>
+      <div><span>Gewinner Verliererbaum</span><strong>${finale1.b || "Noch offen"}</strong></div>`;
+
+    const matchKarte = (match, titel, zusatzKlasse = "") => {
+      const erg = ergebnisVon(match);
+      const karte = document.createElement("article");
+      karte.className = `tv-grand-final-match ${zusatzKlasse}${erg ? " beendet" : ""}`.trim();
+      const headline = document.createElement("div");
+      headline.className = "tv-grand-final-kopf";
+      headline.innerHTML = `<span>${titel}</span><small>${match.id}</small>`;
+      karte.appendChild(headline);
+      [[match.a, match.scoreA], [match.b, match.scoreB]].forEach(([name, score]) => {
+        const zeile = document.createElement("div");
+        zeile.className = "tv-grand-final-spieler";
+        if (erg?.gewinner === name && name !== "Freilos") zeile.classList.add("winner");
+        const spieler = document.createElement("span");
+        spieler.textContent = name || "Noch offen";
+        const stand = document.createElement("b");
+        stand.textContent = score ?? "–";
+        zeile.append(spieler, stand);
+        karte.appendChild(zeile);
+      });
+      return karte;
+    };
+
+    const spiele = document.createElement("div");
+    spiele.className = "tv-finale-spiele";
+    spiele.appendChild(matchKarte(finale1, "Grand Final"));
+
+    const resetNoetig = Boolean(finale2?.a && finale2?.b);
+    if (resetNoetig || erg1?.gewinner === finale1.b) {
+      spiele.appendChild(matchKarte(finale2, "Grand Final Reset", "reset"));
+    } else {
+      const hinweis = document.createElement("div");
+      hinweis.className = "tv-reset-hinweis";
+      hinweis.innerHTML = '<strong>Mögliches Reset-Finale</strong><span>Nur wenn der Gewinner des Verliererbaums das erste Grand Final gewinnt.</span>';
+      spiele.appendChild(hinweis);
+    }
+
+    const status = document.createElement("div");
+    status.className = "tv-finale-status";
+    if (erg2?.gewinner) status.innerHTML = `<span>TURNIERSIEGER</span><strong>🏆 ${erg2.gewinner}</strong>`;
+    else if (erg1?.gewinner === finale1.a) status.innerHTML = `<span>TURNIERSIEGER</span><strong>🏆 ${erg1.gewinner}</strong>`;
+    else if (erg1?.gewinner === finale1.b) status.innerHTML = '<span>RESET ERFORDERLICH</span><strong>Beide Spieler haben jetzt eine Niederlage</strong>';
+    else status.innerHTML = '<span>DOPPEL-K.-O.-FINALE</span><strong>Gewinnerbaum gegen Verliererbaum</strong>';
+
+    container.append(kopf, spiele, status);
   }
 
   function tvEinzelBaumRendern(container, runden, titelPrefix) {
