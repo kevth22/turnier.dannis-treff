@@ -7,21 +7,21 @@
     radial-gradient(circle at 20% 0%, rgba(0,71,171,.14), transparent 34%),
     linear-gradient(145deg, rgba(7,9,14,.72), rgba(3,4,8,.92));
   --tv-scale: 1;
-  --tv-pan-x: 0px;
-  --tv-pan-y: 0px;
-  --tv-pan-duration: 20s;
   --tv-round-width: 300px;
+  scroll-behavior: auto;
 }
 
+/* Der Baum erhält genug natürliche Breite für gut lesbare Karten.
+   JavaScript skaliert ihn danach exakt auf die verfügbare TV-Breite. */
 .tv-bracket-grid {
   grid-template-columns: repeat(var(--tv-rounds), var(--tv-round-width)) !important;
   width: max-content;
-  min-width: calc(100% / var(--tv-scale));
-  min-height: 100%;
+  min-width: 100%;
+  min-height: calc(100% / var(--tv-scale));
   height: auto !important;
   transform: scale(var(--tv-scale));
   transform-origin: top left;
-  transition: transform .35s ease;
+  transition: transform .25s ease;
 }
 
 .tv-bracket-round {
@@ -83,6 +83,24 @@
 
 .tv-bracket.dichte-sehr-kompakt .tv-bracket-player b {
   font-size: .9em;
+}
+
+/* Der aktive Gewinner- oder Verliererbaum nutzt die gesamte verbleibende Höhe. */
+body.tv-mode .tv-bracket-slide.active {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 150px);
+  min-height: 0;
+}
+
+body.tv-mode .tv-bracket-slide.active > h2 {
+  flex: 0 0 auto;
+}
+
+body.tv-mode .tv-bracket-slide.active .tv-bracket {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
 }
 
 body.tv-mode,
