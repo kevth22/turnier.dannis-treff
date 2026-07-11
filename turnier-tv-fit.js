@@ -17,13 +17,34 @@
     container.classList.toggle("dichte-kompakt", maxMatches > 10 || runden.length > 7);
     container.classList.toggle("dichte-sehr-kompakt", maxMatches > 18 || runden.length > 10);
 
+    grid.classList.remove("auto-pan");
     grid.style.setProperty("--tv-scale", "1");
+    container.style.setProperty("--tv-pan-x", "0px");
+    container.style.setProperty("--tv-pan-y", "0px");
     requestAnimationFrame(() => {
       const box = container.getBoundingClientRect();
       const breite = grid.scrollWidth || grid.offsetWidth || 1;
       const hoehe = grid.scrollHeight || grid.offsetHeight || 1;
-      const scale = Math.min(1, box.width / breite, box.height / hoehe);
-      grid.style.setProperty("--tv-scale", String(Math.max(0.24, scale)));
+      if (!box.width || !box.height) return;
+
+      const fitScale = Math.min(box.width / breite, box.height / hoehe);
+      const lesbarerScale = Math.min(1, Math.max(0.58, fitScale * 1.38));
+      const scaledWidth = breite * lesbarerScale;
+      const scaledHeight = hoehe * lesbarerScale;
+      const panX = Math.max(0, scaledWidth - box.width);
+      const panY = Math.max(0, scaledHeight - box.height);
+      const panDistanz = panX + panY;
+      const dauer = Math.min(18, Math.max(10, panDistanz / 95));
+
+      grid.style.setProperty("--tv-scale", String(lesbarerScale));
+      container.style.setProperty("--tv-pan-x", `${Math.round(panX)}px`);
+      container.style.setProperty("--tv-pan-y", `${Math.round(panY)}px`);
+      container.style.setProperty("--tv-pan-duration", `${dauer.toFixed(1)}s`);
+
+      if (panX > 8 || panY > 8) {
+        void grid.offsetWidth;
+        grid.classList.add("auto-pan");
+      }
     });
   }
 
@@ -47,9 +68,17 @@
 
     const tvAnsicht = document.getElementById("tvAnsicht");
     if (tvAnsicht) {
-      new MutationObserver(() => skalierungPlanen()).observe(tvAnsicht, {
+      new MutationObserver((mutations) => {
+        const relevant = mutations.some(mutation =>
+          mutation.type === "childList" ||
+          (mutation.type === "attributes" && mutation.target.classList?.contains("tv-slide"))
+        );
+        if (relevant) skalierungPlanen();
+      }).observe(tvAnsicht, {
         childList: true,
-        subtree: true
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["class"]
       });
     }
 

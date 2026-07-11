@@ -7,6 +7,9 @@
     radial-gradient(circle at 20% 0%, rgba(0,71,171,.14), transparent 34%),
     linear-gradient(145deg, rgba(7,9,14,.72), rgba(3,4,8,.92));
   --tv-scale: 1;
+  --tv-pan-x: 0px;
+  --tv-pan-y: 0px;
+  --tv-pan-duration: 10s;
   --tv-round-width: 182px;
 }
 
@@ -19,6 +22,29 @@
   transform: scale(var(--tv-scale));
   transform-origin: top left;
   transition: transform .35s ease;
+}
+
+.tv-bracket-grid.auto-pan {
+  animation: tvBracketAutoPan var(--tv-pan-duration) ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes tvBracketAutoPan {
+  0%, 8% {
+    transform: translate(0, 0) scale(var(--tv-scale));
+  }
+
+  32% {
+    transform: translate(0, calc(-1 * var(--tv-pan-y))) scale(var(--tv-scale));
+  }
+
+  68% {
+    transform: translate(calc(-1 * var(--tv-pan-x)), calc(-1 * var(--tv-pan-y))) scale(var(--tv-scale));
+  }
+
+  92%, 100% {
+    transform: translate(calc(-1 * var(--tv-pan-x)), 0) scale(var(--tv-scale));
+  }
 }
 
 .tv-bracket-round {
