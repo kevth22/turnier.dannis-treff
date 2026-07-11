@@ -28,13 +28,13 @@
       if (!box.width || !box.height) return;
 
       const fitScale = Math.min(box.width / breite, box.height / hoehe);
-      const lesbarerScale = Math.min(1, Math.max(0.58, fitScale * 1.38));
+      const lesbarerScale = Math.min(1, Math.max(0.72, fitScale * 1.9));
       const scaledWidth = breite * lesbarerScale;
       const scaledHeight = hoehe * lesbarerScale;
       const panX = Math.max(0, scaledWidth - box.width);
       const panY = Math.max(0, scaledHeight - box.height);
       const panDistanz = panX + panY;
-      const dauer = Math.min(18, Math.max(10, panDistanz / 95));
+      const dauer = Math.min(34, Math.max(18, panDistanz / 55));
 
       grid.style.setProperty("--tv-scale", String(lesbarerScale));
       container.style.setProperty("--tv-pan-x", `${Math.round(panX)}px`);

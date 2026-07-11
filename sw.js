@@ -1,4 +1,4 @@
-const VERSION = 'dart11en-v36';
+const VERSION = 'dart11en-v37';
 const APP_SHELL = [
   './', './index.html', './style.css', './pwa.js', './manifest.json',
   './turniere.html', './turnier-live.html', './turnier-live.css', './turnier-tv-fit.css', './turnier-tv-fit.js',
