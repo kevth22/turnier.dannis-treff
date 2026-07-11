@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="turnier-live.css?v=13">
   <link rel="stylesheet" href="turnier-tv-fit.css?v=10">
+  <link rel="stylesheet" href="gruppen-turnier.css?v=1">
   <link rel="manifest" href="manifest.json">
 
   <meta name="theme-color" content="#e00022">
@@ -127,6 +128,16 @@
     <div class="bracket-block"><h3>Finale</h3><div id="finalBaum" class="bracket-scroll"></div></div>
   </section>
 
+
+  <section id="gruppenBereich" class="content-card modus-versteckt">
+    <h2>📊 Gruppenphase</h2>
+    <p class="section-text">Tabellen, Gruppenspiele und die späteren K.-o.-Bäume werden hier live angezeigt.</p>
+    <div id="gruppenAnzeige" class="gruppen-public-grid"></div>
+    <div id="gruppenAdminAnzeige" class="gruppen-admin-grid admin-only"></div>
+    <div class="action-row admin-only"><button id="koErstellenBtn" class="main-button" type="button">K.-o.-Phase erstellen</button></div>
+    <div id="gruppenKoAnzeige" class="ko-phasen-grid"></div>
+  </section>
+
   <!-- Admin Dashboard -->
   <section id="adminDashboard" class="admin-dashboard admin-only">
 
@@ -210,7 +221,26 @@
     </p>
 
     <div class="turniergroesse-control">
-      <label for="turnierGroesse">Größe des Turnierfelds</label>
+      <label for="turnierModus">Turniermodus</label>
+      <select id="turnierModus">
+        <option value="doppelko">Doppel-K.-o.</option>
+        <option value="gruppenko">Gruppenphase + K.-o.</option>
+      </select>
+    </div>
+
+    <div id="gruppenKonfiguration" class="gruppen-config modus-versteckt">
+      <div class="gruppen-config-grid">
+        <label>Anzahl Gruppen<select id="gruppenAnzahl"><option value="1">1 Gruppe</option><option value="2">2 Gruppen</option><option value="3">3 Gruppen</option><option value="4" selected>4 Gruppen</option><option value="5">5 Gruppen</option><option value="6">6 Gruppen</option><option value="7">7 Gruppen</option><option value="8">8 Gruppen</option></select></label>
+        <label>Anzahl K.-o.-Bäume<select id="koAnzahl"><option value="1">1 Baum</option><option value="2" selected>2 Bäume</option></select></label>
+        <label>Gruppenspiele<select id="gruppenBestOf"><option value="1">Best of 1</option><option value="3" selected>Best of 3</option><option value="5">Best of 5</option></select></label>
+      </div>
+      <div class="qualifier-box"><h4>K.-o.-Baum 1: Weiterkommende Plätze</h4><div id="ko1Plaetze" class="qualifier-options"></div></div>
+      <div id="ko2RegelBox" class="qualifier-box"><h4>K.-o.-Baum 2: Weiterkommende Plätze</h4><div id="ko2Plaetze" class="qualifier-options"></div></div>
+      <p class="section-text">Die beiden K.-o.-Bäume benötigen keinen eigenen Namen. Spieler derselben Gruppe werden bei der Erzeugung möglichst auf verschiedene Bereiche verteilt.</p>
+    </div>
+
+    <div class="turniergroesse-control">
+      <label for="turnierGroesse">Größe des Doppel-K.-o.-Turnierfelds</label>
       <select id="turnierGroesse"><option value="16">16 Teilnehmer</option><option value="32" selected>32 Teilnehmer</option><option value="64">64 Teilnehmer</option></select>
       <p id="turnierGroesseHinweis" class="section-text"></p>
     </div>
@@ -367,6 +397,17 @@
     <div id="tvFinale" class="tv-finale-bereich"></div>
   </div>
 
+
+  <div class="tv-slide" id="slideGruppen">
+    <h2>📊 Gruppenphase</h2>
+    <div id="tvGruppen" class="tv-gruppen-grid"></div>
+  </div>
+
+  <div class="tv-slide" id="slideGruppenKo">
+    <h2>🏆 K.-o.-Phasen</h2>
+    <div id="tvGruppenKo" class="tv-ko-wrap"></div>
+  </div>
+
   <div class="tv-slide" id="slideWerbung">
     <h2>📢 Dannis Treff</h2>
     <div class="werbung-box">
@@ -411,6 +452,7 @@
 </nav>
 
 <script type="module" src="turnier-live.js?v=24"></script>
+<script type="module" src="gruppen-turnier.js?v=1"></script>
 <script src="turnier-tv-fit.js?v=10" defer></script>
 <script src="pwa.js" defer></script>
 
