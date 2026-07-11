@@ -10,13 +10,13 @@
   --tv-pan-x: 0px;
   --tv-pan-y: 0px;
   --tv-pan-duration: 20s;
-  --tv-round-width: 230px;
+  --tv-round-width: 300px;
 }
 
 .tv-bracket-grid {
   grid-template-columns: repeat(var(--tv-rounds), var(--tv-round-width)) !important;
   width: max-content;
-  min-width: 100%;
+  min-width: calc(100% / var(--tv-scale));
   min-height: 100%;
   height: auto !important;
   transform: scale(var(--tv-scale));
@@ -32,48 +32,53 @@
   justify-content: flex-start !important;
 }
 
-.tv-bracket.dichte-kompakt { --tv-round-width: 205px; }
-.tv-bracket.dichte-sehr-kompakt { --tv-round-width: 184px; }
+.tv-bracket.dichte-kompakt { --tv-round-width: 270px; }
+.tv-bracket.dichte-sehr-kompakt { --tv-round-width: 245px; }
+
+.tv-bracket-match {
+  min-height: 74px;
+}
 
 .tv-bracket.dichte-kompakt .tv-bracket-round,
 .tv-bracket.dichte-sehr-kompakt .tv-bracket-round {
-  padding: 9px;
-  border-radius: 14px;
+  padding: 11px;
+  border-radius: 16px;
 }
 
 .tv-bracket.dichte-kompakt .tv-bracket-round > h3,
 .tv-bracket.dichte-sehr-kompakt .tv-bracket-round > h3 {
-  margin-bottom: 7px;
-  padding-bottom: 8px;
-  font-size: clamp(10px, .9vw, 16px);
+  margin-bottom: 9px;
+  padding-bottom: 9px;
+  font-size: clamp(12px, 1vw, 18px);
 }
 
 .tv-bracket.dichte-kompakt .tv-bracket-round > h3 small,
 .tv-bracket.dichte-sehr-kompakt .tv-bracket-round > h3 small {
-  min-width: 20px;
-  height: 20px;
+  min-width: 24px;
+  height: 24px;
 }
 
 .tv-bracket.dichte-kompakt .tv-bracket-matches,
 .tv-bracket.dichte-sehr-kompakt .tv-bracket-matches {
-  gap: 6px;
+  gap: 8px;
 }
 
 .tv-bracket.dichte-kompakt .tv-bracket-match,
 .tv-bracket.dichte-sehr-kompakt .tv-bracket-match {
-  border-radius: 10px;
+  min-height: 70px;
+  border-radius: 12px;
 }
 
 .tv-bracket.dichte-kompakt .tv-bracket-match > small,
 .tv-bracket.dichte-sehr-kompakt .tv-bracket-match > small {
-  padding: 3px 7px;
-  font-size: clamp(8px, .7vw, 12px);
+  padding: 4px 9px;
+  font-size: clamp(10px, .82vw, 14px);
 }
 
 .tv-bracket.dichte-kompakt .tv-bracket-player,
 .tv-bracket.dichte-sehr-kompakt .tv-bracket-player {
-  padding: 4px 7px;
-  font-size: clamp(10px, .9vw, 16px);
+  padding: 6px 9px;
+  font-size: clamp(13px, 1.05vw, 19px);
 }
 
 .tv-bracket.dichte-sehr-kompakt .tv-bracket-player b {
