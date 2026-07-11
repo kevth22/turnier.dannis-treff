@@ -91,7 +91,19 @@ function regelSetzen(key,werte){
   const ziel=regelQuelle(),anderer=key==="ko1"?"ko2":"ko1",max=maxGruppenPlaetze();
   ziel[key]=[...new Set(werte.filter(p=>p>=1&&p<=max))].sort((a,b)=>a-b);
   if(aktuelleAufteilung()!=="getrennt")ziel[anderer]=(ziel[anderer]||[]).filter(p=>!ziel[key].includes(p));
-  if(daten){daten.koPhasen=[];speichern()}renderConfig();if(daten)renderAlles();
+
+  // Die sichtbare Auswahl ist zugleich der Entwurf für die nächste Auslosung.
+  // Vorher wurden Änderungen nur in einem bereits vorhandenen Turnier gespeichert;
+  // beim erneuten Auslosen griff der Code wieder auf [1, 2] zurück.
+  entwurfRegeln=clone(ziel);
+
+  if(daten){
+    daten.regeln=clone(ziel);
+    daten.koPhasen=[];
+    speichern();
+  }
+  renderConfig();
+  if(daten)renderAlles();
 }
 function regelOptionen(box,key){
   if(!box)return;box.replaceChildren();normalisiereRegeln();const quelle=regelQuelle(),max=maxGruppenPlaetze();
@@ -137,13 +149,46 @@ function renderAlles(){
 function renderTv(){const gbox=$("tvGruppen");if(gbox){gbox.replaceChildren();daten?.gruppen?.forEach(g=>{const card=renderGruppe(g,false),d=document.createElement("div");d.className=`tv-gruppe turnier-${g.turnierId||1}`;d.append(card.querySelector("h3"),card.querySelector("table"));gbox.append(d)})}const kbox=$("tvGruppenKo");if(kbox){kbox.replaceChildren();daten?.koPhasen?.forEach(k=>kbox.append(renderKo(k,false)))}}
 function neuesGruppenTurnier(){
   const namen=teilnehmer.filter(p=>p.anwesend===true).map(spielName).filter(Boolean),anzahl=Number($("gruppenAnzahl").value),aufteilung=$("turnierAufteilung")?.value||"gemeinsam";
-  if(namen.length<2){alert("Mindestens zwei anwesende Spieler werden benötigt.");return}if(anzahl>namen.length){alert("Es können nicht mehr Gruppen als Spieler erstellt werden.");return}if(aufteilung==="getrennt"&&anzahl<2){alert("Für zwei getrennte Turniere werden mindestens zwei Gruppen benötigt.");return}
-  daten={modus:"gruppenko",version:"2.5",erstellt:Date.now(),bestOf:Number($("gruppenBestOf").value),anzahlGruppen:anzahl,aufteilung,anzahlKo:aufteilung==="getrennt"?2:Number($("koAnzahl").value),koModi:{ko1:"einfach",ko2:"einfach"},regeln:clone(entwurfRegeln),gruppen:gruppenErstellen(namen,anzahl,aufteilung),koPhasen:[]};speichern();renderAlles();
+  if(namen.length<2){alert("Mindestens zwei anwesende Spieler werden benötigt.");return}
+  if(anzahl>namen.length){alert("Es können nicht mehr Gruppen als Spieler erstellt werden.");return}
+  if(aufteilung==="getrennt"&&anzahl<2){alert("Für zwei getrennte Turniere werden mindestens zwei Gruppen benötigt.");return}
+
+  // Immer die aktuell sichtbare Auswahl übernehmen – auch wenn bereits ein
+  // Gruppenturnier existiert. So bleiben z. B. Platz 1–4 beim Neuauslosen erhalten.
+  normalisiereRegeln();
+  const aktuelleRegeln=clone(regelQuelle());
+  entwurfRegeln=clone(aktuelleRegeln);
+
+  daten={
+    modus:"gruppenko",
+    version:"3.0.1",
+    erstellt:Date.now(),
+    bestOf:Number($("gruppenBestOf").value),
+    anzahlGruppen:anzahl,
+    aufteilung,
+    anzahlKo:aufteilung==="getrennt"?2:Number($("koAnzahl").value),
+    koModi:{ko1:"einfach",ko2:"einfach"},
+    regeln:aktuelleRegeln,
+    gruppen:gruppenErstellen(namen,anzahl,aufteilung),
+    koPhasen:[]
+  };
+  speichern();
+  renderAlles();
 }
 
 document.addEventListener("DOMContentLoaded",()=>{
   const mode=$("turnierModus"),originalBtn=$("turnierAuslosenBtn");
-  mode?.addEventListener("change",()=>{localStorage.setItem("dart11enV3TurnierModus",mode.value);$("gruppenKonfiguration")?.classList.toggle("modus-versteckt",mode.value!=="gruppenko");$("doppelKoKonfiguration")?.classList.toggle("modus-versteckt",mode.value==="gruppenko");if(originalBtn)originalBtn.textContent=mode.value==="gruppenko"?"🎲 Gruppen auslosen":"🎲 Live-Auslosung starten";renderConfig()});
+  const modusAnzeigeAktualisieren=()=>{
+    const wert=mode?.value||"doppelko";
+    localStorage.setItem("dart11enV3TurnierModus",wert);
+    $("gruppenKonfiguration")?.classList.toggle("modus-versteckt",wert!=="gruppenko");
+    $("doppelKoKonfiguration")?.classList.toggle("modus-versteckt",wert==="gruppenko");
+    $("gruppenBereich")?.classList.toggle("modus-versteckt",wert!=="gruppenko");
+    $("turnierBaumBereich")?.classList.toggle("modus-versteckt",wert==="gruppenko");
+    if(originalBtn)originalBtn.textContent=wert==="gruppenko"?"🎲 Gruppen auslosen":"🎲 Live-Auslosung starten";
+  };
+  mode?.addEventListener("input",modusAnzeigeAktualisieren);
+  mode?.addEventListener("change",modusAnzeigeAktualisieren);
   originalBtn?.addEventListener("click",e=>{if(mode?.value!=="gruppenko")return;e.stopImmediatePropagation();e.preventDefault();neuesGruppenTurnier()},true);
   $("koErstellenBtn")?.addEventListener("click",koPhasenErstellen);
   $("gruppenAnzahl")?.addEventListener("change",()=>{if(daten)return;normalisiereRegeln();renderConfig()});

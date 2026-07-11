@@ -26,10 +26,14 @@ document.addEventListener("DOMContentLoaded", () => {
   if (mode) mode.value = gespeichert;
   aktiveAnsichtSetzen(gespeichert);
 
-  mode?.addEventListener("change", () => {
-    localStorage.setItem(MODE_KEY, mode.value);
-    aktiveAnsichtSetzen(mode.value);
-  }, true);
+  const modusWechseln = () => {
+    const wert = mode?.value || "doppelko";
+    localStorage.setItem(MODE_KEY, wert);
+    aktiveAnsichtSetzen(wert);
+    window.dispatchEvent(new CustomEvent("dart11en:v3-mode", { detail: { mode: wert } }));
+  };
+  mode?.addEventListener("input", modusWechseln, true);
+  mode?.addEventListener("change", modusWechseln, true);
 
   $("turnierZuruecksetzenBtn")?.addEventListener("click", event => {
     event.preventDefault();
