@@ -925,7 +925,15 @@ document.addEventListener("DOMContentLoaded", () => {
     tvSpieleRendern();
     tvTurnierbaumRendern();
 
-    const slides = [...document.querySelectorAll(".tv-slide")];
+    const angefragterModus = new URLSearchParams(window.location.search).get("mode")
+      || localStorage.getItem("dart11enV3TurnierModus")
+      || "doppelko";
+    const alleSlides = [...document.querySelectorAll(".tv-slide")];
+    const gruppenIds = new Set(["slideGruppen", "slideGruppenKo", "slideWerbung"]);
+    const doppelKoIds = new Set(["slideAktuelleSpiele", "slideNaechsteSpiele", "slideTurnierbaum", "slideGewinnerbaum", "slideVerliererbaum", "slideFinale", "slideWerbung"]);
+    const erlaubteIds = angefragterModus === "gruppenko" ? gruppenIds : doppelKoIds;
+    const slides = alleSlides.filter(slide => erlaubteIds.has(slide.id));
+    alleSlides.forEach(slide => { if(!erlaubteIds.has(slide.id)) slide.classList.remove("active"); });
     const status = document.getElementById("tvRotationStatus");
     let index = 0;
     const punkte = slides.map((slide, i) => {
@@ -955,7 +963,12 @@ document.addEventListener("DOMContentLoaded", () => {
       index = 0;
     };
     tvVorstartAnzeigen();
-    if (turnierDaten) tvDiashowStarten();
+    let gruppenDatenVorhanden = false;
+    try { gruppenDatenVorhanden = Boolean(JSON.parse(localStorage.getItem("dart11enV3GruppenKo") || "null")); } catch {}
+    if ((angefragterModus === "gruppenko" && gruppenDatenVorhanden) || (angefragterModus !== "gruppenko" && turnierDaten)) tvDiashowStarten();
+    window.addEventListener("dart11en:gruppen-tv-ready", () => {
+      if (angefragterModus === "gruppenko") tvDiashowStarten();
+    });
 
     const uhr = document.getElementById("tvUhrzeit");
     const uhrAktualisieren = () => {

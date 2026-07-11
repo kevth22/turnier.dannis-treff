@@ -11,6 +11,10 @@ function aktiveAnsichtSetzen(mode) {
   $("turnierBaumBereich")?.classList.toggle("modus-versteckt", gruppen);
   const draw = $("turnierAuslosenBtn");
   if (draw) draw.textContent = gruppen ? "🎲 Gruppen auslosen" : "🎲 Live-Auslosung starten";
+  $("gruppenSimulationBtn")?.classList.toggle("modus-versteckt", !gruppen);
+  $("gruppenSimulationHinweis")?.classList.toggle("modus-versteckt", !gruppen);
+  const tvLink = $("tvAnsichtLink");
+  if (tvLink) tvLink.href = `turnier-live-v3.html?tv=true&mode=${gruppen ? "gruppenko" : "doppelko"}`;
   const hint = $("v3StatusHinweis");
   if (hint) hint.textContent = gruppen
     ? "Aktiv: Gruppenphase + K.-o. Der Doppel-K.-o.-Stand bleibt getrennt gespeichert."
@@ -30,9 +34,11 @@ document.addEventListener("DOMContentLoaded", () => {
   aktiveAnsichtSetzen(gespeichert);
 
   const modusWechseln = () => {
-    const wert = mode?.value || "doppelko";
+    const wert = mode?.value === "gruppenko" ? "gruppenko" : "doppelko";
     localStorage.setItem(MODE_KEY, wert);
+    if(mode) mode.value=wert;
     aktiveAnsichtSetzen(wert);
+    mode?.blur();
     window.dispatchEvent(new CustomEvent("dart11en:v3-mode", { detail: { mode: wert } }));
   };
   mode?.addEventListener("change", modusWechseln);

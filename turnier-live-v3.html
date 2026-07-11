@@ -214,7 +214,7 @@
   <!-- Turnierauslosung -->
   <section id="auslosungBereich" class="content-card admin-only">
 
-    <div class="v2-title-row"><h2>🎲 Turnier auslosen</h2><span class="v2-badge">VERSION 3.0.2 – MODUS-FIX</span></div>
+    <div class="v2-title-row"><h2>🎲 Turnier auslosen</h2><span class="v2-badge">VERSION 3.0.4 – RESET & MODUSWECHSEL</span></div>
 
     <p class="section-text">
       Spieler werden zufällig gelost. Freilose werden fair verteilt und dürfen nicht gegeneinander spielen.
@@ -262,6 +262,10 @@
         <div id="ko2Plaetze" class="qualifier-options"></div>
       </div>
       <p id="gruppenRegelHinweis" class="section-text">Eine Platzierung kann nur einem K.-o.-Baum zugeordnet werden.</p>
+      <div class="gruppen-reset-aktionen admin-only">
+        <button id="gruppenZuruecksetzenBtn" class="main-button reset-turnier-button" type="button">🔄 Gruppenphase zurücksetzen</button>
+        <button id="gruppenZuDoppelKoBtn" class="main-button secondary-button" type="button">↩ Gruppenphase beenden und zu Doppel-K.-o. wechseln</button>
+      </div>
     </div>
 
     <div id="doppelKoKonfiguration" class="doppelko-config">
@@ -347,6 +351,11 @@
       <small id="ergebnisZurueckInfo">Noch keine Änderung zum Zurücknehmen.</small>
     </div>
 
+    <button id="gruppenSimulationBtn" class="main-button secondary-button modus-versteckt" type="button">
+      🧪 Gruppenphase simulieren
+    </button>
+    <p id="gruppenSimulationHinweis" class="section-text modus-versteckt">Füllt nur offene Gruppenspiele mit gültigen Testergebnissen. Bereits eingetragene Ergebnisse bleiben erhalten.</p>
+
     <div id="spieleListe" class="turnier-output"></div>
 
   </section>
@@ -360,7 +369,7 @@
       Öffnet die Live-Ansicht für euren zweiten Monitor im Dannis Treff.
     </p>
 
-    <a href="turnier-live.html?tv=true" class="main-button" target="_blank" rel="noopener">
+    <a id="tvAnsichtLink" href="turnier-live-v3.html?tv=true&mode=doppelko" class="main-button" target="_blank" rel="noopener">
       📺 TV-Ansicht öffnen
     </a>
 
@@ -485,9 +494,9 @@
   <a href="kader.html">👥<br>Kader</a>
 </nav>
 
-<script type="module" src="turnier-v3-manager.js?v=302"></script>
-<script type="module" src="turnier-live-v3.js?v=302"></script>
-<script type="module" src="gruppen-turnier-v3.js?v=302"></script>
+<script type="module" src="turnier-v3-manager.js?v=304"></script>
+<script type="module" src="turnier-live-v3.js?v=304"></script>
+<script type="module" src="gruppen-turnier-v3.js?v=304"></script>
 <script src="turnier-tv-fit.js?v=11" defer></script>
 <script src="pwa.js" defer></script>
 

@@ -149,7 +149,26 @@ function renderAlles(){
   const ko=$("gruppenKoAnzeige");if(ko){ko.replaceChildren();daten.koPhasen?.forEach(k=>ko.append(renderKo(k,istAdmin)));if(!daten.koPhasen?.length)ko.innerHTML='<p class="section-text">Die K.-o.-Phasen werden nach Abschluss der Gruppenphase erstellt.</p>'}
   const btn=$("koErstellenBtn");if(btn){btn.disabled=!alleGruppenFertig();btn.textContent=alleGruppenFertig()?(daten.aufteilung==="getrennt"?"Beide K.-o.-Phasen erstellen":"K.-o.-Phase erstellen"):"Erst alle Gruppenspiele abschließen"}renderTv();
 }
-function renderTv(){const gbox=$("tvGruppen");if(gbox){gbox.replaceChildren();daten?.gruppen?.forEach(g=>{const card=renderGruppe(g,false),d=document.createElement("div");d.className=`tv-gruppe turnier-${g.turnierId||1}`;d.append(card.querySelector("h3"),card.querySelector("table"));gbox.append(d)})}const kbox=$("tvGruppenKo");if(kbox){kbox.replaceChildren();daten?.koPhasen?.forEach(k=>kbox.append(renderKo(k,false)))}}
+function renderTv(){
+  const gbox=$("tvGruppen");
+  if(gbox){
+    gbox.replaceChildren();
+    daten?.gruppen?.forEach(g=>{
+      const card=renderGruppe(g,false),d=document.createElement("div");
+      d.className=`tv-gruppe turnier-${g.turnierId||1}`;
+      d.append(card.querySelector("h3"),card.querySelector("table"));
+      gbox.append(d);
+    });
+    if(!daten?.gruppen?.length)gbox.innerHTML='<div class="tv-leer">Die Gruppen erscheinen nach der Auslosung.</div>';
+  }
+  const kbox=$("tvGruppenKo");
+  if(kbox){
+    kbox.replaceChildren();
+    daten?.koPhasen?.forEach(k=>kbox.append(renderKo(k,false)));
+    if(!daten?.koPhasen?.length)kbox.innerHTML='<div class="tv-leer">Die K.-o.-Bäume erscheinen nach Abschluss der Gruppenphase.</div>';
+  }
+  if(istTv&&daten)window.dispatchEvent(new CustomEvent("dart11en:gruppen-tv-ready"));
+}
 function neuesGruppenTurnier(){
   const namen=teilnehmer.filter(p=>p.anwesend===true).map(spielName).filter(Boolean),anzahl=Number($("gruppenAnzahl").value),aufteilung=$("turnierAufteilung")?.value||"gemeinsam";
   if(namen.length<2){alert("Mindestens zwei anwesende Spieler werden benötigt.");return}
@@ -176,7 +195,7 @@ function neuesGruppenTurnier(){
 
   daten={
     modus:"gruppenko",
-    version:"3.0.2",
+    version:"3.0.3",
     erstellt:Date.now(),
     bestOf:Number($("gruppenBestOf").value),
     anzahlGruppen:anzahl,
@@ -191,10 +210,58 @@ function neuesGruppenTurnier(){
   renderAlles();
 }
 
+let gruppenResetLaeuft=false;
+
+async function gruppenTurnierZuruecksetzen({wechselZuDoppelKo=false, bestaetigen=true}={}){
+  if(bestaetigen&&!confirm(wechselZuDoppelKo
+    ? "Gruppenphase samt Ergebnissen und K.-o.-Bäumen löschen und zu Doppel-K.-o. wechseln? Die Teilnehmer bleiben erhalten."
+    : "Gruppenphase samt Ergebnissen und K.-o.-Bäumen wirklich zurücksetzen? Die Teilnehmer bleiben erhalten.")) return false;
+  gruppenResetLaeuft=true;
+  daten=null;
+  localStorage.removeItem("dart11enV3GruppenKo");
+  entwurfRegeln={ko1:[1,2],ko2:[1,2]};
+  $("gruppenAnzeige")?.replaceChildren();
+  $("gruppenAdminAnzeige")?.replaceChildren();
+  $("gruppenKoAnzeige")?.replaceChildren();
+  try{await deleteDoc(doc(db,"turnierLive","gruppenTurnierV3"))}catch(e){console.error("Gruppenturnier konnte online nicht gelöscht werden:",e)}
+  renderConfig();
+  if(wechselZuDoppelKo){
+    localStorage.setItem("dart11enV3TurnierModus","doppelko");
+    const mode=$("turnierModus");
+    if(mode){mode.value="doppelko";mode.dispatchEvent(new Event("change",{bubbles:true}))}
+  }
+  setTimeout(()=>{gruppenResetLaeuft=false},500);
+  return true;
+}
+
+window.dart11enGruppenReset=gruppenTurnierZuruecksetzen;
+
+function gruppenphaseSimulieren(){
+  if(!istAdmin){alert("Nur Admins können die Simulation starten.");return}
+  if(!daten?.gruppen?.length){alert("Bitte zuerst die Gruppen auslosen.");return}
+  const ziel=siegLegs();
+  let geaendert=0;
+  daten.gruppen.forEach(g=>g.spiele.forEach(m=>{
+    if(matchErgebnis(m))return;
+    const gewinnerA=Math.random()<0.5;
+    const verliererScore=ziel>1?Math.floor(Math.random()*ziel):0;
+    m.scoreA=gewinnerA?ziel:verliererScore;
+    m.scoreB=gewinnerA?verliererScore:ziel;
+    geaendert++;
+  }));
+  daten.koPhasen=[];
+  speichern();
+  renderAlles();
+  alert(`${geaendert} offene Gruppenspiele wurden simuliert. Du kannst jetzt die K.-o.-Phase erstellen.`);
+}
+
 document.addEventListener("DOMContentLoaded",()=>{
   const mode=$("turnierModus"),originalBtn=$("turnierAuslosenBtn");
   originalBtn?.addEventListener("click",e=>{if(mode?.value!=="gruppenko")return;e.stopImmediatePropagation();e.preventDefault();neuesGruppenTurnier()},true);
   $("koErstellenBtn")?.addEventListener("click",koPhasenErstellen);
+  $("gruppenSimulationBtn")?.addEventListener("click",gruppenphaseSimulieren);
+  $("gruppenZuruecksetzenBtn")?.addEventListener("click",()=>gruppenTurnierZuruecksetzen());
+  $("gruppenZuDoppelKoBtn")?.addEventListener("click",()=>gruppenTurnierZuruecksetzen({wechselZuDoppelKo:true}));
   $("gruppenAnzahl")?.addEventListener("change",()=>{if(daten)return;normalisiereRegeln();renderConfig()});
   $("turnierAufteilung")?.addEventListener("change",()=>{const feld=$("turnierAufteilung");feld.dataset.userChanged="1";regelEntwurfSpeichern(feld.value==="getrennt"?{ko1:[1,2],ko2:[1,2]}:{ko1:[1,2],ko2:[3,4]});renderConfig()});
   document.querySelectorAll(".qualifier-presets").forEach(leiste=>leiste.addEventListener("click",e=>{const btn=e.target.closest("button");if(!btn)return;const key=leiste.dataset.target==="ko1Plaetze"?"ko1":"ko2",max=maxGruppenPlaetze();let werte=[];if(btn.dataset.clear)werte=[];else if(btn.dataset.top)werte=Array.from({length:Math.min(max,Number(btn.dataset.top))},(_,i)=>i+1);else if(btn.dataset.from)werte=Array.from({length:Math.max(0,max-Number(btn.dataset.from)+1)},(_,i)=>Number(btn.dataset.from)+i);regelSetzen(key,werte)}));
@@ -202,8 +269,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   $("gruppenBestOf")?.addEventListener("change",()=>{if(!daten)return;daten.bestOf=Number($("gruppenBestOf").value);daten.gruppen.forEach(g=>g.spiele.forEach(m=>{m.scoreA=null;m.scoreB=null}));daten.koPhasen=[];speichern();renderAlles()});
   try{daten=JSON.parse(localStorage.getItem("dart11enV3GruppenKo")||"null")}catch{}
   if(daten){if(!daten.aufteilung)daten.aufteilung="gemeinsam";daten.gruppen?.forEach(g=>{if(!g.turnierId)g.turnierId=1});regelEntwurfSpeichern(daten.regeln);renderAlles()}
-  window.addEventListener("dart11en:v3-reset",event=>{const scope=event.detail?.scope||"active",activeMode=localStorage.getItem("dart11enV3TurnierModus")||"doppelko";if(scope==="active"&&activeMode!=="gruppenko")return;daten=null;localStorage.removeItem("dart11enV3GruppenKo");deleteDoc(doc(db,"turnierLive","gruppenTurnierV3")).catch(console.error);$("gruppenAnzeige")?.replaceChildren();$("gruppenAdminAnzeige")?.replaceChildren();$("gruppenKoAnzeige")?.replaceChildren();renderConfig();});
+  window.addEventListener("dart11en:v3-reset",event=>{const scope=event.detail?.scope||"active",activeMode=localStorage.getItem("dart11enV3TurnierModus")||"doppelko";if(scope==="active"&&activeMode!=="gruppenko")return;gruppenTurnierZuruecksetzen({bestaetigen:false});});
   renderConfig();if(mode){$("doppelKoKonfiguration")?.classList.toggle("modus-versteckt",mode.value==="gruppenko")}if(originalBtn&&mode)originalBtn.textContent=mode.value==="gruppenko"?"🎲 Gruppen auslosen":"🎲 Live-Auslosung starten";
 });
 onSnapshot(collection(db,"warteschlange"),snap=>{teilnehmer=[];snap.forEach(d=>teilnehmer.push({id:d.id,...d.data()}));if(!daten)renderConfig()});
-onSnapshot(doc(db,"turnierLive","gruppenTurnierV3"),snap=>{if(istAdmin&&!istTv)return;if(!snap.exists())return;try{daten=JSON.parse(snap.data().datenJson||"null");if(daten){if(!daten.aufteilung)daten.aufteilung="gemeinsam";localStorage.setItem("dart11enV3GruppenKo",JSON.stringify(daten));renderAlles()}}catch(e){console.error(e)}});
+onSnapshot(doc(db,"turnierLive","gruppenTurnierV3"),snap=>{if(istAdmin&&!istTv)return;if(gruppenResetLaeuft)return;if(!snap.exists()){daten=null;localStorage.removeItem("dart11enV3GruppenKo");return}try{daten=JSON.parse(snap.data().datenJson||"null");if(daten){if(!daten.aufteilung)daten.aufteilung="gemeinsam";localStorage.setItem("dart11enV3GruppenKo",JSON.stringify(daten));renderAlles()}}catch(e){console.error(e)}});
