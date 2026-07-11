@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function ergebnisVon(match) {
     if (!match?.a && !match?.b) return null;
-    if (match.a === "Freilos" && match.b === "Freilos") return { gewinner: null, verlierer: "Freilos" };
+    if (match.a === "Freilos" && match.b === "Freilos") return { gewinner: "Freilos", verlierer: "Freilos" };
     if (match.a === "Freilos" && match.b) return { gewinner: match.b, verlierer: "Freilos" };
     if (match.b === "Freilos" && match.a) return { gewinner: match.a, verlierer: "Freilos" };
     if (!match.a || !match.b) return null;
