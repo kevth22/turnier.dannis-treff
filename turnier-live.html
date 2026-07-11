@@ -7,9 +7,9 @@
   <title>Dart11en | Turnier-Center</title>
 
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="turnier-live.css?v=13">
+  <link rel="stylesheet" href="turnier-live-v3.css?v=300">
   <link rel="stylesheet" href="turnier-tv-fit.css?v=10">
-  <link rel="stylesheet" href="gruppen-turnier.css?v=25">
+  <link rel="stylesheet" href="gruppen-turnier-v3.css?v=302">
   <link rel="manifest" href="manifest.json">
 
   <meta name="theme-color" content="#e00022">
@@ -214,7 +214,7 @@
   <!-- Turnierauslosung -->
   <section id="auslosungBereich" class="content-card admin-only">
 
-    <div class="v2-title-row"><h2>🎲 Turnier auslosen</h2><span class="v2-badge">VERSION 2.5</span></div>
+    <div class="v2-title-row"><h2>🎲 Turnier auslosen</h2><span class="v2-badge">VERSION 3.0.5 – LIVE-EINBAU</span></div>
 
     <p class="section-text">
       Spieler werden zufällig gelost. Freilose werden fair verteilt und dürfen nicht gegeneinander spielen.
@@ -239,7 +239,7 @@
         <div class="qualifier-head">
           <h4 id="ko1Titel">K.-o.-Baum 1</h4>
           <label class="ko-modus-label">Modus
-            <select id="ko1Modus"><option value="einfach" selected>Einfach-K.-o.</option><option value="doppel" disabled>Doppel-K.-o. (folgt)</option></select>
+            <select id="ko1Modus"><option value="einfach" selected>Einfach-K.-o.</option><option value="doppel" disabled>Doppel-K.-o. nach Gruppen (noch nicht eingebaut)</option></select>
           </label>
         </div>
         <p class="qualifier-hint">Welche Platzierungen sollen in diesen Baum einziehen?</p>
@@ -252,7 +252,7 @@
         <div class="qualifier-head">
           <h4 id="ko2Titel">K.-o.-Baum 2</h4>
           <label class="ko-modus-label">Modus
-            <select id="ko2Modus"><option value="einfach" selected>Einfach-K.-o.</option><option value="doppel" disabled>Doppel-K.-o. (folgt)</option></select>
+            <select id="ko2Modus"><option value="einfach" selected>Einfach-K.-o.</option><option value="doppel" disabled>Doppel-K.-o. nach Gruppen (noch nicht eingebaut)</option></select>
           </label>
         </div>
         <p class="qualifier-hint">Welche Platzierungen sollen in diesen Baum einziehen?</p>
@@ -262,6 +262,10 @@
         <div id="ko2Plaetze" class="qualifier-options"></div>
       </div>
       <p id="gruppenRegelHinweis" class="section-text">Eine Platzierung kann nur einem K.-o.-Baum zugeordnet werden.</p>
+      <div class="gruppen-reset-aktionen admin-only">
+        <button id="gruppenZuruecksetzenBtn" class="main-button reset-turnier-button" type="button">🔄 Gruppenphase zurücksetzen</button>
+        <button id="gruppenZuDoppelKoBtn" class="main-button secondary-button" type="button">↩ Gruppenphase beenden und zu Doppel-K.-o. wechseln</button>
+      </div>
     </div>
 
     <div id="doppelKoKonfiguration" class="doppelko-config">
@@ -296,9 +300,15 @@
       🎲 Live-Auslosung starten
     </button>
 
-    <button id="turnierZuruecksetzenBtn" class="main-button reset-turnier-button" type="button">
-      Turnierbaum zurücksetzen
-    </button>
+    <div class="v3-turnier-aktionen">
+      <button id="turnierZuruecksetzenBtn" class="main-button reset-turnier-button" type="button">
+        🔄 Aktiven Modus zurücksetzen
+      </button>
+      <button id="neuesTurnierBtn" class="main-button v3-danger-button" type="button">
+        🗑 Neues Turnier
+      </button>
+    </div>
+    <p id="v3StatusHinweis" class="section-text v3-status-hinweis">Jeder Modus besitzt einen eigenen Speicherstand.</p>
 
     <div id="auslosungAnimation" class="turnier-output"></div>
 
@@ -341,6 +351,11 @@
       <small id="ergebnisZurueckInfo">Noch keine Änderung zum Zurücknehmen.</small>
     </div>
 
+    <button id="gruppenSimulationBtn" class="main-button secondary-button modus-versteckt" type="button">
+      🧪 Gruppenphase simulieren
+    </button>
+    <p id="gruppenSimulationHinweis" class="section-text modus-versteckt">Füllt nur offene Gruppenspiele mit gültigen Testergebnissen. Bereits eingetragene Ergebnisse bleiben erhalten.</p>
+
     <div id="spieleListe" class="turnier-output"></div>
 
   </section>
@@ -354,7 +369,7 @@
       Öffnet die Live-Ansicht für euren zweiten Monitor im Dannis Treff.
     </p>
 
-    <a href="turnier-live.html?tv=true" class="main-button" target="_blank" rel="noopener">
+    <a id="tvAnsichtLink" href="turnier-live-v3.html?tv=true&mode=doppelko" class="main-button" target="_blank" rel="noopener">
       📺 TV-Ansicht öffnen
     </a>
 
@@ -479,8 +494,9 @@
   <a href="kader.html">👥<br>Kader</a>
 </nav>
 
-<script type="module" src="turnier-live.js?v=25"></script>
-<script type="module" src="gruppen-turnier.js?v=25"></script>
+<script type="module" src="turnier-v3-manager.js?v=305"></script>
+<script type="module" src="turnier-live-v3.js?v=305"></script>
+<script type="module" src="gruppen-turnier-v3.js?v=305"></script>
 <script src="turnier-tv-fit.js?v=11" defer></script>
 <script src="pwa.js" defer></script>
 

@@ -14,7 +14,7 @@ function aktiveAnsichtSetzen(mode) {
   $("gruppenSimulationBtn")?.classList.toggle("modus-versteckt", !gruppen);
   $("gruppenSimulationHinweis")?.classList.toggle("modus-versteckt", !gruppen);
   const tvLink = $("tvAnsichtLink");
-  if (tvLink) tvLink.href = `turnier-live-v3.html?tv=true&mode=${gruppen ? "gruppenko" : "doppelko"}`;
+  if (tvLink) tvLink.href = `turnier-live.html?tv=true&mode=${gruppen ? "gruppenko" : "doppelko"}`;
   const hint = $("v3StatusHinweis");
   if (hint) hint.textContent = gruppen
     ? "Aktiv: Gruppenphase + K.-o. Der Doppel-K.-o.-Stand bleibt getrennt gespeichert."
