@@ -2,7 +2,7 @@
   const istTv = new URLSearchParams(window.location.search).get("tv") === "true";
   if (!istTv) return;
 
-  const SLIDE_DAUER = 10000;
+  const SLIDE_DAUER = 15000;
   let skalierungGeplant = false;
   let kameraFrame = null;
   const kameraDaten = new Map();
