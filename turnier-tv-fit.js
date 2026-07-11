@@ -17,10 +17,9 @@
       ? [
           { p: 0.00, x: 0, y: 0 },
           { p: 0.14, x: 0, y: 0 },
-          { p: 0.62, x: 0, y: maxTop },
-          { p: 0.78, x: maxLeft, y: maxTop },
-          { p: 0.92, x: maxLeft, y: Math.max(0, maxTop * .35) },
-          { p: 1.00, x: maxLeft, y: Math.max(0, maxTop * .35) }
+          { p: 0.60, x: 0, y: maxTop },
+          { p: 0.82, x: maxLeft, y: maxTop },
+          { p: 1.00, x: maxLeft, y: maxTop }
         ]
       : [
           { p: 0.00, x: 0, y: 0 },
@@ -83,7 +82,14 @@
       const sichtbareBreite = box.width / scale;
       const sichtbareHoehe = box.height / scale;
       const maxLeft = Math.max(0, breite - sichtbareBreite);
-      const maxTop = Math.max(0, hoehe - sichtbareHoehe);
+
+      // Zusätzlicher Sicherheitsabstand unten, damit die letzte Partie vollständig
+      // sichtbar wird. Ohne diesen Puffer kann der Rahmen am unteren Rand durch
+      // Rundungen, Grid-Gaps oder nachträglich geladene Inhalte abgeschnitten wirken.
+      const untererPuffer = 90 / scale;
+      const theoretischesMaxTop = Math.max(0, hoehe - sichtbareHoehe + untererPuffer);
+      const browserMaxTop = Math.max(0, container.scrollHeight - container.clientHeight);
+      const maxTop = Math.min(theoretischesMaxTop, browserMaxTop);
 
       container.classList.toggle("braucht-kamera", maxLeft > 8 || maxTop > 8);
       if (maxLeft > 8 || maxTop > 8) kameraNeuStarten(container, maxLeft, maxTop);

@@ -16,6 +16,8 @@
   min-width: calc(100% / var(--tv-scale)) !important;
   height: max-content !important;
   min-height: calc(100% / var(--tv-scale));
+  padding-bottom: calc(90px / var(--tv-scale));
+  box-sizing: border-box;
   transform: scale(var(--tv-scale));
   transform-origin: top left;
 }
