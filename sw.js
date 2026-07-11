@@ -1,7 +1,7 @@
-const VERSION = 'dart11en-v32';
+const VERSION = 'dart11en-v33';
 const APP_SHELL = [
   './', './index.html', './style.css', './pwa.js', './manifest.json',
-  './turniere.html', './turnier-live.html', './turnier-live.css',
+  './turniere.html', './turnier-live.html', './turnier-live.css', './turnier-tv-fit.css', './turnier-tv-fit.js',
   './liga.html', './kalender.html', './kader.html', './spieltag-center.html',
   './dart11enlogo.png', './icon-192.png', './icon-512.png', './offline.html'
 ];

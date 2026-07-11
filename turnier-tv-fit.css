@@ -1,0 +1,78 @@
+.tv-bracket {
+  overflow: hidden;
+  padding: clamp(8px, .9vw, 16px);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(0,71,171,.14), transparent 34%),
+    linear-gradient(145deg, rgba(7,9,14,.72), rgba(3,4,8,.92));
+  --tv-scale: 1;
+  --tv-round-width: 182px;
+}
+
+.tv-bracket-grid {
+  grid-template-columns: repeat(var(--tv-rounds), var(--tv-round-width)) !important;
+  width: max-content;
+  min-width: 100%;
+  min-height: 100%;
+  height: auto !important;
+  transform: scale(var(--tv-scale));
+  transform-origin: top left;
+  transition: transform .35s ease;
+}
+
+.tv-bracket-round {
+  grid-template-rows: auto auto !important;
+}
+
+.tv-bracket-matches {
+  justify-content: flex-start !important;
+}
+
+.tv-bracket.dichte-kompakt { --tv-round-width: 158px; }
+.tv-bracket.dichte-sehr-kompakt { --tv-round-width: 132px; }
+
+.tv-bracket.dichte-kompakt .tv-bracket-round,
+.tv-bracket.dichte-sehr-kompakt .tv-bracket-round {
+  padding: 7px;
+  border-radius: 12px;
+}
+
+.tv-bracket.dichte-kompakt .tv-bracket-round > h3,
+.tv-bracket.dichte-sehr-kompakt .tv-bracket-round > h3 {
+  margin-bottom: 5px;
+  padding-bottom: 6px;
+  font-size: clamp(8px, .75vw, 13px);
+}
+
+.tv-bracket.dichte-kompakt .tv-bracket-round > h3 small,
+.tv-bracket.dichte-sehr-kompakt .tv-bracket-round > h3 small {
+  min-width: 20px;
+  height: 20px;
+}
+
+.tv-bracket.dichte-kompakt .tv-bracket-matches,
+.tv-bracket.dichte-sehr-kompakt .tv-bracket-matches {
+  gap: 4px;
+}
+
+.tv-bracket.dichte-kompakt .tv-bracket-match,
+.tv-bracket.dichte-sehr-kompakt .tv-bracket-match {
+  border-radius: 8px;
+}
+
+.tv-bracket.dichte-kompakt .tv-bracket-match > small,
+.tv-bracket.dichte-sehr-kompakt .tv-bracket-match > small {
+  padding: 2px 5px;
+  font-size: clamp(6px, .55vw, 9px);
+}
+
+.tv-bracket.dichte-kompakt .tv-bracket-player,
+.tv-bracket.dichte-sehr-kompakt .tv-bracket-player {
+  padding: 2px 5px;
+  font-size: clamp(7px, .72vw, 12px);
+}
+
+.tv-bracket.dichte-sehr-kompakt .tv-bracket-player b {
+  font-size: .9em;
+}
