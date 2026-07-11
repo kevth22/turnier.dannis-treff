@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="turnier-live.css?v=13">
   <link rel="stylesheet" href="turnier-tv-fit.css?v=10">
-  <link rel="stylesheet" href="gruppen-turnier.css?v=22">
+  <link rel="stylesheet" href="gruppen-turnier.css?v=24">
   <link rel="manifest" href="manifest.json">
 
   <meta name="theme-color" content="#e00022">
@@ -214,7 +214,7 @@
   <!-- Turnierauslosung -->
   <section id="auslosungBereich" class="content-card admin-only">
 
-    <div class="v2-title-row"><h2>🎲 Turnier auslosen</h2><span class="v2-badge">VERSION 2.2</span></div>
+    <div class="v2-title-row"><h2>🎲 Turnier auslosen</h2><span class="v2-badge">VERSION 2.4</span></div>
 
     <p class="section-text">
       Spieler werden zufällig gelost. Freilose werden fair verteilt und dürfen nicht gegeneinander spielen.
@@ -231,12 +231,13 @@
     <div id="gruppenKonfiguration" class="gruppen-config modus-versteckt">
       <div class="gruppen-config-grid">
         <label>Anzahl Gruppen<select id="gruppenAnzahl"><option value="1">1 Gruppe</option><option value="2">2 Gruppen</option><option value="3">3 Gruppen</option><option value="4" selected>4 Gruppen</option><option value="5">5 Gruppen</option><option value="6">6 Gruppen</option><option value="7">7 Gruppen</option><option value="8">8 Gruppen</option></select></label>
-        <label>Anzahl K.-o.-Bäume<select id="koAnzahl"><option value="1">1 Baum</option><option value="2" selected>2 Bäume</option></select></label>
+        <label>Turnieraufteilung<select id="turnierAufteilung"><option value="gemeinsam">Alle Gruppen gemeinsam</option><option value="getrennt" selected>Zwei getrennte Turniere</option></select></label>
+        <label id="koAnzahlZeile">Anzahl K.-o.-Bäume<select id="koAnzahl"><option value="1">1 Baum</option><option value="2" selected>2 Bäume</option></select></label>
         <label>Gruppenspiele<select id="gruppenBestOf"><option value="1">Best of 1</option><option value="3" selected>Best of 3</option><option value="5">Best of 5</option></select></label>
       </div>
       <div class="qualifier-box">
         <div class="qualifier-head">
-          <h4>K.-o.-Baum 1</h4>
+          <h4 id="ko1Titel">K.-o.-Baum 1</h4>
           <label class="ko-modus-label">Modus
             <select id="ko1Modus"><option value="einfach" selected>Einfach-K.-o.</option><option value="doppel" disabled>Doppel-K.-o. (folgt)</option></select>
           </label>
@@ -249,7 +250,7 @@
       </div>
       <div id="ko2RegelBox" class="qualifier-box">
         <div class="qualifier-head">
-          <h4>K.-o.-Baum 2</h4>
+          <h4 id="ko2Titel">K.-o.-Baum 2</h4>
           <label class="ko-modus-label">Modus
             <select id="ko2Modus"><option value="einfach" selected>Einfach-K.-o.</option><option value="doppel" disabled>Doppel-K.-o. (folgt)</option></select>
           </label>
@@ -260,7 +261,7 @@
         </div>
         <div id="ko2Plaetze" class="qualifier-options"></div>
       </div>
-      <p class="section-text">Eine Platzierung kann nur einem K.-o.-Baum zugeordnet werden. Es werden automatisch nur so viele Plätze angezeigt, wie eine Gruppe höchstens Spieler hat.</p>
+      <p id="gruppenRegelHinweis" class="section-text">Eine Platzierung kann nur einem K.-o.-Baum zugeordnet werden.</p>
     </div>
 
     <div id="doppelKoKonfiguration" class="doppelko-config">
@@ -479,7 +480,7 @@
 </nav>
 
 <script type="module" src="turnier-live.js?v=25"></script>
-<script type="module" src="gruppen-turnier.js?v=22"></script>
+<script type="module" src="gruppen-turnier.js?v=24"></script>
 <script src="turnier-tv-fit.js?v=11" defer></script>
 <script src="pwa.js" defer></script>
 
