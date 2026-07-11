@@ -1,3 +1,4 @@
+window.__dart11enV3ManagerAktiv = true;
 const MODE_KEY = "dart11enV3TurnierModus";
 
 function $(id) { return document.getElementById(id); }
@@ -22,7 +23,9 @@ function resetAusloesen(scope) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const mode = $("turnierModus");
-  const gespeichert = localStorage.getItem(MODE_KEY) || "doppelko";
+  const roh = localStorage.getItem(MODE_KEY);
+  const gespeichert = roh === "gruppenko" ? "gruppenko" : "doppelko";
+  localStorage.setItem(MODE_KEY, gespeichert);
   if (mode) mode.value = gespeichert;
   aktiveAnsichtSetzen(gespeichert);
 
@@ -32,8 +35,8 @@ document.addEventListener("DOMContentLoaded", () => {
     aktiveAnsichtSetzen(wert);
     window.dispatchEvent(new CustomEvent("dart11en:v3-mode", { detail: { mode: wert } }));
   };
-  mode?.addEventListener("input", modusWechseln, true);
-  mode?.addEventListener("change", modusWechseln, true);
+  mode?.addEventListener("change", modusWechseln);
+  mode?.addEventListener("input", modusWechseln);
 
   $("turnierZuruecksetzenBtn")?.addEventListener("click", event => {
     event.preventDefault();

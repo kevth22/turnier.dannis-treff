@@ -999,6 +999,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   turnierAuslosenBtn?.addEventListener("click", () => {
+    if ((localStorage.getItem("dart11enV3TurnierModus") || "doppelko") !== "doppelko") return;
     if (!istAdmin) return;
     const namen = letzteTeilnehmer.filter(p => p.anwesend === true).map(p => p.nickname || [p.vorname, p.nachname].filter(Boolean).join(" ")).filter(Boolean);
     if (namen.length < 2) { alert("Mindestens zwei anwesende Personen werden für die Auslosung benötigt."); return; }
@@ -1009,6 +1010,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   turnierZuruecksetzenBtn?.addEventListener("click", () => {
+    if (window.__dart11enV3ManagerAktiv) return;
     if (!istAdmin) return;
     if (!confirm("Turnierbaum und alle Ergebnisse wirklich zurücksetzen?")) return;
 

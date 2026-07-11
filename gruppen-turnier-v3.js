@@ -12,7 +12,9 @@ try{istAdmin=(JSON.parse(localStorage.getItem("dart11enLogin")||"null")?.rolle||
 let teilnehmer=[];
 let daten=null;
 let speicherTimer=null;
+const REGEL_ENTWURF_KEY="dart11enV3GruppenRegelnEntwurf";
 let entwurfRegeln={ko1:[1,2],ko2:[1,2]};
+try{const gespeichert=JSON.parse(localStorage.getItem(REGEL_ENTWURF_KEY)||"null");if(gespeichert?.ko1&&gespeichert?.ko2)entwurfRegeln=gespeichert}catch{}
 
 function spielName(p){return p.nickname||[p.vorname,p.nachname].filter(Boolean).join(" ")}
 function mischen(a){const x=[...a];for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]]}return x}
@@ -80,6 +82,7 @@ function speichern(){localStorage.setItem("dart11enV3GruppenKo",JSON.stringify(d
 function scoreSelect(wert,onchange){const s=document.createElement("select");s.innerHTML='<option value="">–</option>'+Array.from({length:siegLegs()+1},(_,i)=>`<option value="${i}">${i}</option>`).join("");s.value=wert??"";s.onchange=()=>onchange(s.value===""?null:Number(s.value));return s}
 function maxGruppenPlaetze(){if(daten?.gruppen?.length)return Math.max(1,...daten.gruppen.map(g=>g.spieler.length));const gruppen=Math.max(1,Number($("gruppenAnzahl")?.value||1));const anwesend=teilnehmer.filter(p=>p.anwesend===true).length;return Math.max(1,Math.min(8,Math.ceil(Math.max(anwesend,2)/gruppen)))}
 function regelQuelle(){return daten?.regeln||entwurfRegeln}
+function regelEntwurfSpeichern(regeln=regelQuelle()){entwurfRegeln=clone(regeln);localStorage.setItem(REGEL_ENTWURF_KEY,JSON.stringify(entwurfRegeln))}
 function aktuelleAufteilung(){return $("turnierAufteilung")?.value||daten?.aufteilung||"gemeinsam"}
 function normalisiereRegeln(){
   const ziel=regelQuelle(),max=maxGruppenPlaetze();
@@ -95,7 +98,7 @@ function regelSetzen(key,werte){
   // Die sichtbare Auswahl ist zugleich der Entwurf für die nächste Auslosung.
   // Vorher wurden Änderungen nur in einem bereits vorhandenen Turnier gespeichert;
   // beim erneuten Auslosen griff der Code wieder auf [1, 2] zurück.
-  entwurfRegeln=clone(ziel);
+  regelEntwurfSpeichern(ziel);
 
   if(daten){
     daten.regeln=clone(ziel);
@@ -110,7 +113,7 @@ function regelOptionen(box,key){
   for(let p=1;p<=max;p++){const l=document.createElement("label"),c=document.createElement("input"),t=document.createElement("span");c.type="checkbox";c.checked=quelle[key]?.includes(p)||false;t.textContent=`Platz ${p}`;l.classList.toggle("is-selected",c.checked);c.onchange=()=>{const arr=new Set(regelQuelle()[key]||[]);c.checked?arr.add(p):arr.delete(p);regelSetzen(key,[...arr])};l.append(c,t);box.append(l)}
 }
 function renderConfig(){
-  const mode=$("turnierModus");if(mode)mode.value=localStorage.getItem("dart11enV3TurnierModus")||"doppelko";
+  const mode=$("turnierModus");
   const panel=$("gruppenKonfiguration");panel?.classList.toggle("modus-versteckt",mode?.value!=="gruppenko");
   $("doppelKoKonfiguration")?.classList.toggle("modus-versteckt",mode?.value==="gruppenko");
   if(daten){$("gruppenAnzahl").value=daten.anzahlGruppen;$("koAnzahl").value=daten.anzahlKo;$("gruppenBestOf").value=daten.bestOf;const aufteilungFeld=$("turnierAufteilung");if(aufteilungFeld&&!aufteilungFeld.dataset.userChanged)aufteilungFeld.value=daten.aufteilung||"gemeinsam"}
@@ -153,23 +156,35 @@ function neuesGruppenTurnier(){
   if(anzahl>namen.length){alert("Es können nicht mehr Gruppen als Spieler erstellt werden.");return}
   if(aufteilung==="getrennt"&&anzahl<2){alert("Für zwei getrennte Turniere werden mindestens zwei Gruppen benötigt.");return}
 
-  // Immer die aktuell sichtbare Auswahl übernehmen – auch wenn bereits ein
-  // Gruppenturnier existiert. So bleiben z. B. Platz 1–4 beim Neuauslosen erhalten.
-  normalisiereRegeln();
-  const aktuelleRegeln=clone(regelQuelle());
-  entwurfRegeln=clone(aktuelleRegeln);
+  // Die Auswahl direkt aus den sichtbaren Checkboxen lesen. Dadurch kann ein
+  // alter Speicherstand die gerade gewählten Platzierungen nicht überschreiben.
+  const checkboxWerte=id=>[...document.querySelectorAll(`#${id} input[type="checkbox"]:checked`)]
+    .map(input=>Number(input.closest("label")?.textContent?.match(/\d+/)?.[0]))
+    .filter(Number.isFinite);
+  const aktuelleRegeln={ko1:checkboxWerte("ko1Plaetze"),ko2:checkboxWerte("ko2Plaetze")};
+  if(!aktuelleRegeln.ko1.length){alert("Bitte für Turnier 1 mindestens eine Platzierung auswählen.");return}
+  if(aufteilung==="getrennt"&&!aktuelleRegeln.ko2.length){alert("Bitte für Turnier 2 mindestens eine Platzierung auswählen.");return}
+  regelEntwurfSpeichern(aktuelleRegeln);
+
+  const neueGruppen=gruppenErstellen(namen,anzahl,aufteilung);
+  const maxPlatz=Math.max(...neueGruppen.map(g=>g.spieler.length));
+  const ungueltig=[...aktuelleRegeln.ko1,...aktuelleRegeln.ko2].filter(p=>p>maxPlatz);
+  if(ungueltig.length){
+    alert(`Die Gruppen haben höchstens ${maxPlatz} Spieler. Deshalb sind nur Platz 1 bis ${maxPlatz} möglich. Die Auswahl wurde nicht verändert.`);
+    return;
+  }
 
   daten={
     modus:"gruppenko",
-    version:"3.0.1",
+    version:"3.0.2",
     erstellt:Date.now(),
     bestOf:Number($("gruppenBestOf").value),
     anzahlGruppen:anzahl,
     aufteilung,
     anzahlKo:aufteilung==="getrennt"?2:Number($("koAnzahl").value),
     koModi:{ko1:"einfach",ko2:"einfach"},
-    regeln:aktuelleRegeln,
-    gruppen:gruppenErstellen(namen,anzahl,aufteilung),
+    regeln:clone(aktuelleRegeln),
+    gruppen:neueGruppen,
     koPhasen:[]
   };
   speichern();
@@ -178,26 +193,15 @@ function neuesGruppenTurnier(){
 
 document.addEventListener("DOMContentLoaded",()=>{
   const mode=$("turnierModus"),originalBtn=$("turnierAuslosenBtn");
-  const modusAnzeigeAktualisieren=()=>{
-    const wert=mode?.value||"doppelko";
-    localStorage.setItem("dart11enV3TurnierModus",wert);
-    $("gruppenKonfiguration")?.classList.toggle("modus-versteckt",wert!=="gruppenko");
-    $("doppelKoKonfiguration")?.classList.toggle("modus-versteckt",wert==="gruppenko");
-    $("gruppenBereich")?.classList.toggle("modus-versteckt",wert!=="gruppenko");
-    $("turnierBaumBereich")?.classList.toggle("modus-versteckt",wert==="gruppenko");
-    if(originalBtn)originalBtn.textContent=wert==="gruppenko"?"🎲 Gruppen auslosen":"🎲 Live-Auslosung starten";
-  };
-  mode?.addEventListener("input",modusAnzeigeAktualisieren);
-  mode?.addEventListener("change",modusAnzeigeAktualisieren);
   originalBtn?.addEventListener("click",e=>{if(mode?.value!=="gruppenko")return;e.stopImmediatePropagation();e.preventDefault();neuesGruppenTurnier()},true);
   $("koErstellenBtn")?.addEventListener("click",koPhasenErstellen);
   $("gruppenAnzahl")?.addEventListener("change",()=>{if(daten)return;normalisiereRegeln();renderConfig()});
-  $("turnierAufteilung")?.addEventListener("change",()=>{const feld=$("turnierAufteilung");feld.dataset.userChanged="1";entwurfRegeln=feld.value==="getrennt"?{ko1:[1,2],ko2:[1,2]}:{ko1:[1,2],ko2:[3,4]};renderConfig()});
+  $("turnierAufteilung")?.addEventListener("change",()=>{const feld=$("turnierAufteilung");feld.dataset.userChanged="1";regelEntwurfSpeichern(feld.value==="getrennt"?{ko1:[1,2],ko2:[1,2]}:{ko1:[1,2],ko2:[3,4]});renderConfig()});
   document.querySelectorAll(".qualifier-presets").forEach(leiste=>leiste.addEventListener("click",e=>{const btn=e.target.closest("button");if(!btn)return;const key=leiste.dataset.target==="ko1Plaetze"?"ko1":"ko2",max=maxGruppenPlaetze();let werte=[];if(btn.dataset.clear)werte=[];else if(btn.dataset.top)werte=Array.from({length:Math.min(max,Number(btn.dataset.top))},(_,i)=>i+1);else if(btn.dataset.from)werte=Array.from({length:Math.max(0,max-Number(btn.dataset.from)+1)},(_,i)=>Number(btn.dataset.from)+i);regelSetzen(key,werte)}));
   $("koAnzahl")?.addEventListener("change",()=>{if(!daten)return;daten.anzahlKo=Number($("koAnzahl").value);daten.koPhasen=[];speichern();renderAlles()});
   $("gruppenBestOf")?.addEventListener("change",()=>{if(!daten)return;daten.bestOf=Number($("gruppenBestOf").value);daten.gruppen.forEach(g=>g.spiele.forEach(m=>{m.scoreA=null;m.scoreB=null}));daten.koPhasen=[];speichern();renderAlles()});
   try{daten=JSON.parse(localStorage.getItem("dart11enV3GruppenKo")||"null")}catch{}
-  if(daten){if(!daten.aufteilung)daten.aufteilung="gemeinsam";daten.gruppen?.forEach(g=>{if(!g.turnierId)g.turnierId=1});entwurfRegeln=clone(daten.regeln);renderAlles()}
+  if(daten){if(!daten.aufteilung)daten.aufteilung="gemeinsam";daten.gruppen?.forEach(g=>{if(!g.turnierId)g.turnierId=1});regelEntwurfSpeichern(daten.regeln);renderAlles()}
   window.addEventListener("dart11en:v3-reset",event=>{const scope=event.detail?.scope||"active",activeMode=localStorage.getItem("dart11enV3TurnierModus")||"doppelko";if(scope==="active"&&activeMode!=="gruppenko")return;daten=null;localStorage.removeItem("dart11enV3GruppenKo");deleteDoc(doc(db,"turnierLive","gruppenTurnierV3")).catch(console.error);$("gruppenAnzeige")?.replaceChildren();$("gruppenAdminAnzeige")?.replaceChildren();$("gruppenKoAnzeige")?.replaceChildren();renderConfig();});
   renderConfig();if(mode){$("doppelKoKonfiguration")?.classList.toggle("modus-versteckt",mode.value==="gruppenko")}if(originalBtn&&mode)originalBtn.textContent=mode.value==="gruppenko"?"🎲 Gruppen auslosen":"🎲 Live-Auslosung starten";
 });
