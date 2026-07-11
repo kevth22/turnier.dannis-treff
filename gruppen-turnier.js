@@ -50,7 +50,8 @@ function regelOptionen(box,key){
   for(let p=1;p<=max;p++){
     const l=document.createElement("label"),c=document.createElement("input"),t=document.createElement("span");
     c.type="checkbox";c.checked=quelle[key]?.includes(p)||false;t.textContent=`Platz ${p}`;
-    c.onchange=()=>{const arr=new Set(regelQuelle()[key]||[]);c.checked?arr.add(p):arr.delete(p);regelSetzen(key,[...arr])};
+    l.classList.toggle("is-selected",c.checked);
+    c.onchange=()=>{l.classList.toggle("is-selected",c.checked);const arr=new Set(regelQuelle()[key]||[]);c.checked?arr.add(p):arr.delete(p);regelSetzen(key,[...arr])};
     l.append(c,t);box.append(l)
   }
 }
