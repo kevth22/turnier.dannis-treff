@@ -13,6 +13,15 @@ function aktiveAnsichtSetzen(mode) {
   if (draw) draw.textContent = gruppen ? "🎲 Gruppen auslosen" : "🎲 Live-Auslosung starten";
   $("gruppenSimulationBtn")?.classList.toggle("modus-versteckt", !gruppen);
   $("gruppenSimulationHinweis")?.classList.toggle("modus-versteckt", !gruppen);
+  $("gruppenErgebnisAnzeige")?.classList.toggle("modus-versteckt", !gruppen);
+
+  // In der Gruppenphase darf der Ergebnisbereich nicht weiterhin die
+  // gespeicherten Doppel-K.-o.-Partien anzeigen. Genau dadurch wirkten die
+  // Paarungen nach einer Gruppensimulation falsch.
+  $("spieleListe")?.classList.toggle("modus-versteckt", gruppen);
+  document.querySelector("#ergebnisBereich .match-format-control")?.classList.toggle("modus-versteckt", gruppen);
+  document.querySelector("#ergebnisBereich .board-control")?.classList.toggle("modus-versteckt", gruppen);
+  document.querySelector("#ergebnisBereich .ergebnis-werkzeuge")?.classList.toggle("modus-versteckt", gruppen);
   const tvLink = $("tvAnsichtLink");
   if (tvLink) tvLink.href = `turnier-live.html?tv=true&mode=${gruppen ? "gruppenko" : "doppelko"}`;
   const hint = $("v3StatusHinweis");

@@ -146,6 +146,13 @@ function renderAlles(){
   if(!daten||daten.modus!=="gruppenko")return;renderConfig();$("gruppenBereich")?.classList.remove("modus-versteckt");
   const pub=$("gruppenAnzeige");if(pub){pub.replaceChildren();daten.gruppen.forEach(g=>pub.append(renderGruppe(g,false)))}
   const adm=$("gruppenAdminAnzeige");if(adm){adm.replaceChildren();if(istAdmin)daten.gruppen.forEach(g=>adm.append(renderGruppe(g,true)))}
+  // Eigene Ergebnisliste für die Gruppenphase. Die allgemeine #spieleListe
+  // gehört ausschließlich zum Doppel-K.-o.-Modus.
+  const gruppenErgebnisse=$("gruppenErgebnisAnzeige");
+  if(gruppenErgebnisse){
+    gruppenErgebnisse.replaceChildren();
+    if(istAdmin)daten.gruppen.forEach(g=>gruppenErgebnisse.append(renderGruppe(g,true)));
+  }
   const ko=$("gruppenKoAnzeige");if(ko){ko.replaceChildren();daten.koPhasen?.forEach(k=>ko.append(renderKo(k,istAdmin)));if(!daten.koPhasen?.length)ko.innerHTML='<p class="section-text">Die K.-o.-Phasen werden nach Abschluss der Gruppenphase erstellt.</p>'}
   const btn=$("koErstellenBtn");if(btn){btn.disabled=!alleGruppenFertig();btn.textContent=alleGruppenFertig()?(daten.aufteilung==="getrennt"?"Beide K.-o.-Phasen erstellen":"K.-o.-Phase erstellen"):"Erst alle Gruppenspiele abschließen"}renderTv();
 }
@@ -195,7 +202,7 @@ function neuesGruppenTurnier(){
 
   daten={
     modus:"gruppenko",
-    version:"3.0.3",
+    version:"3.0.6",
     erstellt:Date.now(),
     bestOf:Number($("gruppenBestOf").value),
     anzahlGruppen:anzahl,
