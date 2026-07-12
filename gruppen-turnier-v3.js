@@ -179,7 +179,6 @@ function renderKo(ko,admin=false){
 function renderAlles(){
   if(!daten||daten.modus!=="gruppenko")return;gruppenBoardsVerteilen();renderConfig();$("gruppenBereich")?.classList.remove("modus-versteckt");
   const pub=$("gruppenAnzeige");if(pub){pub.replaceChildren();daten.gruppen.forEach(g=>pub.append(renderGruppe(g,false)))}
-  const adm=$("gruppenAdminAnzeige");if(adm){adm.replaceChildren();if(istAdmin)daten.gruppen.forEach(g=>adm.append(renderGruppe(g,true)))}
   // Eigene Ergebnisliste für die Gruppenphase. Die allgemeine #spieleListe
   // gehört ausschließlich zum Doppel-K.-o.-Modus.
   const gruppenErgebnisse=$("gruppenErgebnisAnzeige");
@@ -257,7 +256,7 @@ function neuesGruppenTurnier(){
 
   daten={
     modus:"gruppenko",
-    version:"3.0.8",
+    version:"3.1.0",
     erstellt:Date.now(),
     bestOf:Number($("gruppenBestOf").value),
     anzahlGruppen:anzahl,
@@ -285,6 +284,7 @@ async function gruppenTurnierZuruecksetzen({wechselZuDoppelKo=false, bestaetigen
   entwurfRegeln={ko1:[1,2],ko2:[1,2]};
   $("gruppenAnzeige")?.replaceChildren();
   $("gruppenAdminAnzeige")?.replaceChildren();
+  $("gruppenErgebnisAnzeige")?.replaceChildren();
   $("gruppenKoAnzeige")?.replaceChildren();
   try{await deleteDoc(doc(db,"turnierLive","gruppenTurnierV3"))}catch(e){console.error("Gruppenturnier konnte online nicht gelöscht werden:",e)}
   renderConfig();
@@ -334,7 +334,11 @@ document.addEventListener("DOMContentLoaded",()=>{
   if(daten){if(!daten.aufteilung)daten.aufteilung="gemeinsam";daten.gruppen?.forEach(g=>{if(!g.turnierId)g.turnierId=1});regelEntwurfSpeichern(daten.regeln);renderAlles()}
   window.addEventListener("dart11en:v3-reset",event=>{const scope=event.detail?.scope||"active",activeMode=localStorage.getItem("dart11enV3TurnierModus")||"doppelko";if(scope==="active"&&activeMode!=="gruppenko")return;gruppenTurnierZuruecksetzen({bestaetigen:false});});
   window.addEventListener("storage",event=>{if(event.key==="dart11enV3BoardAnzahl"&&daten){gruppenBoardsVerteilen();speichern();renderAlles()}});
-  $("boardAnzahl")?.addEventListener("change",()=>{if(daten){gruppenBoardsVerteilen();speichern();renderAlles()}});
+  $("boardAnzahl")?.addEventListener("change",()=>{
+    const anzahl=Math.min(6,Math.max(1,Number($("boardAnzahl").value)||6));
+    localStorage.setItem("dart11enV3BoardAnzahl",String(anzahl));
+    if(daten){gruppenBoardsVerteilen();speichern();renderAlles()}
+  });
   renderConfig();if(mode){$("doppelKoKonfiguration")?.classList.toggle("modus-versteckt",mode.value==="gruppenko")}if(originalBtn&&mode)originalBtn.textContent=mode.value==="gruppenko"?"🎲 Gruppen auslosen":"🎲 Live-Auslosung starten";
 });
 onSnapshot(collection(db,"warteschlange"),snap=>{teilnehmer=[];snap.forEach(d=>teilnehmer.push({id:d.id,...d.data()}));if(!daten)renderConfig()});
