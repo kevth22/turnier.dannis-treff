@@ -133,3 +133,23 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", starten, { once: true });
   else starten();
 })();
+
+
+// HOTFIX 2.6
+(() => {
+const BOARD_KEY="dart11enV3BoardAnzahl";
+function mode(){return (document.getElementById("turnierModus")?.value||localStorage.getItem("dart11enV3TurnierModus"))==="gruppenko";}
+function clean(){
+document.getElementById("gruppenAdminAnzeige")?.replaceChildren();
+const a=document.getElementById("gruppenAdminAnzeige"); if(a)a.style.display="none";
+document.querySelectorAll("#gruppenErgebnisAnzeige .gruppen-tabelle").forEach(e=>e.remove());
+}
+document.addEventListener("DOMContentLoaded",()=>{
+const b=document.getElementById("boardAnzahl");
+if(b)b.addEventListener("change",()=>window.dispatchEvent(new StorageEvent("storage",{key:BOARD_KEY,newValue:b.value})));
+const r=document.getElementById("turnierZuruecksetzenBtn");
+if(r)r.addEventListener("click",e=>{if(!mode())return;e.preventDefault();e.stopImmediatePropagation();window.dart11enGruppenReset&&window.dart11enGruppenReset();},true);
+clean();
+new MutationObserver(clean).observe(document.body,{childList:true,subtree:true});
+});
+})();
