@@ -37,6 +37,40 @@ function tabelle(g){
   return [...rows.values()].sort((a,b)=>b.p-a.p||b.diff-a.diff||b.lf-a.lf||a.name.localeCompare(b.name,"de"));
 }
 function alleGruppenFertig(){return daten?.gruppen?.every(g=>g.spiele.every(m=>matchErgebnis(m)))||false}
+function gruppenBoardAnzahl(){
+  const n=Number(localStorage.getItem("dart11enV3BoardAnzahl")||6);
+  return Number.isFinite(n)&&n>=1?Math.min(6,n):6;
+}
+function alleGruppenMatches(){return daten?.gruppen?.flatMap(g=>g.spiele||[])||[]}
+function alleGruppenKoMatches(){return daten?.koPhasen?.flatMap(k=>k.runden?.flat()||[])||[]}
+function gruppenMatchErgebnis(m){return String(m?.id||"").startsWith("K")?koErgebnis(m):matchErgebnis(m)}
+function aktiveGruppenTurnierMatches(){
+  const ko=alleGruppenKoMatches();
+  return ko.length?ko:alleGruppenMatches();
+}
+function gruppenBoardsVerteilen(){
+  if(!daten)return;
+  const alle=[...alleGruppenMatches(),...alleGruppenKoMatches()];
+  const matches=aktiveGruppenTurnierMatches();
+  const offen=matches.filter(m=>m.a&&m.b&&m.a!=="Freilos"&&m.b!=="Freilos"&&!gruppenMatchErgebnis(m));
+  alle.filter(m=>!offen.includes(m)).forEach(m=>{m.board=null});
+
+  const boardAnzahl=gruppenBoardAnzahl(),belegt=new Set(),aktiveSpieler=new Set();
+  // Bereits gültig vergebene Boards möglichst beibehalten.
+  offen.forEach(m=>{
+    const board=Number(m.board);
+    const gueltig=board>=1&&board<=boardAnzahl&&!belegt.has(board)&&!aktiveSpieler.has(m.a)&&!aktiveSpieler.has(m.b);
+    if(gueltig){belegt.add(board);aktiveSpieler.add(m.a);aktiveSpieler.add(m.b)}else m.board=null;
+  });
+
+  const freieBoards=[];
+  for(let b=1;b<=boardAnzahl;b++)if(!belegt.has(b))freieBoards.push(b);
+  // Nur Spiele gleichzeitig ansetzen, deren Spieler nicht schon auf einem anderen Board stehen.
+  offen.filter(m=>!m.board).forEach(m=>{
+    if(!freieBoards.length||aktiveSpieler.has(m.a)||aktiveSpieler.has(m.b))return;
+    m.board=freieBoards.shift();aktiveSpieler.add(m.a);aktiveSpieler.add(m.b);
+  });
+}
 function naechsteZweierzahl(n){let z=2;while(z<n)z*=2;return z}
 function koErstellen(spieler,id,turnierId=null){
   const feld=naechsteZweierzahl(Math.max(2,spieler.length));
@@ -78,7 +112,7 @@ function koPhasenErstellen(){
   if(fehler.length){alert(`K.-o.-Phase konnte nicht erstellt werden:\n\n${fehler.join("\n")}\n\nPrüfe die ausgewählten Plätze und die Gruppentabellen.`);return}
   daten.koPhasen=neuePhasen;speichern();renderAlles();
 }
-function speichern(){localStorage.setItem("dart11enV3GruppenKo",JSON.stringify(daten));clearTimeout(speicherTimer);speicherTimer=setTimeout(()=>setDoc(doc(db,"turnierLive","gruppenTurnierV3"),{datenJson:JSON.stringify(daten),aktualisiert:Date.now()}).catch(console.error),250)}
+function speichern(){gruppenBoardsVerteilen();localStorage.setItem("dart11enV3GruppenKo",JSON.stringify(daten));clearTimeout(speicherTimer);speicherTimer=setTimeout(()=>setDoc(doc(db,"turnierLive","gruppenTurnierV3"),{datenJson:JSON.stringify(daten),aktualisiert:Date.now()}).catch(console.error),250)}
 function scoreSelect(wert,onchange){const s=document.createElement("select");s.innerHTML='<option value="">–</option>'+Array.from({length:siegLegs()+1},(_,i)=>`<option value="${i}">${i}</option>`).join("");s.value=wert??"";s.onchange=()=>onchange(s.value===""?null:Number(s.value));return s}
 function maxGruppenPlaetze(){if(daten?.gruppen?.length)return Math.max(1,...daten.gruppen.map(g=>g.spieler.length));const gruppen=Math.max(1,Number($("gruppenAnzahl")?.value||1));const anwesend=teilnehmer.filter(p=>p.anwesend===true).length;return Math.max(1,Math.min(8,Math.ceil(Math.max(anwesend,2)/gruppen)))}
 function regelQuelle(){return daten?.regeln||entwurfRegeln}
@@ -134,7 +168,7 @@ function renderGruppe(g,admin=false){
   const table=document.createElement("table");table.className="gruppen-tabelle";table.innerHTML='<thead><tr><th>#</th><th>Spieler</th><th>Sp</th><th>S</th><th>N</th><th>Legs</th><th>Diff</th><th>P</th></tr></thead>';
   const body=document.createElement("tbody"),regelKey=daten.aufteilung==="getrennt"?(g.turnierId===1?"ko1":"ko2"):null,q=new Set(regelKey?(daten.regeln[regelKey]||[]):[...(daten.regeln.ko1||[]),...(daten.anzahlKo>1?daten.regeln.ko2:[])]);
   tabelle(g).forEach((r,i)=>{const tr=document.createElement("tr");if(q.has(i+1))tr.className="qualifiziert";tr.innerHTML=`<td>${i+1}</td><td>${r.name}</td><td>${r.sp}</td><td>${r.s}</td><td>${r.n}</td><td>${r.lf}:${r.lg}</td><td>${r.diff}</td><td>${r.p}</td>`;body.append(tr)});table.append(body);card.append(table);
-  if(admin){const games=document.createElement("div");games.className="gruppen-spiele";g.spiele.forEach(m=>{const a=document.createElement("article");a.className="gruppen-match";a.innerHTML=`<div class="gruppen-match-kopf"><span>${m.id}</span><span>Best of ${daten.bestOf}</span></div>`;const row=document.createElement("div");row.className="gruppen-score";const na=document.createElement("span");na.textContent=m.a;const nb=document.createElement("span");nb.textContent=m.b;const sep=document.createElement("b");sep.textContent=":";const sa=scoreSelect(m.scoreA,v=>{m.scoreA=v;if(v===siegLegs()&&m.scoreB>=siegLegs())m.scoreB=null;daten.koPhasen=[];speichern();renderAlles()});const sb=scoreSelect(m.scoreB,v=>{m.scoreB=v;if(v===siegLegs()&&m.scoreA>=siegLegs())m.scoreA=null;daten.koPhasen=[];speichern();renderAlles()});row.append(na,sa,sep,sb,nb);a.append(row);games.append(a)});card.append(games)}
+  if(admin){const games=document.createElement("div");games.className="gruppen-spiele";g.spiele.forEach(m=>{const a=document.createElement("article");a.className="gruppen-match";a.innerHTML=`<div class="gruppen-match-kopf"><span>${m.id}</span><span>${matchErgebnis(m)?"BEENDET":m.board?`BOARD ${m.board}`:"WARTET"} · Best of ${daten.bestOf}</span></div>`;const row=document.createElement("div");row.className="gruppen-score";const na=document.createElement("span");na.textContent=m.a;const nb=document.createElement("span");nb.textContent=m.b;const sep=document.createElement("b");sep.textContent=":";const sa=scoreSelect(m.scoreA,v=>{m.scoreA=v;if(v===siegLegs()&&m.scoreB>=siegLegs())m.scoreB=null;daten.koPhasen=[];speichern();renderAlles()});const sb=scoreSelect(m.scoreB,v=>{m.scoreB=v;if(v===siegLegs()&&m.scoreA>=siegLegs())m.scoreA=null;daten.koPhasen=[];speichern();renderAlles()});row.append(na,sa,sep,sb,nb);a.append(row);games.append(a)});card.append(games)}
   return card;
 }
 function renderKo(ko,admin=false){
@@ -143,7 +177,7 @@ function renderKo(ko,admin=false){
   ko.runden.forEach((runde,ri)=>{const col=document.createElement("section");col.className="gruppen-bracket-round";col.innerHTML=`<h4>Runde ${ri+1}</h4>`;runde.forEach(m=>{const e=koErgebnis(m),box=document.createElement("article");box.className="gruppen-bracket-match";box.innerHTML=`<small>${m.id}</small>`;[[m.a,m.scoreA],[m.b,m.scoreB]].forEach(([n,s])=>{const p=document.createElement("div");p.className="gruppen-bracket-player"+(e?.gewinner===n&&n!=="Freilos"?" winner":"");p.innerHTML=`<span>${n||"Noch offen"}</span><b>${s??"–"}</b>`;box.append(p)});if(admin&&m.a&&m.b&&m.a!=="Freilos"&&m.b!=="Freilos"){const row=document.createElement("div");row.className="gruppen-bracket-score";const na=document.createElement("span");na.textContent=m.a;const nb=document.createElement("span");nb.textContent=m.b;const sep=document.createElement("b");sep.textContent=":";const sa=scoreSelect(m.scoreA,v=>{m.scoreA=v;if(v===siegLegs()&&m.scoreB>=siegLegs())m.scoreB=null;koWege(ko);speichern();renderAlles()});const sb=scoreSelect(m.scoreB,v=>{m.scoreB=v;if(v===siegLegs()&&m.scoreA>=siegLegs())m.scoreA=null;koWege(ko);speichern();renderAlles()});row.append(na,sa,sep,sb,nb);box.append(row)}col.append(box)});grid.append(col)});wrap.append(grid);card.append(wrap);return card;
 }
 function renderAlles(){
-  if(!daten||daten.modus!=="gruppenko")return;renderConfig();$("gruppenBereich")?.classList.remove("modus-versteckt");
+  if(!daten||daten.modus!=="gruppenko")return;gruppenBoardsVerteilen();renderConfig();$("gruppenBereich")?.classList.remove("modus-versteckt");
   const pub=$("gruppenAnzeige");if(pub){pub.replaceChildren();daten.gruppen.forEach(g=>pub.append(renderGruppe(g,false)))}
   const adm=$("gruppenAdminAnzeige");if(adm){adm.replaceChildren();if(istAdmin)daten.gruppen.forEach(g=>adm.append(renderGruppe(g,true)))}
   // Eigene Ergebnisliste für die Gruppenphase. Die allgemeine #spieleListe
@@ -156,7 +190,28 @@ function renderAlles(){
   const ko=$("gruppenKoAnzeige");if(ko){ko.replaceChildren();daten.koPhasen?.forEach(k=>ko.append(renderKo(k,istAdmin)));if(!daten.koPhasen?.length)ko.innerHTML='<p class="section-text">Die K.-o.-Phasen werden nach Abschluss der Gruppenphase erstellt.</p>'}
   const btn=$("koErstellenBtn");if(btn){btn.disabled=!alleGruppenFertig();btn.textContent=alleGruppenFertig()?(daten.aufteilung==="getrennt"?"Beide K.-o.-Phasen erstellen":"K.-o.-Phase erstellen"):"Erst alle Gruppenspiele abschließen"}renderTv();
 }
+function tvGruppenSpieleRendern(){
+  const aktuell=$("tvAktuelleSpiele"),naechste=$("tvNaechsteSpiele");
+  if(!aktuell||!naechste)return;
+  aktuell.replaceChildren();naechste.replaceChildren();
+  const matches=aktiveGruppenTurnierMatches().filter(m=>m.a&&m.b&&m.a!=="Freilos"&&m.b!=="Freilos"&&!gruppenMatchErgebnis(m))
+    .sort((a,b)=>(a.board||999)-(b.board||999)||String(a.id).localeCompare(String(b.id),"de"));
+  let laufend=0,wartend=0;
+  matches.forEach(m=>{
+    if(!m.board&&wartend>=6)return;
+    const zeile=document.createElement("article");zeile.className="tv-match-row";
+    const meta=document.createElement("div");meta.className="tv-match-meta";meta.textContent=m.board?`BOARD ${m.board}`:`ALS NÄCHSTES · ${m.id}`;
+    const paarung=document.createElement("div");paarung.className="tv-match-paarung";
+    const a=document.createElement("strong");a.textContent=m.a;const vs=document.createElement("span");vs.textContent="VS";const b=document.createElement("strong");b.textContent=m.b;paarung.append(a,vs,b);
+    const format=document.createElement("small");format.textContent=`Best of ${daten.bestOf}`;zeile.append(meta,paarung,format);
+    (m.board?aktuell:naechste).append(zeile);if(m.board)laufend++;else wartend++;
+  });
+  if(!laufend)aktuell.innerHTML='<div class="tv-leer">Zurzeit läuft kein Gruppenspiel.</div>';
+  if(!wartend)naechste.innerHTML='<div class="tv-leer">Keine weiteren spielbereiten Partien.</div>';
+}
 function renderTv(){
+  gruppenBoardsVerteilen();
+  tvGruppenSpieleRendern();
   const gbox=$("tvGruppen");
   if(gbox){
     gbox.replaceChildren();
@@ -202,7 +257,7 @@ function neuesGruppenTurnier(){
 
   daten={
     modus:"gruppenko",
-    version:"3.0.6",
+    version:"3.0.8",
     erstellt:Date.now(),
     bestOf:Number($("gruppenBestOf").value),
     anzahlGruppen:anzahl,
@@ -213,6 +268,7 @@ function neuesGruppenTurnier(){
     gruppen:neueGruppen,
     koPhasen:[]
   };
+  gruppenBoardsVerteilen();
   speichern();
   renderAlles();
 }
@@ -277,6 +333,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   try{daten=JSON.parse(localStorage.getItem("dart11enV3GruppenKo")||"null")}catch{}
   if(daten){if(!daten.aufteilung)daten.aufteilung="gemeinsam";daten.gruppen?.forEach(g=>{if(!g.turnierId)g.turnierId=1});regelEntwurfSpeichern(daten.regeln);renderAlles()}
   window.addEventListener("dart11en:v3-reset",event=>{const scope=event.detail?.scope||"active",activeMode=localStorage.getItem("dart11enV3TurnierModus")||"doppelko";if(scope==="active"&&activeMode!=="gruppenko")return;gruppenTurnierZuruecksetzen({bestaetigen:false});});
+  window.addEventListener("storage",event=>{if(event.key==="dart11enV3BoardAnzahl"&&daten){gruppenBoardsVerteilen();speichern();renderAlles()}});
+  $("boardAnzahl")?.addEventListener("change",()=>{if(daten){gruppenBoardsVerteilen();speichern();renderAlles()}});
   renderConfig();if(mode){$("doppelKoKonfiguration")?.classList.toggle("modus-versteckt",mode.value==="gruppenko")}if(originalBtn&&mode)originalBtn.textContent=mode.value==="gruppenko"?"🎲 Gruppen auslosen":"🎲 Live-Auslosung starten";
 });
 onSnapshot(collection(db,"warteschlange"),snap=>{teilnehmer=[];snap.forEach(d=>teilnehmer.push({id:d.id,...d.data()}));if(!daten)renderConfig()});

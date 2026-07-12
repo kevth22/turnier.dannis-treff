@@ -929,7 +929,7 @@ document.addEventListener("DOMContentLoaded", () => {
       || localStorage.getItem("dart11enV3TurnierModus")
       || "doppelko";
     const alleSlides = [...document.querySelectorAll(".tv-slide")];
-    const gruppenIds = new Set(["slideGruppen", "slideGruppenKo", "slideWerbung"]);
+    const gruppenIds = new Set(["slideAktuelleSpiele", "slideNaechsteSpiele", "slideGruppen", "slideGruppenKo", "slideWerbung"]);
     const doppelKoIds = new Set(["slideAktuelleSpiele", "slideNaechsteSpiele", "slideTurnierbaum", "slideGewinnerbaum", "slideVerliererbaum", "slideFinale", "slideWerbung"]);
     const erlaubteIds = angefragterModus === "gruppenko" ? gruppenIds : doppelKoIds;
     const slides = alleSlides.filter(slide => erlaubteIds.has(slide.id));

@@ -1,4 +1,4 @@
-const VERSION = 'dart11en-turnier-center-3-0-6-gruppen-ergebnisse';
+const VERSION = 'dart11en-turnier-center-3-0-7-gruppen-boards';
 const APP_SHELL = [
   './', './index.html', './style.css', './pwa.js', './manifest.json',
   './turniere.html', './turnier-live.html', './turnier-live-v3.css',
