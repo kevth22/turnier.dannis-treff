@@ -120,13 +120,3 @@
 #turnierAufteilung{font-weight:700}
 
 .gruppen-reset-aktionen{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.gruppen-reset-aktionen .main-button{margin:0}@media(max-width:650px){.gruppen-reset-aktionen{grid-template-columns:1fr}}
-
-/* Version 3.1.0: gemeinsame Board-Auswahl direkt in der Turniersteuerung */
-.gemeinsame-board-control {
-  margin: 18px 0;
-}
-.gemeinsame-board-control small {
-  display: block;
-  margin-top: 8px;
-  opacity: .72;
-}

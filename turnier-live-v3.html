@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="turnier-live-v3.css?v=300">
   <link rel="stylesheet" href="turnier-tv-fit.css?v=10">
-  <link rel="stylesheet" href="gruppen-turnier-v3.css?v=310">
+  <link rel="stylesheet" href="gruppen-turnier-v3.css?v=302">
   <link rel="manifest" href="manifest.json">
 
   <meta name="theme-color" content="#e00022">
@@ -133,6 +133,7 @@
     <h2>📊 Gruppenphase</h2>
     <p class="section-text">Tabellen, Gruppenspiele und die späteren K.-o.-Bäume werden hier live angezeigt.</p>
     <div id="gruppenAnzeige" class="gruppen-public-grid"></div>
+    <div id="gruppenAdminAnzeige" class="gruppen-admin-grid admin-only"></div>
     <div class="action-row admin-only"><button id="koErstellenBtn" class="main-button" type="button">K.-o.-Phase erstellen</button></div>
     <div id="gruppenKoAnzeige" class="ko-phasen-grid"></div>
   </section>
@@ -213,7 +214,7 @@
   <!-- Turnierauslosung -->
   <section id="auslosungBereich" class="content-card admin-only">
 
-    <div class="v2-title-row"><h2>🎲 Turnier auslosen</h2><span class="v2-badge">VERSION 3.1.0 – GRUPPEN & BOARDS</span></div>
+    <div class="v2-title-row"><h2>🎲 Turnier auslosen</h2><span class="v2-badge">VERSION 3.0.4 – RESET & MODUSWECHSEL</span></div>
 
     <p class="section-text">
       Spieler werden zufällig gelost. Freilose werden fair verteilt und dürfen nicht gegeneinander spielen.
@@ -225,19 +226,6 @@
         <option value="doppelko">Doppel-K.-o.</option>
         <option value="gruppenko">Gruppenphase + K.-o.</option>
       </select>
-    </div>
-
-    <div class="board-control gemeinsame-board-control">
-      <label for="boardAnzahl">Aktive Boards</label>
-      <select id="boardAnzahl">
-        <option value="6">6 Boards</option>
-        <option value="5">5 Boards</option>
-        <option value="4">4 Boards</option>
-        <option value="3">3 Boards</option>
-        <option value="2">2 Boards</option>
-        <option value="1">1 Board</option>
-      </select>
-      <small>Gilt für Doppel-K.-o. und Gruppenphase.</small>
     </div>
 
     <div id="gruppenKonfiguration" class="gruppen-config modus-versteckt">
@@ -339,6 +327,21 @@
       <label for="matchFormat">Spielmodus</label>
       <select id="matchFormat"><option value="3">Best of 3</option><option value="5">Best of 5</option></select>
       <small id="matchFormatInfo">2 gewonnene Legs werden zum Sieg benötigt.</small>
+    </div>
+
+    <div class="board-control">
+
+      <label for="boardAnzahl">Aktive Boards</label>
+
+      <select id="boardAnzahl">
+        <option value="6">6 Boards</option>
+        <option value="5">5 Boards</option>
+        <option value="4">4 Boards</option>
+        <option value="3">3 Boards</option>
+        <option value="2">2 Boards</option>
+        <option value="1">1 Board</option>
+      </select>
+
     </div>
 
     <div class="ergebnis-werkzeuge">
@@ -494,8 +497,8 @@
 
 <script type="module" src="turnier-v3-manager.js?v=306"></script>
 <script type="module" src="turnier-live-v3.js?v=306"></script>
-<script type="module" src="gruppen-turnier-v3.js?v=310"></script>
-<script src="turnier-tv-fit.js?v=12" defer></script>
+<script type="module" src="gruppen-turnier-v3.js?v=307"></script>
+<script src="turnier-tv-fit.js?v=11" defer></script>
 <script src="pwa.js" defer></script>
 
 </body>

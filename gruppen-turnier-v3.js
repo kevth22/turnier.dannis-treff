@@ -55,17 +55,46 @@ function gruppenBoardsVerteilen(){
   const offen=matches.filter(m=>m.a&&m.b&&m.a!=="Freilos"&&m.b!=="Freilos"&&!gruppenMatchErgebnis(m));
   alle.filter(m=>!offen.includes(m)).forEach(m=>{m.board=null});
 
-  const boardAnzahl=gruppenBoardAnzahl(),belegt=new Set(),aktiveSpieler=new Set();
-  // Bereits gültig vergebene Boards möglichst beibehalten.
+  const boardAnzahl=gruppenBoardAnzahl(),aktiveSpieler=new Set();
+
+  // In der Gruppenphase werden die freien Boards im Wechsel auf die Gruppen
+  // verteilt. So starten z. B. Gruppe A und Gruppe B gleichzeitig, statt dass
+  // zuerst alle Boards mit Spielen aus nur einer Gruppe belegt werden.
+  if(!alleGruppenKoMatches().length){
+    offen.forEach(m=>{m.board=null});
+    const gruppenReihenfolge=(daten.gruppen||[]).map(g=>g.id);
+    const warteschlangen=new Map(gruppenReihenfolge.map(id=>[
+      id,
+      offen.filter(m=>String(m.id).startsWith(`G${id}-`))
+    ]));
+
+    let board=1;
+    let fortschritt=true;
+    while(board<=boardAnzahl&&fortschritt){
+      fortschritt=false;
+      for(const gruppenId of gruppenReihenfolge){
+        if(board>boardAnzahl)break;
+        const queue=warteschlangen.get(gruppenId)||[];
+        const index=queue.findIndex(m=>!aktiveSpieler.has(m.a)&&!aktiveSpieler.has(m.b));
+        if(index<0)continue;
+        const match=queue.splice(index,1)[0];
+        match.board=board++;
+        aktiveSpieler.add(match.a);aktiveSpieler.add(match.b);
+        fortschritt=true;
+      }
+    }
+    return;
+  }
+
+  // In der K.-o.-Phase bereits laufende Board-Zuweisungen beibehalten.
+  const belegt=new Set();
   offen.forEach(m=>{
     const board=Number(m.board);
     const gueltig=board>=1&&board<=boardAnzahl&&!belegt.has(board)&&!aktiveSpieler.has(m.a)&&!aktiveSpieler.has(m.b);
     if(gueltig){belegt.add(board);aktiveSpieler.add(m.a);aktiveSpieler.add(m.b)}else m.board=null;
   });
-
   const freieBoards=[];
   for(let b=1;b<=boardAnzahl;b++)if(!belegt.has(b))freieBoards.push(b);
-  // Nur Spiele gleichzeitig ansetzen, deren Spieler nicht schon auf einem anderen Board stehen.
   offen.filter(m=>!m.board).forEach(m=>{
     if(!freieBoards.length||aktiveSpieler.has(m.a)||aktiveSpieler.has(m.b))return;
     m.board=freieBoards.shift();aktiveSpieler.add(m.a);aktiveSpieler.add(m.b);
@@ -179,12 +208,13 @@ function renderKo(ko,admin=false){
 function renderAlles(){
   if(!daten||daten.modus!=="gruppenko")return;gruppenBoardsVerteilen();renderConfig();$("gruppenBereich")?.classList.remove("modus-versteckt");
   const pub=$("gruppenAnzeige");if(pub){pub.replaceChildren();daten.gruppen.forEach(g=>pub.append(renderGruppe(g,false)))}
+  const adm=$("gruppenAdminAnzeige");if(adm){adm.replaceChildren();adm.classList.add("modus-versteckt")}
   // Eigene Ergebnisliste für die Gruppenphase. Die allgemeine #spieleListe
   // gehört ausschließlich zum Doppel-K.-o.-Modus.
   const gruppenErgebnisse=$("gruppenErgebnisAnzeige");
   if(gruppenErgebnisse){
     gruppenErgebnisse.replaceChildren();
-    if(istAdmin)daten.gruppen.forEach(g=>gruppenErgebnisse.append(renderGruppe(g,true)));
+    if(istAdmin)daten.gruppen.forEach(g=>{const card=renderGruppe(g,true);card.querySelector(".gruppen-tabelle")?.remove();gruppenErgebnisse.append(card)});
   }
   const ko=$("gruppenKoAnzeige");if(ko){ko.replaceChildren();daten.koPhasen?.forEach(k=>ko.append(renderKo(k,istAdmin)));if(!daten.koPhasen?.length)ko.innerHTML='<p class="section-text">Die K.-o.-Phasen werden nach Abschluss der Gruppenphase erstellt.</p>'}
   const btn=$("koErstellenBtn");if(btn){btn.disabled=!alleGruppenFertig();btn.textContent=alleGruppenFertig()?(daten.aufteilung==="getrennt"?"Beide K.-o.-Phasen erstellen":"K.-o.-Phase erstellen"):"Erst alle Gruppenspiele abschließen"}renderTv();
@@ -256,7 +286,7 @@ function neuesGruppenTurnier(){
 
   daten={
     modus:"gruppenko",
-    version:"3.1.0",
+    version:"3.1.1",
     erstellt:Date.now(),
     bestOf:Number($("gruppenBestOf").value),
     anzahlGruppen:anzahl,
@@ -284,7 +314,6 @@ async function gruppenTurnierZuruecksetzen({wechselZuDoppelKo=false, bestaetigen
   entwurfRegeln={ko1:[1,2],ko2:[1,2]};
   $("gruppenAnzeige")?.replaceChildren();
   $("gruppenAdminAnzeige")?.replaceChildren();
-  $("gruppenErgebnisAnzeige")?.replaceChildren();
   $("gruppenKoAnzeige")?.replaceChildren();
   try{await deleteDoc(doc(db,"turnierLive","gruppenTurnierV3"))}catch(e){console.error("Gruppenturnier konnte online nicht gelöscht werden:",e)}
   renderConfig();
@@ -334,11 +363,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   if(daten){if(!daten.aufteilung)daten.aufteilung="gemeinsam";daten.gruppen?.forEach(g=>{if(!g.turnierId)g.turnierId=1});regelEntwurfSpeichern(daten.regeln);renderAlles()}
   window.addEventListener("dart11en:v3-reset",event=>{const scope=event.detail?.scope||"active",activeMode=localStorage.getItem("dart11enV3TurnierModus")||"doppelko";if(scope==="active"&&activeMode!=="gruppenko")return;gruppenTurnierZuruecksetzen({bestaetigen:false});});
   window.addEventListener("storage",event=>{if(event.key==="dart11enV3BoardAnzahl"&&daten){gruppenBoardsVerteilen();speichern();renderAlles()}});
-  $("boardAnzahl")?.addEventListener("change",()=>{
-    const anzahl=Math.min(6,Math.max(1,Number($("boardAnzahl").value)||6));
-    localStorage.setItem("dart11enV3BoardAnzahl",String(anzahl));
-    if(daten){gruppenBoardsVerteilen();speichern();renderAlles()}
-  });
+  $("boardAnzahl")?.addEventListener("change",()=>{if(daten){gruppenBoardsVerteilen();speichern();renderAlles()}});
   renderConfig();if(mode){$("doppelKoKonfiguration")?.classList.toggle("modus-versteckt",mode.value==="gruppenko")}if(originalBtn&&mode)originalBtn.textContent=mode.value==="gruppenko"?"🎲 Gruppen auslosen":"🎲 Live-Auslosung starten";
 });
 onSnapshot(collection(db,"warteschlange"),snap=>{teilnehmer=[];snap.forEach(d=>teilnehmer.push({id:d.id,...d.data()}));if(!daten)renderConfig()});

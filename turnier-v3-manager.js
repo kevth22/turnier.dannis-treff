@@ -20,6 +20,7 @@ function aktiveAnsichtSetzen(mode) {
   // Paarungen nach einer Gruppensimulation falsch.
   $("spieleListe")?.classList.toggle("modus-versteckt", gruppen);
   document.querySelector("#ergebnisBereich .match-format-control")?.classList.toggle("modus-versteckt", gruppen);
+  document.querySelector("#ergebnisBereich .board-control")?.classList.toggle("modus-versteckt", gruppen);
   document.querySelector("#ergebnisBereich .ergebnis-werkzeuge")?.classList.toggle("modus-versteckt", gruppen);
   const tvLink = $("tvAnsichtLink");
   if (tvLink) tvLink.href = `turnier-live.html?tv=true&mode=${gruppen ? "gruppenko" : "doppelko"}`;
@@ -59,12 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ? "Gruppenphase, Gruppenergebnisse und K.-o.-Bäume"
       : "Doppel-K.-o.-Baum und Ergebnisse";
     if (!confirm(`${label} wirklich zurücksetzen? Die Teilnehmerliste bleibt erhalten.`)) return;
-    const aktiverModus = localStorage.getItem(MODE_KEY) || "doppelko";
-    if (aktiverModus === "gruppenko" && typeof window.dart11enGruppenReset === "function") {
-      window.dart11enGruppenReset({ bestaetigen: false });
-    } else {
-      resetAusloesen("active");
-    }
+    resetAusloesen("active");
   }, true);
 
   $("neuesTurnierBtn")?.addEventListener("click", event => {
