@@ -1183,3 +1183,23 @@ body.is-admin .admin-only {
 body.is-admin .admin-dashboard {
   display: block !important;
 }
+
+
+/* Version 3.0 – Sprint 1 */
+.v3-turnier-aktionen{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.v3-turnier-aktionen .main-button{margin-top:0}
+.v3-danger-button{background:linear-gradient(135deg,#6f0011,#2b0007)}
+.v3-danger-button:hover{background:linear-gradient(135deg,#b0001b,#59000e)}
+.v3-status-hinweis{margin-top:10px;padding:10px 12px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.035)}
+@media(max-width:560px){.v3-turnier-aktionen{grid-template-columns:1fr}}
+
+/* Version 4.0: Statussteuerung */
+.turnier-status-steuerung{margin-top:14px;padding:14px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(0,0,0,.22)}
+.turnier-status-steuerung label{display:block;font-weight:800;margin-bottom:8px}
+.turnier-status-steuerung select{width:100%;min-height:48px;border-radius:12px;padding:0 14px;background:#101116;color:#fff;border:1px solid #444;font-weight:800}
+.turnier-status.status-vorbereitung span{background:rgba(36,190,90,.18);border-color:#24be5a}
+.turnier-status.status-anmeldung span{background:rgba(242,190,38,.18);border-color:#f2be26}
+.turnier-status.status-live span{background:rgba(224,0,34,.2);border-color:#e00022}
+.tv-live-kopf.status-vorbereitung i{background:#24be5a!important;box-shadow:0 0 18px #24be5a}
+.tv-live-kopf.status-anmeldung i{background:#f2be26!important;box-shadow:0 0 18px #f2be26}
+.tv-live-kopf.status-live i{background:#ff2445!important;box-shadow:0 0 18px #ff2445}

@@ -38,6 +38,15 @@
       <span id="status">🟢 Vorbereitung</span>
     </div>
 
+    <div class="turnier-status-steuerung admin-only">
+      <label for="turnierLiveStatus">Status oben ändern</label>
+      <select id="turnierLiveStatus">
+        <option value="vorbereitung">🟢 Vorbereitung</option>
+        <option value="anmeldung">🟡 Anmeldung</option>
+        <option value="live">🔴 Live</option>
+      </select>
+    </div>
+
     <div class="dashboard-grid">
 
       <div class="status-card">
@@ -214,7 +223,7 @@
   <!-- Turnierauslosung -->
   <section id="auslosungBereich" class="content-card admin-only">
 
-    <div class="v2-title-row"><h2>🎲 Turnier auslosen</h2><span class="v2-badge">VERSION 3.1.1 – GRUPPEN PARALLEL</span></div>
+    <div class="v2-title-row"><h2>🎲 Turnier auslosen</h2><span class="v2-badge">VERSION 4.0.0 – LIVE-STEUERUNG</span></div>
 
     <p class="section-text">
       Spieler werden zufällig gelost. Freilose werden fair verteilt und dürfen nicht gegeneinander spielen.
@@ -370,7 +379,7 @@
       Öffnet die Live-Ansicht für euren zweiten Monitor im Dannis Treff.
     </p>
 
-    <a id="tvAnsichtLink" href="turnier-live-v3.html?tv=true&mode=doppelko" class="main-button" target="_blank" rel="noopener">
+    <a id="tvAnsichtLink" href="turnier-live.html?tv=true&mode=auto" class="main-button" target="_blank" rel="noopener">
       📺 TV-Ansicht öffnen
     </a>
 
@@ -396,7 +405,7 @@
   <div class="tv-header">
     <img src="dart11enlogo.png" alt="Dart11en Logo">
     <div class="tv-live-kopf">
-      <span><i></i> LIVE TURNIER</span>
+      <span id="tvLiveStatus"><i></i> VORBEREITUNG</span>
       <small id="tvUhrzeit"></small>
     </div>
     <button id="tvVollbildBtn" class="tv-vollbild-button" type="button">⛶ Vollbild</button>
@@ -498,7 +507,8 @@
 <script type="module" src="turnier-v3-manager.js?v=308"></script>
 <script type="module" src="turnier-live-v3.js?v=308"></script>
 <script type="module" src="gruppen-turnier-v3.js?v=308"></script>
-<script src="turnier-tv-fit.js?v=11" defer></script>
+<script src="turnier-tv-fit.js?v=400" defer></script>
+<script type="module" src="turnier-v4-live.js?v=400"></script>
 <script src="pwa.js" defer></script>
 
 </body>

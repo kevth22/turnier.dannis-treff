@@ -616,6 +616,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!aktuell || !naechste) return;
     aktuell.replaceChildren(); naechste.replaceChildren();
     if (!turnierDaten) {
+      const modus = new URLSearchParams(location.search).get("mode") || "auto";
+      if (modus === "gruppenko" || modus === "auto") return;
       aktuell.innerHTML = '<div class="tv-leer">Das Turnier wurde noch nicht ausgelost.</div>';
       naechste.innerHTML = '<div class="tv-leer">Noch keine Partien vorhanden.</div>';
       return;
@@ -931,7 +933,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const alleSlides = [...document.querySelectorAll(".tv-slide")];
     const gruppenIds = new Set(["slideAktuelleSpiele", "slideNaechsteSpiele", "slideGruppen", "slideGruppenKo", "slideWerbung"]);
     const doppelKoIds = new Set(["slideAktuelleSpiele", "slideNaechsteSpiele", "slideTurnierbaum", "slideGewinnerbaum", "slideVerliererbaum", "slideFinale", "slideWerbung"]);
-    const erlaubteIds = angefragterModus === "gruppenko" ? gruppenIds : doppelKoIds;
+    const erlaubteIds = angefragterModus === "gruppenko" ? gruppenIds : angefragterModus === "doppelko" ? doppelKoIds : new Set([...gruppenIds, ...doppelKoIds]);
     const slides = alleSlides.filter(slide => erlaubteIds.has(slide.id));
     alleSlides.forEach(slide => { if(!erlaubteIds.has(slide.id)) slide.classList.remove("active"); });
     const status = document.getElementById("tvRotationStatus");
@@ -965,9 +967,9 @@ document.addEventListener("DOMContentLoaded", () => {
     tvVorstartAnzeigen();
     let gruppenDatenVorhanden = false;
     try { gruppenDatenVorhanden = Boolean(JSON.parse(localStorage.getItem("dart11enV3GruppenKo") || "null")); } catch {}
-    if ((angefragterModus === "gruppenko" && gruppenDatenVorhanden) || (angefragterModus !== "gruppenko" && turnierDaten)) tvDiashowStarten();
+    if (gruppenDatenVorhanden || turnierDaten) tvDiashowStarten();
     window.addEventListener("dart11en:gruppen-tv-ready", () => {
-      if (angefragterModus === "gruppenko") tvDiashowStarten();
+      tvDiashowStarten();
     });
 
     const uhr = document.getElementById("tvUhrzeit");
