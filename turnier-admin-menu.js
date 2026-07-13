@@ -1,7 +1,7 @@
 (() => {
   const SETTINGS_KEY = "dart11enTurnierUiV5";
   const pageSections = {
-    dashboard: ["dashboard", "statistikBereich", "spielerBereich"],
+    dashboard: ["dashboard", "naechsteSpieleBereich", "statistikBereich", "spielerBereich"],
     teilnehmer: ["teilnehmerBereich"],
     konfiguration: ["auslosungBereich"],
     ergebnisse: ["ergebnisBereich"],
@@ -18,7 +18,16 @@
   function saveSettings(value){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(value)); }
 
   document.addEventListener("DOMContentLoaded", () => {
-    if (!document.body.classList.contains("is-admin")) return;
+    let isAdmin = false;
+    try {
+      const login = JSON.parse(localStorage.getItem("dart11enLogin") || "null");
+      isAdmin = String(login?.rolle || sessionStorage.getItem("rolle") || "").toLowerCase().trim() === "admin";
+    } catch {
+      isAdmin = String(sessionStorage.getItem("rolle") || "").toLowerCase().trim() === "admin";
+    }
+    document.body.classList.toggle("is-admin", isAdmin);
+    document.body.classList.toggle("is-public-turnier", !isAdmin);
+    document.querySelectorAll(".admin-menu-only").forEach(el => { el.hidden = !isAdmin; });
     const drawer = document.getElementById("adminDrawer");
     const backdrop = document.getElementById("adminDrawerBackdrop");
     const openButton = document.getElementById("adminMenuButton");
@@ -43,7 +52,8 @@
       document.body.classList.add("admin-menu-open");
     };
     const showPage = (page, updateHash = true) => {
-      if (!pageSections[page]) page = "dashboard";
+      const publicPages = new Set(["dashboard", "turnierbaum"]);
+      if (!pageSections[page] || (!isAdmin && !publicPages.has(page))) page = "dashboard";
       document.querySelectorAll("[data-admin-section]").forEach(section => {
         section.classList.toggle("admin-page-hidden", section.dataset.adminSection !== page);
       });
@@ -92,7 +102,8 @@
 
     applySettings();
     const hashPage = location.hash.replace("#", "");
-    showPage(pageSections[hashPage] ? hashPage : settings.startPage, false);
+    const desiredStart = pageSections[hashPage] ? hashPage : (isAdmin ? settings.startPage : "dashboard");
+    showPage(desiredStart, false);
 
     const statusSource = document.getElementById("status");
     const headerStatus = document.getElementById("headerTurnierStatus");

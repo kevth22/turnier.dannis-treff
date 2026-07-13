@@ -120,3 +120,46 @@
 #turnierAufteilung{font-weight:700}
 
 .gruppen-reset-aktionen{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.gruppen-reset-aktionen .main-button{margin:0}@media(max-width:650px){.gruppen-reset-aktionen{grid-template-columns:1fr}}
+
+
+/* v5.0.3 – kompakte, chronologische Gruppenspiele */
+.gruppen-match-kopf{
+  display:grid;
+  grid-template-columns:minmax(74px,1fr) auto auto;
+  align-items:center;
+  gap:8px;
+}
+.match-reihenfolge{font-weight:700;color:#d9d9d9}
+.best-of-label{white-space:nowrap;color:#aaa}
+.gruppen-board-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:30px;
+  padding:5px 11px;
+  border-radius:9px;
+  font-weight:800;
+  font-size:.78rem;
+  letter-spacing:.03em;
+  white-space:nowrap;
+  border:1px solid rgba(255,255,255,.16);
+  color:#fff;
+  background:#3b3b3b;
+}
+.gruppen-board-badge.ist-wartet{background:#303030;color:#c7c7c7}
+.gruppen-board-badge.ist-beendet{background:#11652f;border-color:#28ce69}
+.gruppen-board-badge.board-1{background:#18753a;border-color:#34d36f}
+.gruppen-board-badge.board-2{background:#1557a6;border-color:#3c91f4}
+.gruppen-board-badge.board-3{background:#9a5b00;border-color:#f0a52c}
+.gruppen-board-badge.board-4{background:#60328c;border-color:#a66be0}
+.gruppen-board-badge.board-5{background:#8b2733;border-color:#e15b6d}
+.gruppen-board-badge.board-6{background:#006b70;border-color:#25bfc6}
+.gruppen-board-badge.board-7{background:#675d00;border-color:#c7b62a}
+.gruppen-board-badge.board-8{background:#5e3a24;border-color:#b77c52}
+#gruppenErgebnisAnzeige .gruppe-card>h3{position:sticky;top:0;z-index:2}
+#gruppenErgebnisAnzeige .gruppen-spiele{counter-reset:match}
+@media(max-width:700px){
+  .gruppen-match-kopf{grid-template-columns:1fr auto;gap:6px}
+  .best-of-label{grid-column:1/-1;font-size:.76rem}
+  .gruppen-board-badge{min-height:28px;padding:4px 9px}
+}

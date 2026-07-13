@@ -1,0 +1,5 @@
+Version 5.0.6
+- TV-Ansicht zeigt nur den aktiven Turniermodus.
+- Doppel-K.-o. blendet Gruppenphase und Gruppen-K.-o. vollständig aus.
+- Boardnummern sind in Gewinner-, Verlierer- und Gruppen-K.-o.-Bäumen farbig markiert.
+- Aktiver Turniermodus wird online an die TV-Ansicht übertragen.

@@ -1203,3 +1203,19 @@ body.is-admin .admin-dashboard {
 .tv-live-kopf.status-vorbereitung i{background:#24be5a!important;box-shadow:0 0 18px #24be5a}
 .tv-live-kopf.status-anmeldung i{background:#f2be26!important;box-shadow:0 0 18px #f2be26}
 .tv-live-kopf.status-live i{background:#ff2445!important;box-shadow:0 0 18px #ff2445}
+
+
+/* v5.0.5: Öffentliche Vorschau der nächsten Partien */
+.dashboard-section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}
+.dashboard-section-head h2{margin-bottom:4px}
+.next-count-badge{flex:0 0 auto;border:1px solid rgba(224,0,34,.45);background:rgba(224,0,34,.12);color:#fff;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:900}
+.dashboard-next-list{display:grid;gap:10px}
+.dashboard-next-match{border:1px solid rgba(255,255,255,.12);background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));border-radius:14px;padding:12px 13px;box-shadow:0 8px 22px rgba(0,0,0,.18)}
+.dashboard-next-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;color:#aeb3bd}
+.next-order-box{display:inline-flex;align-items:center;border-radius:8px;padding:5px 8px;background:#d99b00;color:#121212;font-size:11px;font-weight:1000;letter-spacing:.04em}
+.dashboard-next-pairing{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px}
+.dashboard-next-pairing strong{font-size:15px;overflow-wrap:anywhere}
+.dashboard-next-pairing strong:last-child{text-align:right}
+.dashboard-next-pairing span{color:#ffbe2d;font-weight:1000;font-size:12px}
+.dashboard-next-format{display:block;margin-top:9px;color:#969ca7;font-size:11px}
+@media (min-width:720px){.dashboard-next-list{grid-template-columns:repeat(2,minmax(0,1fr))}}

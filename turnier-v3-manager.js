@@ -23,7 +23,7 @@ function aktiveAnsichtSetzen(mode) {
   document.querySelector("#ergebnisBereich .board-control")?.classList.remove("modus-versteckt");
   document.querySelector("#ergebnisBereich .ergebnis-werkzeuge")?.classList.toggle("modus-versteckt", gruppen);
   const tvLink = $("tvAnsichtLink");
-  if (tvLink) tvLink.href = "turnier-live.html?tv=true&mode=auto";
+  if (tvLink) tvLink.href = `turnier-live.html?tv=true&mode=${mode}`;
   const hint = $("v3StatusHinweis");
   if (hint) hint.textContent = gruppen
     ? "Aktiv: Gruppenphase + K.-o. Der Doppel-K.-o.-Stand bleibt getrennt gespeichert."

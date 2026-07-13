@@ -1,0 +1,7 @@
+Dart11en Turnier-Center 5.0.7
+- Vereinsname und Vereinsfarben individuell einstellbar
+- Eigenes Vereinslogo mit automatischer Verkleinerung
+- Live-Vorschau im Einstellungsbereich
+- Zentrale Synchronisierung über Firestore für Admin, Gäste und TV
+- Lokaler Fallback bei Verbindungsproblemen
+- Boardfarben bleiben unabhängig vom Vereinsdesign

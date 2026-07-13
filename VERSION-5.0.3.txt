@@ -1,0 +1,6 @@
+Dart11en Turnier-Center Version 5.0.3
+- Gäste und Mitglieder: nur Dashboard und Turnierbaum
+- Admin: vollständige Verwaltung
+- Gruppenspiele chronologisch ohne Spieler-Zuordnungsfelder
+- farbige Board-Kästen
+- enthält den Doppel-K.-o.-Modus-Fix aus 5.0.2

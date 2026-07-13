@@ -479,12 +479,17 @@ document.addEventListener("DOMContentLoaded", () => {
         turnierGroesse,
         boardAnzahl,
         bestOf,
+        turnierModus: localStorage.getItem("dart11enV3TurnierModus") || "doppelko",
         aktualisiert: Date.now()
       }, { merge: true });
     } catch (fehler) {
       console.error("Die Turniereinstellungen konnten nicht gespeichert werden:", fehler);
     }
   }
+
+  window.addEventListener("dart11en:v3-mode", () => {
+    einstellungenOnlineSpeichern();
+  });
 
   ergebnisZurueckBtn?.addEventListener("click", () => {
     const vorherigerStand = ergebnisHistorie.pop();
@@ -610,6 +615,42 @@ document.addEventListener("DOMContentLoaded", () => {
     bereit.filter(match => !match.board).forEach(match => { match.board = frei.shift() || null; });
   }
 
+  function dashboardNaechsteSpieleRendern(matches, bestOfWert) {
+    const container = document.getElementById("dashboardNaechsteSpiele");
+    const anzahl = document.getElementById("naechsteSpieleAnzahl");
+    if (!container) return;
+    container.replaceChildren();
+    const liste = matches.filter(match => !match.board).slice(0, 6);
+    if (anzahl) anzahl.textContent = `${liste.length} ${liste.length === 1 ? "Spiel" : "Spiele"}`;
+    if (!liste.length) {
+      container.innerHTML = '<div class="tv-leer">Aktuell ist keine weitere spielbereite Partie vorhanden.</div>';
+      return;
+    }
+    liste.forEach((match, index) => {
+      const karte = document.createElement("article");
+      karte.className = "dashboard-next-match";
+      const meta = document.createElement("div");
+      meta.className = "dashboard-next-meta";
+      const reihenfolge = document.createElement("span");
+      reihenfolge.className = "next-order-box";
+      reihenfolge.textContent = `${index + 1}. NÄCHSTES`;
+      const matchId = document.createElement("small");
+      matchId.textContent = match.id || "Partie";
+      meta.append(reihenfolge, matchId);
+      const paarung = document.createElement("div");
+      paarung.className = "dashboard-next-pairing";
+      const a = document.createElement("strong"); a.textContent = match.a;
+      const vs = document.createElement("span"); vs.textContent = "VS";
+      const b = document.createElement("strong"); b.textContent = match.b;
+      paarung.append(a, vs, b);
+      const format = document.createElement("small");
+      format.className = "dashboard-next-format";
+      format.textContent = `Best of ${bestOfWert}`;
+      karte.append(meta, paarung, format);
+      container.appendChild(karte);
+    });
+  }
+
   function tvSpieleRendern() {
     const aktuell = document.getElementById("tvAktuelleSpiele");
     const naechste = document.getElementById("tvNaechsteSpiele");
@@ -620,6 +661,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (modus === "gruppenko" || modus === "auto") return;
       aktuell.innerHTML = '<div class="tv-leer">Das Turnier wurde noch nicht ausgelost.</div>';
       naechste.innerHTML = '<div class="tv-leer">Noch keine Partien vorhanden.</div>';
+      dashboardNaechsteSpieleRendern([], bestOf);
       return;
     }
     let naechsteAngezeigt = 0;
@@ -647,6 +689,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     if (!aktuellAngezeigt) aktuell.innerHTML = '<div class="tv-leer">Zurzeit läuft kein Spiel.</div>';
     if (!naechsteAngezeigt) naechste.innerHTML = '<div class="tv-leer">Keine weiteren spielbereiten Partien.</div>';
+    dashboardNaechsteSpieleRendern(alleTurnierMatches().filter(istSpielbereit).sort((a, b) => {
+      if (a.board && b.board) return a.board - b.board;
+      if (a.board) return -1;
+      if (b.board) return 1;
+      return String(a.id || "").localeCompare(String(b.id || ""), "de");
+    }), bestOf);
   }
 
   function tvTurnierbaumRendern() {
@@ -776,9 +824,19 @@ document.addEventListener("DOMContentLoaded", () => {
       matches.forEach(match => {
         const erg = ergebnisVon(match);
         const karte = document.createElement("article");
-        karte.className = `tv-bracket-match${erg ? " beendet" : ""}`;
+        const boardKlasse = match.board ? ` board-${Math.min(8, Math.max(1, Number(match.board) || 1))}` : "";
+        karte.className = `tv-bracket-match${erg ? " beendet" : ""}${boardKlasse}`;
         const meta = document.createElement("small");
-        meta.textContent = match.board ? `${match.id} · Board ${match.board}` : match.id;
+        meta.className = "tv-bracket-meta";
+        const matchId = document.createElement("span");
+        matchId.textContent = match.id;
+        meta.appendChild(matchId);
+        if (match.board) {
+          const boardBadge = document.createElement("b");
+          boardBadge.className = `tv-tree-board board-${Math.min(8, Math.max(1, Number(match.board) || 1))}`;
+          boardBadge.textContent = `BOARD ${match.board}`;
+          meta.appendChild(boardBadge);
+        }
         karte.appendChild(meta);
 
         [[match.a, match.scoreA], [match.b, match.scoreB]].forEach(([name, score]) => {
@@ -1230,6 +1288,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const neueGroesse = Number(daten.turnierGroesse);
     const neueBoardAnzahl = Number(daten.boardAnzahl);
     const neuesBestOf = Number(daten.bestOf);
+    const onlineModus = daten.turnierModus === "gruppenko" ? "gruppenko" : daten.turnierModus === "doppelko" ? "doppelko" : null;
+    if (onlineModus) {
+      localStorage.setItem("dart11enV3TurnierModus", onlineModus);
+      if (istTvModus) {
+        const url = new URL(window.location.href);
+        const aktuellerTvModus = url.searchParams.get("mode");
+        if (aktuellerTvModus !== onlineModus) {
+          url.searchParams.set("mode", onlineModus);
+          window.location.replace(url.toString());
+          return;
+        }
+      }
+    }
     if ([16, 32, 64].includes(neueGroesse)) turnierGroesse = neueGroesse;
     if (neueBoardAnzahl >= 1 && neueBoardAnzahl <= 6) boardAnzahl = neueBoardAnzahl;
     if ([1, 3, 5, 7].includes(neuesBestOf)) bestOf = neuesBestOf;

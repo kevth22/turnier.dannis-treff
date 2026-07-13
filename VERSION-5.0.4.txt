@@ -1,0 +1,2 @@
+Dart11en Turnier-Center Version 5.0.4
+Fix: Gäste und Mitglieder sehen nur den aktuell gewählten öffentlichen Bereich. Admin- und Gruppenbereiche werden nicht mehr gleichzeitig eingeblendet.

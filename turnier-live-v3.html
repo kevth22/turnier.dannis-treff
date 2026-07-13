@@ -7,9 +7,9 @@
   <title>Dart11en | Turnier-Center</title>
 
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="turnier-live-v3.css?v=300">
+  <link rel="stylesheet" href="turnier-live-v3.css?v=507">
   <link rel="stylesheet" href="turnier-tv-fit.css?v=10">
-  <link rel="stylesheet" href="gruppen-turnier-v3.css?v=308">
+  <link rel="stylesheet" href="gruppen-turnier-v3.css?v=507">
   <link rel="stylesheet" href="turnier-admin-menu.css?v=501">
   <link rel="manifest" href="manifest.json">
 
@@ -19,21 +19,22 @@
   <meta name="apple-mobile-web-app-title" content="Dart11en">
 
   <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="turnier-theme.css?v=507">
 </head>
 
 <body>
 
 <header class="app-header turnier-app-header">
-  <button id="adminMenuButton" class="admin-menu-button admin-only" type="button" aria-label="Turniermenü öffnen" aria-controls="adminDrawer" aria-expanded="false">☰</button>
+  <button id="adminMenuButton" class="admin-menu-button" type="button" aria-label="Turniermenü öffnen" aria-controls="adminDrawer" aria-expanded="false">☰</button>
   <div class="turnier-header-brand">
     <img src="dart11enlogo.png" class="logo" alt="Dart11en Logo">
     <div><strong>Dart11en</strong><span>Turnier-Center</span></div>
   </div>
-  <span id="headerTurnierStatus" class="header-status admin-only">Vorbereitung</span>
+  <span id="headerTurnierStatus" class="header-status">Vorbereitung</span>
 </header>
 
-<div id="adminDrawerBackdrop" class="admin-drawer-backdrop admin-only" aria-hidden="true"></div>
-<aside id="adminDrawer" class="admin-drawer admin-only" aria-hidden="true">
+<div id="adminDrawerBackdrop" class="admin-drawer-backdrop" aria-hidden="true"></div>
+<aside id="adminDrawer" class="admin-drawer" aria-hidden="true">
   <div class="drawer-head">
     <img src="dart11enlogo.png" alt="Dart11en Logo">
     <div><strong>Dart11en</strong><span>Turnier-Center</span></div>
@@ -41,14 +42,14 @@
   </div>
   <nav class="drawer-nav" aria-label="Turnierverwaltung">
     <button class="drawer-link active" data-admin-page="dashboard" type="button">📊 <span>Dashboard</span></button>
-    <button class="drawer-link" data-admin-page="teilnehmer" type="button">👥 <span>Teilnehmer verwalten</span></button>
-    <button class="drawer-link" data-admin-page="konfiguration" type="button">🎲 <span>Turnier konfigurieren</span></button>
-    <button class="drawer-link" data-admin-page="ergebnisse" type="button">🎯 <span>Ergebnisse verwalten</span></button>
+    <button class="drawer-link admin-menu-only" data-admin-page="teilnehmer" type="button">👥 <span>Teilnehmer verwalten</span></button>
+    <button class="drawer-link admin-menu-only" data-admin-page="konfiguration" type="button">🎲 <span>Turnier konfigurieren</span></button>
+    <button class="drawer-link admin-menu-only" data-admin-page="ergebnisse" type="button">🎯 <span>Ergebnisse verwalten</span></button>
     <button class="drawer-link" data-admin-page="turnierbaum" type="button">🌳 <span>Turnierbaum</span></button>
-    <button class="drawer-link" data-admin-page="tv" type="button">📺 <span>TV-Modus</span></button>
-    <button class="drawer-link" data-admin-page="einstellungen" type="button">⚙️ <span>Einstellungen</span></button>
+    <button class="drawer-link admin-menu-only" data-admin-page="tv" type="button">📺 <span>TV-Modus</span></button>
+    <button class="drawer-link admin-menu-only" data-admin-page="einstellungen" type="button">⚙️ <span>Einstellungen</span></button>
   </nav>
-  <div class="drawer-version">Version 5.0 – neue Navigation</div>
+  <div class="drawer-version">Version 5.0.6 – TV-Modus & Boardfarben</div>
 </aside>
 
 <main class="turnier-center app-container">
@@ -95,6 +96,20 @@
 
     </div>
 
+  </section>
+
+  <!-- Öffentliche Vorschau der nächsten Partien -->
+  <section id="naechsteSpieleBereich" class="content-card" data-admin-section="dashboard">
+    <div class="dashboard-section-head">
+      <div>
+        <h2>⏭️ Als Nächstes</h2>
+        <p class="section-text">Diese Partien stehen als Nächstes an.</p>
+      </div>
+      <span id="naechsteSpieleAnzahl" class="next-count-badge">0 Spiele</span>
+    </div>
+    <div id="dashboardNaechsteSpiele" class="dashboard-next-list">
+      <div class="tv-leer">Noch keine nächsten Partien vorhanden.</div>
+    </div>
   </section>
 
   <!-- Turnierstatistik -->
@@ -415,6 +430,38 @@
       <input id="settingTournamentName" type="text" maxlength="50" placeholder="Dart11en-Turnier">
     </div>
 
+    <div id="clubThemeSettings" class="settings-group">
+      <h3>🎨 Vereinsdesign</h3>
+      <p class="section-text">Farben und Logo werden zentral gespeichert und erscheinen auf Admin-, Gäste- und TV-Ansicht.</p>
+      <label for="themeClubName">Vereinsname</label>
+      <input id="themeClubName" type="text" maxlength="60" placeholder="Vereinsname">
+      <div class="theme-color-grid">
+        <label class="theme-color-field"><span><strong>Hauptfarbe</strong><small>Kopfzeilen und wichtige Buttons</small></span><input id="themePrimary" type="color" value="#e00022"></label>
+        <label class="theme-color-field"><span><strong>Zweitfarbe</strong><small>Rahmen und zweite Akzente</small></span><input id="themeSecondary" type="color" value="#0047ab"></label>
+        <label class="theme-color-field"><span><strong>Akzentfarbe</strong><small>Hinweise und Highlights</small></span><input id="themeAccent" type="color" value="#ffbe2d"></label>
+        <label class="theme-color-field"><span><strong>Hintergrund</strong><small>Seitenhintergrund</small></span><input id="themeBackground" type="color" value="#05070d"></label>
+        <label class="theme-color-field"><span><strong>Kartenfarbe</strong><small>Dashboard- und Spielkarten</small></span><input id="themeCard" type="color" value="#101116"></label>
+        <label class="theme-color-field"><span><strong>Textfarbe</strong><small>Haupttext der Seite</small></span><input id="themeText" type="color" value="#ffffff"></label>
+      </div>
+      <div class="theme-logo-editor">
+        <img id="themeLogoPreview" class="theme-logo-preview" data-club-logo src="dart11enlogo.png" alt="Logo Vorschau">
+        <div>
+          <label for="themeLogoInput"><strong>Eigenes Vereinslogo</strong></label>
+          <input id="themeLogoInput" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+          <div class="theme-logo-actions"><button id="themeLogoRemove" class="main-button secondary-button" type="button">Logo zurücksetzen</button></div>
+        </div>
+      </div>
+      <div class="theme-live-preview">
+        <div class="theme-live-preview-header"><img data-club-logo src="dart11enlogo.png" alt="Logo"><span data-club-name>Dart11en</span> Turnier-Center</div>
+        <div class="theme-live-preview-body"><span class="theme-live-preview-button">Beispiel-Button</span><span class="theme-live-preview-accent">LIVE</span></div>
+      </div>
+      <div class="settings-actions">
+        <button id="themeSaveBtn" class="main-button" type="button">💾 Vereinsdesign speichern</button>
+        <button id="themeResetBtn" class="main-button secondary-button" type="button">↩ Standarddesign</button>
+      </div>
+      <p id="themeMessage" class="section-text" role="status"></p>
+    </div>
+
     <div class="settings-actions">
       <button id="settingsSaveBtn" class="main-button" type="button">💾 Einstellungen speichern</button>
       <button id="settingsResetBtn" class="main-button secondary-button" type="button">↩ Standard wiederherstellen</button>
@@ -529,12 +576,13 @@
   <a href="kader.html">👥<br>Kader</a>
 </nav>
 
-<script type="module" src="turnier-v3-manager.js?v=308"></script>
-<script type="module" src="turnier-live-v3.js?v=308"></script>
-<script type="module" src="gruppen-turnier-v3.js?v=308"></script>
+<script type="module" src="turnier-v3-manager.js?v=507"></script>
+<script type="module" src="turnier-live-v3.js?v=507"></script>
+<script type="module" src="gruppen-turnier-v3.js?v=507"></script>
 <script src="turnier-tv-fit.js?v=400" defer></script>
 <script type="module" src="turnier-v4-live.js?v=400"></script>
-<script src="turnier-admin-menu.js?v=501" defer></script>
+<script src="turnier-admin-menu.js?v=507" defer></script>
+<script type="module" src="turnier-theme.js?v=507"></script>
 <script src="pwa.js" defer></script>
 
 </body>

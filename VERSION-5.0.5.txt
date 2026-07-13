@@ -1,0 +1,3 @@
+Dart11en Turniercenter Version 5.0.5
+- Gäste und Mitglieder sehen im Dashboard die nächsten spielbereiten Partien.
+- Funktioniert für Gruppenphase, K.-o. nach Gruppen und Doppel-K.-o.

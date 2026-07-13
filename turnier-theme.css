@@ -1,0 +1,31 @@
+:root{
+  --club-primary:#e00022;
+  --club-secondary:#0047ab;
+  --club-accent:#ffbe2d;
+  --club-bg:#05070d;
+  --club-card:#101116;
+  --club-text:#ffffff;
+  --club-muted:#bdbdbd;
+}
+body{background:var(--club-bg)!important;color:var(--club-text)!important}
+.app-header,.tv-header,.admin-drawer-header{background:linear-gradient(135deg,var(--club-primary),color-mix(in srgb,var(--club-primary) 55%,#000))!important}
+.content-card,.info-card,.settings-group,.dashboard-card,.tv-card,.match-card,.gruppen-card,.gruppe-card{background-color:var(--club-card)!important;color:var(--club-text)!important}
+.main-button,button.primary,.drawer-link.active,.tab-button.active,.filter-btn.active{background:var(--club-primary)!important;border-color:var(--club-primary)!important;color:#fff!important}
+.secondary-button,.drawer-link:hover{border-color:var(--club-secondary)!important}
+a,.section-link,.highlight-text{color:var(--club-accent)}
+h1,h2,h3,h4,strong,label{color:var(--club-text)}
+.section-text,small,.muted{color:var(--club-muted)!important}
+input,select,textarea{background:color-mix(in srgb,var(--club-card) 82%,#000)!important;color:var(--club-text)!important;border-color:color-mix(in srgb,var(--club-secondary) 65%,#777)!important}
+.logo,[data-club-logo]{object-fit:contain}
+.theme-color-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+.theme-color-field{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.035)}
+.theme-color-field span{display:flex;flex-direction:column;gap:2px}.theme-color-field small{font-size:.75rem}
+.theme-color-field input[type=color]{width:48px;height:38px;padding:2px;border:0;border-radius:9px;background:transparent!important}
+.theme-logo-editor{display:grid;grid-template-columns:84px 1fr;gap:14px;align-items:center;margin-top:12px}
+.theme-logo-preview{width:84px;height:84px;border-radius:14px;border:1px solid rgba(255,255,255,.15);background:#fff;object-fit:contain;padding:6px}
+.theme-logo-actions{display:flex;flex-wrap:wrap;gap:8px}.theme-logo-actions button{margin:0}
+.theme-live-preview{border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.14);margin-top:14px;background:var(--club-bg)}
+.theme-live-preview-header{padding:14px;background:linear-gradient(135deg,var(--club-primary),var(--club-secondary));display:flex;align-items:center;gap:10px;font-weight:800}
+.theme-live-preview-header img{width:42px;height:42px;object-fit:contain;background:#fff;border-radius:9px;padding:3px}
+.theme-live-preview-body{padding:14px}.theme-live-preview-button{display:inline-block;padding:9px 14px;border-radius:10px;background:var(--club-primary);color:#fff;font-weight:700}.theme-live-preview-accent{color:var(--club-accent);font-weight:800;margin-left:10px}
+@media(max-width:520px){.theme-color-grid{grid-template-columns:1fr}.theme-logo-editor{grid-template-columns:70px 1fr}.theme-logo-preview{width:70px;height:70px}}
