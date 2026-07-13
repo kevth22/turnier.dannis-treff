@@ -1,5 +1,0 @@
-Dart11en Turnier-Center Version 1.0
-
-- Kompakte Darstellung funktioniert sofort
-- Untere Hauptnavigation kann sofort ein- und ausgeblendet werden
-- Einstellungen bleiben lokal gespeichert
