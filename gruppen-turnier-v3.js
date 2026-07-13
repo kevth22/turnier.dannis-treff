@@ -287,6 +287,7 @@ function gruppenDashboardNaechsteRendern(matches){
   });
 }
 function tvGruppenSpieleRendern(){
+  if(daten?.gruppen?.length)window.dart11enDashboardTurnierInhalteSichtbar?.(true);
   const aktuell=$("tvAktuelleSpiele"),naechste=$("tvNaechsteSpiele");
   if(!aktuell||!naechste)return;
   aktuell.replaceChildren();naechste.replaceChildren();
@@ -380,6 +381,7 @@ async function gruppenTurnierZuruecksetzen({wechselZuDoppelKo=false, bestaetigen
     : "Gruppenphase samt Ergebnissen und K.-o.-Bäumen wirklich zurücksetzen? Die Teilnehmer bleiben erhalten.")) return false;
   gruppenResetLaeuft=true;
   daten=null;
+  window.dart11enDashboardTurnierInhalteSichtbar?.(false);
   localStorage.removeItem("dart11enV3GruppenKo");
   entwurfRegeln={ko1:[1,2],ko2:[1,2]};
   $("gruppenAnzeige")?.replaceChildren();
@@ -440,4 +442,4 @@ document.addEventListener("DOMContentLoaded",()=>{
   renderConfig();if(mode){$("doppelKoKonfiguration")?.classList.toggle("modus-versteckt",mode.value==="gruppenko")}if(originalBtn&&mode)originalBtn.textContent=mode.value==="gruppenko"?"🎲 Gruppen auslosen":"🎲 Live-Auslosung starten";
 });
 onSnapshot(collection(db,"warteschlange"),snap=>{teilnehmer=[];snap.forEach(d=>teilnehmer.push({id:d.id,...d.data()}));if(!daten)renderConfig()});
-onSnapshot(doc(db,"turnierLive","gruppenTurnierV3"),snap=>{if(istAdmin&&!istTv)return;if(gruppenResetLaeuft)return;if(!snap.exists()){daten=null;localStorage.removeItem("dart11enV3GruppenKo");return}try{daten=JSON.parse(snap.data().datenJson||"null");if(daten){if(!daten.aufteilung)daten.aufteilung="gemeinsam";localStorage.setItem("dart11enV3GruppenKo",JSON.stringify(daten));if(gruppenModusIstAktiv())renderAlles();else $("gruppenBereich")?.classList.add("modus-versteckt")}}catch(e){console.error(e)}});
+onSnapshot(doc(db,"turnierLive","gruppenTurnierV3"),snap=>{if(istAdmin&&!istTv)return;if(gruppenResetLaeuft)return;if(!snap.exists()){daten=null;localStorage.removeItem("dart11enV3GruppenKo");if(gruppenModusIstAktiv())window.dart11enDashboardTurnierInhalteSichtbar?.(false);return}try{daten=JSON.parse(snap.data().datenJson||"null");if(daten){if(!daten.aufteilung)daten.aufteilung="gemeinsam";localStorage.setItem("dart11enV3GruppenKo",JSON.stringify(daten));if(gruppenModusIstAktiv())renderAlles();else $("gruppenBereich")?.classList.add("modus-versteckt")}}catch(e){console.error(e)}});

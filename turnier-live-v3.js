@@ -615,6 +615,23 @@ document.addEventListener("DOMContentLoaded", () => {
     bereit.filter(match => !match.board).forEach(match => { match.board = frei.shift() || null; });
   }
 
+  function dashboardTurnierInhalteSichtbar(sichtbar) {
+    ["aktuelleSpieleBereich", "naechsteSpieleBereich", "statistikBereich", "spielerBereich"].forEach(id => {
+      document.getElementById(id)?.classList.toggle("modus-versteckt", !sichtbar);
+    });
+    if (!sichtbar) {
+      document.getElementById("dashboardGruppenBereich")?.classList.add("modus-versteckt");
+      document.getElementById("dashboardAktuelleSpiele")?.replaceChildren();
+      document.getElementById("dashboardNaechsteSpiele")?.replaceChildren();
+      document.getElementById("dashboardGruppenTabellen")?.replaceChildren();
+      const aktuell = document.getElementById("aktuelleSpieleAnzahl");
+      const naechste = document.getElementById("naechsteSpieleAnzahl");
+      if (aktuell) aktuell.textContent = "0 Spiele";
+      if (naechste) naechste.textContent = "0 Spiele";
+    }
+  }
+  window.dart11enDashboardTurnierInhalteSichtbar = dashboardTurnierInhalteSichtbar;
+
   function dashboardAktuelleSpieleRendern(matches, bestOfWert) {
     const container = document.getElementById("dashboardAktuelleSpiele");
     const anzahl = document.getElementById("aktuelleSpieleAnzahl");
@@ -685,6 +702,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!aktuell || !naechste) return;
     aktuell.replaceChildren(); naechste.replaceChildren();
     if (!turnierDaten) {
+      if ((localStorage.getItem("dart11enV3TurnierModus") || "doppelko") === "doppelko") dashboardTurnierInhalteSichtbar(false);
       const modus = new URLSearchParams(location.search).get("mode") || "auto";
       if (modus === "gruppenko" || modus === "auto") return;
       aktuell.innerHTML = '<div class="tv-leer">Das Turnier wurde noch nicht ausgelost.</div>';
@@ -693,6 +711,7 @@ document.addEventListener("DOMContentLoaded", () => {
       dashboardNaechsteSpieleRendern([], bestOf);
       return;
     }
+    dashboardTurnierInhalteSichtbar(true);
     let naechsteAngezeigt = 0;
     let aktuellAngezeigt = 0;
     alleTurnierMatches().filter(istSpielbereit).sort((a, b) => {
@@ -1118,6 +1137,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!confirm("Turnierbaum und alle Ergebnisse wirklich zurücksetzen?")) return;
 
     turnierDaten = null;
+    dashboardTurnierInhalteSichtbar(false);
     ergebnisHistorieLeeren();
     localStorage.removeItem("dart11enV3DoppelKo");
     turnierAnsichtRendern();
@@ -1133,8 +1153,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  if (turnierDaten) { bestOf = turnierDaten.bestOf || bestOf; if (matchFormatAuswahl) matchFormatAuswahl.value = String(bestOf); formatInfoAktualisieren(); wegeBerechnen(); turnierSpeichernUndRendern(); }
-  else statistikAktualisieren();
+  if (turnierDaten) { dashboardTurnierInhalteSichtbar(true); bestOf = turnierDaten.bestOf || bestOf; if (matchFormatAuswahl) matchFormatAuswahl.value = String(bestOf); formatInfoAktualisieren(); wegeBerechnen(); turnierSpeichernUndRendern(); }
+  else { dashboardTurnierInhalteSichtbar(false); statistikAktualisieren(); }
   if (istTvModus) tvModusStarten();
   if (istAdmin && !istTvModus) einstellungenOnlineSpeichern();
 
