@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="turnier-live-v3.css?v=300">
   <link rel="stylesheet" href="turnier-tv-fit.css?v=10">
   <link rel="stylesheet" href="gruppen-turnier-v3.css?v=308">
+  <link rel="stylesheet" href="turnier-admin-menu.css?v=500">
   <link rel="manifest" href="manifest.json">
 
   <meta name="theme-color" content="#e00022">
@@ -22,15 +23,38 @@
 
 <body>
 
-<header class="app-header">
-  <img src="dart11enlogo.png" class="logo" alt="Dart11en Logo">
-  <p>Turnier-Center</p>
+<header class="app-header turnier-app-header">
+  <button id="adminMenuButton" class="admin-menu-button admin-only" type="button" aria-label="Turniermenü öffnen" aria-controls="adminDrawer" aria-expanded="false">☰</button>
+  <div class="turnier-header-brand">
+    <img src="dart11enlogo.png" class="logo" alt="Dart11en Logo">
+    <div><strong>Dart11en</strong><span>Turnier-Center</span></div>
+  </div>
+  <span id="headerTurnierStatus" class="header-status admin-only">Vorbereitung</span>
 </header>
+
+<div id="adminDrawerBackdrop" class="admin-drawer-backdrop admin-only" hidden></div>
+<aside id="adminDrawer" class="admin-drawer admin-only" aria-hidden="true">
+  <div class="drawer-head">
+    <img src="dart11enlogo.png" alt="Dart11en Logo">
+    <div><strong>Dart11en</strong><span>Turnier-Center</span></div>
+    <button id="adminMenuClose" type="button" aria-label="Menü schließen">×</button>
+  </div>
+  <nav class="drawer-nav" aria-label="Turnierverwaltung">
+    <button class="drawer-link active" data-admin-page="dashboard" type="button">📊 <span>Dashboard</span></button>
+    <button class="drawer-link" data-admin-page="teilnehmer" type="button">👥 <span>Teilnehmer verwalten</span></button>
+    <button class="drawer-link" data-admin-page="konfiguration" type="button">🎲 <span>Turnier konfigurieren</span></button>
+    <button class="drawer-link" data-admin-page="ergebnisse" type="button">🎯 <span>Ergebnisse verwalten</span></button>
+    <button class="drawer-link" data-admin-page="turnierbaum" type="button">🌳 <span>Turnierbaum</span></button>
+    <button class="drawer-link" data-admin-page="tv" type="button">📺 <span>TV-Modus</span></button>
+    <button class="drawer-link" data-admin-page="einstellungen" type="button">⚙️ <span>Einstellungen</span></button>
+  </nav>
+  <div class="drawer-version">Version 5.0 – neue Navigation</div>
+</aside>
 
 <main class="turnier-center app-container">
 
   <!-- Dashboard -->
-  <section id="dashboard" class="dashboard-card">
+  <section id="dashboard" class="dashboard-card" data-admin-section="dashboard">
 
     <h2>🏆 Dart11en-Turnier</h2>
 
@@ -74,7 +98,7 @@
   </section>
 
   <!-- Turnierstatistik -->
-  <section id="statistikBereich" class="content-card">
+  <section id="statistikBereich" class="content-card" data-admin-section="dashboard">
 
     <h2>📈 Turnierstatistik</h2>
 
@@ -110,7 +134,7 @@
   </section>
 
   <!-- Spielerbereich -->
-  <section id="spielerBereich" class="content-card">
+  <section id="spielerBereich" class="content-card" data-admin-section="dashboard">
 
     <h2>📱 Spieler verfolgen</h2>
 
@@ -129,7 +153,7 @@
 
   </section>
 
-  <section id="turnierBaumBereich" class="content-card">
+  <section id="turnierBaumBereich" class="content-card" data-admin-section="turnierbaum">
     <h2>Doppel-K.-o.-Turnierbaum</h2>
     <p id="baumStatus" class="section-text">Der Turnierbaum wird nach der Auslosung angezeigt.</p>
     <div class="bracket-block"><h3>Gewinnerbaum</h3><div id="gewinnerBaum" class="bracket-scroll"></div></div>
@@ -138,7 +162,7 @@
   </section>
 
 
-  <section id="gruppenBereich" class="content-card modus-versteckt">
+  <section id="gruppenBereich" class="content-card modus-versteckt" data-admin-section="turnierbaum">
     <h2>📊 Gruppenphase</h2>
     <p class="section-text">Tabellen, Gruppenspiele und die späteren K.-o.-Bäume werden hier live angezeigt.</p>
     <div id="gruppenAnzeige" class="gruppen-public-grid"></div>
@@ -147,43 +171,8 @@
     <div id="gruppenKoAnzeige" class="ko-phasen-grid"></div>
   </section>
 
-  <!-- Admin Dashboard -->
-  <section id="adminDashboard" class="admin-dashboard admin-only">
-
-    <h2>🛠 Turnierverwaltung</h2>
-
-    <div class="admin-grid">
-
-      <button class="admin-box" data-target="teilnehmerBereich">
-        <div class="admin-icon">👥</div>
-        <h3>Teilnehmer</h3>
-        <p>Warteschlange verwalten</p>
-      </button>
-
-      <button class="admin-box" data-target="auslosungBereich">
-        <div class="admin-icon">🎲</div>
-        <h3>Auslosung</h3>
-        <p>Turnier erstellen</p>
-      </button>
-
-      <button class="admin-box" data-target="ergebnisBereich">
-        <div class="admin-icon">🎯</div>
-        <h3>Ergebnisse</h3>
-        <p>Spiele verwalten</p>
-      </button>
-
-      <button class="admin-box" data-target="tvBereich">
-        <div class="admin-icon">📺</div>
-        <h3>TV</h3>
-        <p>Live-Anzeige starten</p>
-      </button>
-
-    </div>
-
-  </section>
-
   <!-- Teilnehmer verwalten -->
-  <section id="teilnehmerBereich" class="content-card admin-only">
+  <section id="teilnehmerBereich" class="content-card admin-only" data-admin-section="teilnehmer">
 
     <h2>👥 Teilnehmer verwalten</h2>
 
@@ -221,9 +210,9 @@
   </section>
 
   <!-- Turnierauslosung -->
-  <section id="auslosungBereich" class="content-card admin-only">
+  <section id="auslosungBereich" class="content-card admin-only" data-admin-section="konfiguration">
 
-    <div class="v2-title-row"><h2>🎲 Turnier auslosen</h2><span class="v2-badge">VERSION 4.0.0 – LIVE-STEUERUNG</span></div>
+    <div class="v2-title-row"><h2>🎲 Turnier konfigurieren</h2><span class="v2-badge">VERSION 4.0.0 – LIVE-STEUERUNG</span></div>
 
     <p class="section-text">
       Spieler werden zufällig gelost. Freilose werden fair verteilt und dürfen nicht gegeneinander spielen.
@@ -324,7 +313,7 @@
   </section>
 
   <!-- Ergebnisse verwalten -->
-  <section id="ergebnisBereich" class="content-card admin-only">
+  <section id="ergebnisBereich" class="content-card admin-only" data-admin-section="ergebnisse">
 
     <h2>🎯 Ergebnisse verwalten</h2>
 
@@ -371,7 +360,7 @@
   </section>
 
   <!-- TV Steuerung -->
-  <section id="tvBereich" class="content-card admin-only">
+  <section id="tvBereich" class="content-card admin-only" data-admin-section="tv">
 
     <h2>📺 TV-Modus</h2>
 
@@ -395,6 +384,42 @@
 
     </div>
 
+  </section>
+
+  <section id="einstellungenBereich" class="content-card admin-only" data-admin-section="einstellungen">
+    <h2>⚙️ Einstellungen</h2>
+    <p class="section-text">Passe die Bedienung des Turnier-Centers an. Die Turnierregeln und Auslosung findest du unter „Turnier konfigurieren“.</p>
+
+    <div class="settings-group">
+      <h3>Anzeige</h3>
+      <label class="settings-row"><span><strong>Kompakte Darstellung</strong><small>Weniger Abstände, damit mehr Spiele auf den Bildschirm passen.</small></span><input id="settingCompact" type="checkbox"></label>
+      <label class="settings-row"><span><strong>Untere Hauptnavigation anzeigen</strong><small>Home, Turniere, Liga, Kalender und Kader im Turnier-Center einblenden.</small></span><input id="settingBottomNav" type="checkbox"></label>
+    </div>
+
+    <div class="settings-group">
+      <h3>Startansicht</h3>
+      <label for="settingStartPage">Beim Öffnen des Adminbereichs anzeigen</label>
+      <select id="settingStartPage">
+        <option value="dashboard">Dashboard</option>
+        <option value="teilnehmer">Teilnehmer verwalten</option>
+        <option value="konfiguration">Turnier konfigurieren</option>
+        <option value="ergebnisse">Ergebnisse verwalten</option>
+        <option value="turnierbaum">Turnierbaum</option>
+        <option value="tv">TV-Modus</option>
+      </select>
+    </div>
+
+    <div class="settings-group">
+      <h3>Bezeichnung</h3>
+      <label for="settingTournamentName">Turniername im Dashboard</label>
+      <input id="settingTournamentName" type="text" maxlength="50" placeholder="Dart11en-Turnier">
+    </div>
+
+    <div class="settings-actions">
+      <button id="settingsSaveBtn" class="main-button" type="button">💾 Einstellungen speichern</button>
+      <button id="settingsResetBtn" class="main-button secondary-button" type="button">↩ Standard wiederherstellen</button>
+    </div>
+    <p id="settingsMessage" class="section-text" role="status"></p>
   </section>
 
 </main>
@@ -509,6 +534,7 @@
 <script type="module" src="gruppen-turnier-v3.js?v=308"></script>
 <script src="turnier-tv-fit.js?v=400" defer></script>
 <script type="module" src="turnier-v4-live.js?v=400"></script>
+<script src="turnier-admin-menu.js?v=500" defer></script>
 <script src="pwa.js" defer></script>
 
 </body>
