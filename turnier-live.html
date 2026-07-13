@@ -49,7 +49,7 @@
     <button class="drawer-link admin-menu-only" data-admin-page="tv" type="button">📺 <span>TV-Modus</span></button>
     <button class="drawer-link admin-menu-only" data-admin-page="einstellungen" type="button">⚙️ <span>Einstellungen</span></button>
   </nav>
-  <div class="drawer-version">Version 1.1 – Dashboard</div>
+  <div class="drawer-version">Version 1.2 – K.-o.-Automatik</div>
 </aside>
 
 <main class="turnier-center app-container">
@@ -207,7 +207,6 @@
     <p class="section-text">Tabellen, Gruppenspiele und die späteren K.-o.-Bäume werden hier live angezeigt.</p>
     <div id="gruppenAnzeige" class="gruppen-public-grid"></div>
     <div id="gruppenAdminAnzeige" class="gruppen-admin-grid admin-only"></div>
-    <div class="action-row admin-only"><button id="koErstellenBtn" class="main-button" type="button">K.-o.-Phase erstellen</button></div>
     <div id="gruppenKoAnzeige" class="ko-phasen-grid"></div>
   </section>
 
@@ -300,10 +299,6 @@
         <div id="ko2Plaetze" class="qualifier-options"></div>
       </div>
       <p id="gruppenRegelHinweis" class="section-text">Eine Platzierung kann nur einem K.-o.-Baum zugeordnet werden.</p>
-      <div class="gruppen-reset-aktionen admin-only">
-        <button id="gruppenZuruecksetzenBtn" class="main-button reset-turnier-button" type="button">🔄 Gruppenphase zurücksetzen</button>
-        <button id="gruppenZuDoppelKoBtn" class="main-button secondary-button" type="button">↩ Gruppenphase beenden und zu Doppel-K.-o. wechseln</button>
-      </div>
     </div>
 
     <div id="doppelKoKonfiguration" class="doppelko-config">

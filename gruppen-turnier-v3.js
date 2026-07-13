@@ -120,8 +120,10 @@ function qualifizierte(pos,turnierId=null){
   daten.gruppen.filter(g=>turnierId==null||g.turnierId===turnierId).forEach(g=>{const tab=tabelle(g);pos.forEach(p=>{if(tab[p-1])out.push({name:tab[p-1].name,gruppe:g.id,platz:p})})});
   return out;
 }
-function koPhasenErstellen(){
-  if(!alleGruppenFertig()){alert("Bitte zuerst alle Gruppenspiele abschließen.");return}
+let koErstellungLaeuft=false;
+function koPhasenErstellen({automatisch=false}={}){
+  if(koErstellungLaeuft)return false;
+  if(!alleGruppenFertig()){if(!automatisch)alert("Bitte zuerst alle Gruppenspiele abschließen.");return false}
   normalisiereRegeln();
   const getrennt=daten.aufteilung==="getrennt";
   const sets=getrennt?
@@ -138,8 +140,13 @@ function koPhasenErstellen(){
     if(eindeutig.length<2){fehler.push(`${set.label}: Es wurden nur ${eindeutig.length} qualifizierte Spieler gefunden.`);return}
     neuePhasen.push(koErstellen(eindeutig,i+1,set.turnierId));
   });
-  if(fehler.length){alert(`K.-o.-Phase konnte nicht erstellt werden:\n\n${fehler.join("\n")}\n\nPrüfe die ausgewählten Plätze und die Gruppentabellen.`);return}
-  daten.koPhasen=neuePhasen;speichern();renderAlles();
+  if(fehler.length){if(!automatisch)alert(`K.-o.-Phase konnte nicht erstellt werden:\n\n${fehler.join("\n")}\n\nPrüfe die ausgewählten Plätze und die Gruppentabellen.`);return false}
+  koErstellungLaeuft=true;
+  daten.koPhasen=neuePhasen;
+  speichern();
+  renderAlles();
+  koErstellungLaeuft=false;
+  return true;
 }
 function speichern(){gruppenBoardsVerteilen();localStorage.setItem("dart11enV3GruppenKo",JSON.stringify(daten));clearTimeout(speicherTimer);speicherTimer=setTimeout(()=>setDoc(doc(db,"turnierLive","gruppenTurnierV3"),{datenJson:JSON.stringify(daten),aktualisiert:Date.now()}).catch(console.error),250)}
 function scoreSelect(wert,onchange){const s=document.createElement("select");s.innerHTML='<option value="">–</option>'+Array.from({length:siegLegs()+1},(_,i)=>`<option value="${i}">${i}</option>`).join("");s.value=wert??"";s.onchange=()=>onchange(s.value===""?null:Number(s.value));return s}
@@ -212,6 +219,9 @@ function gruppenModusIstAktiv(){
 }
 function renderAlles(){
   if(!daten||daten.modus!=="gruppenko")return;
+  if(alleGruppenFertig()&&!daten.koPhasen?.length&&!koErstellungLaeuft){
+    setTimeout(()=>koPhasenErstellen({automatisch:true}),0);
+  }
   if(!gruppenModusIstAktiv()){
     $("gruppenBereich")?.classList.add("modus-versteckt");
     $("gruppenErgebnisAnzeige")?.classList.add("modus-versteckt");
@@ -404,16 +414,13 @@ function gruppenphaseSimulieren(){
   daten.koPhasen=[];
   speichern();
   renderAlles();
-  alert(`${geaendert} offene Gruppenspiele wurden simuliert. Du kannst jetzt die K.-o.-Phase erstellen.`);
+  alert(`${geaendert} offene Gruppenspiele wurden simuliert. Die K.-o.-Phase wird jetzt automatisch erstellt.`);
 }
 
 document.addEventListener("DOMContentLoaded",()=>{
   const mode=$("turnierModus"),originalBtn=$("turnierAuslosenBtn");
   originalBtn?.addEventListener("click",e=>{if(mode?.value!=="gruppenko")return;e.stopImmediatePropagation();e.preventDefault();neuesGruppenTurnier()},true);
-  $("koErstellenBtn")?.addEventListener("click",koPhasenErstellen);
   $("gruppenSimulationBtn")?.addEventListener("click",gruppenphaseSimulieren);
-  $("gruppenZuruecksetzenBtn")?.addEventListener("click",()=>gruppenTurnierZuruecksetzen());
-  $("gruppenZuDoppelKoBtn")?.addEventListener("click",()=>gruppenTurnierZuruecksetzen({wechselZuDoppelKo:true}));
   $("gruppenAnzahl")?.addEventListener("change",()=>{if(daten)return;normalisiereRegeln();renderConfig()});
   $("turnierAufteilung")?.addEventListener("change",()=>{const feld=$("turnierAufteilung");feld.dataset.userChanged="1";regelEntwurfSpeichern(feld.value==="getrennt"?{ko1:[1,2],ko2:[1,2]}:{ko1:[1,2],ko2:[3,4]});renderConfig()});
   document.querySelectorAll(".qualifier-presets").forEach(leiste=>leiste.addEventListener("click",e=>{const btn=e.target.closest("button");if(!btn)return;const key=leiste.dataset.target==="ko1Plaetze"?"ko1":"ko2",max=maxGruppenPlaetze();let werte=[];if(btn.dataset.clear)werte=[];else if(btn.dataset.top)werte=Array.from({length:Math.min(max,Number(btn.dataset.top))},(_,i)=>i+1);else if(btn.dataset.from)werte=Array.from({length:Math.max(0,max-Number(btn.dataset.from)+1)},(_,i)=>Number(btn.dataset.from)+i);regelSetzen(key,werte)}));
