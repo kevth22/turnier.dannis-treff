@@ -1,0 +1,5 @@
+Dart11en Turnier-Center 5.0.8
+- Fehler behoben: Adminbereiche werden wieder strikt als einzelne Seiten angezeigt
+- Vereinsdesign erscheint ausschließlich unter Einstellungen
+- Turnier konfigurieren, Teilnehmer, Ergebnisse, TV und Einstellungen überlagern sich nicht mehr
+- PWA-Cache auf 5.0.8 erhöht

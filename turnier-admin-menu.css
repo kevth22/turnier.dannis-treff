@@ -17,3 +17,11 @@ body.is-public-turnier .drawer-version::before{content:"Nur Ansicht · ";}
 
 /* v5.0.4: Nicht aktive Bereiche werden auch für Gäste und Mitglieder sicher ausgeblendet. */
 body.is-public-turnier [data-admin-section].admin-page-hidden{display:none!important}
+
+/* Version 5.0.8: aktive Admin-Seite strikt von allen anderen Bereichen trennen.
+   Die ältere Regel body.is-admin .admin-only ist spezifischer und würde sonst
+   ausgeblendete Admin-Bereiche erneut sichtbar machen. */
+body.is-admin [data-admin-section].admin-page-hidden,
+body.is-public-turnier [data-admin-section].admin-page-hidden {
+  display: none !important;
+}
