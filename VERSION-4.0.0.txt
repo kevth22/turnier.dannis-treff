@@ -1,8 +1,0 @@
-Dart11en Turnier-Center 4.0.0
-
-- TV erkennt Gruppenphase oder Doppel-K.-o. automatisch.
-- Beide Gruppen werden parallel auf die aktiven Boards verteilt.
-- Status oben kann als Admin auf Vorbereitung, Anmeldung oder Live gesetzt werden.
-- Status wird über Firebase auf allen Geräten und der TV-Ansicht synchronisiert.
-- Board-Anzahl bleibt auch im Gruppenmodus sichtbar.
-- Veraltete doppelte JavaScript-Dateien wurden entfernt.
