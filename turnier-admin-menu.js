@@ -1,5 +1,5 @@
 (() => {
-  const SETTINGS_KEY = "dart11enTurnierUiV5";
+  const SETTINGS_KEY = "dart11enTurnierUiV1";
   const pageSections = {
     dashboard: ["dashboard", "naechsteSpieleBereich", "statistikBereich", "spielerBereich"],
     teilnehmer: ["teilnehmerBereich"],
@@ -11,11 +11,20 @@
   };
   const defaults = { compact: false, bottomNav: false, startPage: "dashboard", tournamentName: "Dart11en-Turnier" };
 
-  function loadSettings(){
-    try { return { ...defaults, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}") }; }
-    catch { return { ...defaults }; }
+  function loadSettings() {
+    try {
+      const current = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
+      // Einmalige Übernahme aus der alten Version, damit vorhandene Wünsche nicht verloren gehen.
+      const legacy = JSON.parse(localStorage.getItem("dart11enTurnierUiV5") || "{}");
+      return { ...defaults, ...legacy, ...current };
+    } catch {
+      return { ...defaults };
+    }
   }
-  function saveSettings(value){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(value)); }
+
+  function saveSettings(value) {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(value));
+  }
 
   document.addEventListener("DOMContentLoaded", () => {
     let isAdmin = false;
@@ -25,9 +34,11 @@
     } catch {
       isAdmin = String(sessionStorage.getItem("rolle") || "").toLowerCase().trim() === "admin";
     }
+
     document.body.classList.toggle("is-admin", isAdmin);
     document.body.classList.toggle("is-public-turnier", !isAdmin);
-    document.querySelectorAll(".admin-menu-only").forEach(el => { el.hidden = !isAdmin; });
+    document.querySelectorAll(".admin-menu-only").forEach((el) => { el.hidden = !isAdmin; });
+
     const drawer = document.getElementById("adminDrawer");
     const backdrop = document.getElementById("adminDrawerBackdrop");
     const openButton = document.getElementById("adminMenuButton");
@@ -43,6 +54,7 @@
       backdrop?.setAttribute("aria-hidden", "true");
       document.body.classList.remove("admin-menu-open");
     };
+
     const openDrawer = () => {
       backdrop?.classList.add("open");
       backdrop?.setAttribute("aria-hidden", "false");
@@ -51,13 +63,14 @@
       openButton?.setAttribute("aria-expanded", "true");
       document.body.classList.add("admin-menu-open");
     };
+
     const showPage = (page, updateHash = true) => {
       const publicPages = new Set(["dashboard", "turnierbaum"]);
       if (!pageSections[page] || (!isAdmin && !publicPages.has(page))) page = "dashboard";
-      document.querySelectorAll("[data-admin-section]").forEach(section => {
+      document.querySelectorAll("[data-admin-section]").forEach((section) => {
         section.classList.toggle("admin-page-hidden", section.dataset.adminSection !== page);
       });
-      links.forEach(link => link.classList.toggle("active", link.dataset.adminPage === page));
+      links.forEach((link) => link.classList.toggle("active", link.dataset.adminPage === page));
       if (updateHash) history.replaceState(null, "", `#${page}`);
       closeDrawer();
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -66,8 +79,8 @@
     openButton?.addEventListener("click", openDrawer);
     closeButton?.addEventListener("click", closeDrawer);
     backdrop?.addEventListener("click", closeDrawer);
-    document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
-    links.forEach(link => link.addEventListener("click", () => showPage(link.dataset.adminPage)));
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeDrawer(); });
+    links.forEach((link) => link.addEventListener("click", () => showPage(link.dataset.adminPage)));
 
     const compact = document.getElementById("settingCompact");
     const bottomNav = document.getElementById("settingBottomNav");
@@ -76,27 +89,48 @@
     const message = document.getElementById("settingsMessage");
     const title = document.querySelector("#dashboard h2");
 
-    function applySettings(){
-      document.body.classList.toggle("turnier-compact", !!settings.compact);
+    function applySettings() {
+      document.body.classList.toggle("turnier-compact", Boolean(settings.compact));
       document.body.classList.toggle("hide-turnier-bottom-nav", !settings.bottomNav);
-      if (compact) compact.checked = !!settings.compact;
-      if (bottomNav) bottomNav.checked = !!settings.bottomNav;
+      document.body.classList.toggle("show-turnier-bottom-nav", Boolean(settings.bottomNav));
+      if (compact) compact.checked = Boolean(settings.compact);
+      if (bottomNav) bottomNav.checked = Boolean(settings.bottomNav);
       if (startPage) startPage.value = settings.startPage;
       if (tournamentName) tournamentName.value = settings.tournamentName;
       if (title) title.textContent = `🏆 ${settings.tournamentName || defaults.tournamentName}`;
     }
-    document.getElementById("settingsSaveBtn")?.addEventListener("click", () => {
+
+    function persistImmediate(messageText) {
       settings = {
-        compact: !!compact?.checked,
-        bottomNav: !!bottomNav?.checked,
+        compact: Boolean(compact?.checked),
+        bottomNav: Boolean(bottomNav?.checked),
         startPage: startPage?.value || "dashboard",
         tournamentName: tournamentName?.value.trim() || defaults.tournamentName
       };
-      saveSettings(settings); applySettings();
-      if (message) message.textContent = "Einstellungen wurden gespeichert.";
+      saveSettings(settings);
+      applySettings();
+      if (message) message.textContent = messageText;
+    }
+
+    // Beide Schalter wirken sofort und bleiben nach einem Neustart gespeichert.
+    compact?.addEventListener("change", () => {
+      persistImmediate(compact.checked ? "Kompakte Darstellung ist aktiviert." : "Kompakte Darstellung ist deaktiviert.");
     });
+    bottomNav?.addEventListener("change", () => {
+      persistImmediate(bottomNav.checked ? "Untere Hauptnavigation ist eingeblendet." : "Untere Hauptnavigation ist ausgeblendet.");
+    });
+
+    startPage?.addEventListener("change", () => persistImmediate("Startansicht wurde gespeichert."));
+    tournamentName?.addEventListener("change", () => persistImmediate("Turniername wurde gespeichert."));
+
+    document.getElementById("settingsSaveBtn")?.addEventListener("click", () => {
+      persistImmediate("Einstellungen wurden gespeichert.");
+    });
+
     document.getElementById("settingsResetBtn")?.addEventListener("click", () => {
-      settings = { ...defaults }; saveSettings(settings); applySettings();
+      settings = { ...defaults };
+      saveSettings(settings);
+      applySettings();
       if (message) message.textContent = "Standardeinstellungen wurden wiederhergestellt.";
     });
 
@@ -108,8 +142,9 @@
     const statusSource = document.getElementById("status");
     const headerStatus = document.getElementById("headerTurnierStatus");
     if (statusSource && headerStatus) {
-      const sync = () => headerStatus.textContent = statusSource.textContent.replace(/^[^\p{L}\p{N}]+/u, "").trim();
-      sync(); new MutationObserver(sync).observe(statusSource, { childList:true, subtree:true, characterData:true });
+      const sync = () => { headerStatus.textContent = statusSource.textContent.replace(/^[^\p{L}\p{N}]+/u, "").trim(); };
+      sync();
+      new MutationObserver(sync).observe(statusSource, { childList: true, subtree: true, characterData: true });
     }
   });
 })();
