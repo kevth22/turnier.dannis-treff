@@ -1,4 +1,4 @@
-const VERSION = 'dart11en-v1-0-0';
+const VERSION = 'dart11en-v1-1-0';
 const APP_SHELL = [
   "turnier-theme.css",
   "turnier-theme.js",

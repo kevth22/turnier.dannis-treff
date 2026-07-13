@@ -1,7 +1,7 @@
 (() => {
   const SETTINGS_KEY = "dart11enTurnierUiV1";
   const pageSections = {
-    dashboard: ["dashboard", "naechsteSpieleBereich", "statistikBereich", "spielerBereich"],
+    dashboard: ["dashboard", "aktuelleSpieleBereich", "naechsteSpieleBereich", "dashboardGruppenBereich", "statistikBereich", "spielerBereich"],
     teilnehmer: ["teilnehmerBereich"],
     konfiguration: ["auslosungBereich"],
     ergebnisse: ["ergebnisBereich"],

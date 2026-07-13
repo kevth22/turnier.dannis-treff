@@ -615,6 +615,34 @@ document.addEventListener("DOMContentLoaded", () => {
     bereit.filter(match => !match.board).forEach(match => { match.board = frei.shift() || null; });
   }
 
+  function dashboardAktuelleSpieleRendern(matches, bestOfWert) {
+    const container = document.getElementById("dashboardAktuelleSpiele");
+    const anzahl = document.getElementById("aktuelleSpieleAnzahl");
+    const gruppenBox = document.getElementById("dashboardGruppenBereich");
+    if (!container) return;
+    gruppenBox?.classList.add("modus-versteckt");
+    container.replaceChildren();
+    const liste = matches.filter(match => match.board).sort((a,b) => a.board-b.board);
+    if (anzahl) anzahl.textContent = `${liste.length} ${liste.length === 1 ? "Spiel" : "Spiele"}`;
+    if (!liste.length) {
+      container.innerHTML = '<div class="tv-leer">Zurzeit läuft keine Partie.</div>';
+      return;
+    }
+    liste.forEach(match => {
+      const karte = document.createElement("article");
+      karte.className = "dashboard-current-match";
+      const board = Math.min(8, Math.max(1, Number(match.board) || 1));
+      const meta = document.createElement("div");
+      meta.className = "dashboard-current-meta";
+      meta.innerHTML = `<span class="dashboard-board-badge board-${board}">BOARD ${match.board}</span><small>${match.id || "Partie"} · Best of ${bestOfWert}</small>`;
+      const paarung = document.createElement("div");
+      paarung.className = "dashboard-current-pairing";
+      paarung.innerHTML = `<strong>${match.a}</strong><span>VS</span><strong>${match.b}</strong>`;
+      karte.append(meta,paarung);
+      container.append(karte);
+    });
+  }
+
   function dashboardNaechsteSpieleRendern(matches, bestOfWert) {
     const container = document.getElementById("dashboardNaechsteSpiele");
     const anzahl = document.getElementById("naechsteSpieleAnzahl");
@@ -661,6 +689,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (modus === "gruppenko" || modus === "auto") return;
       aktuell.innerHTML = '<div class="tv-leer">Das Turnier wurde noch nicht ausgelost.</div>';
       naechste.innerHTML = '<div class="tv-leer">Noch keine Partien vorhanden.</div>';
+      dashboardAktuelleSpieleRendern([], bestOf);
       dashboardNaechsteSpieleRendern([], bestOf);
       return;
     }
@@ -689,6 +718,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     if (!aktuellAngezeigt) aktuell.innerHTML = '<div class="tv-leer">Zurzeit läuft kein Spiel.</div>';
     if (!naechsteAngezeigt) naechste.innerHTML = '<div class="tv-leer">Keine weiteren spielbereiten Partien.</div>';
+    dashboardAktuelleSpieleRendern(alleTurnierMatches().filter(istSpielbereit), bestOf);
     dashboardNaechsteSpieleRendern(alleTurnierMatches().filter(istSpielbereit).sort((a, b) => {
       if (a.board && b.board) return a.board - b.board;
       if (a.board) return -1;

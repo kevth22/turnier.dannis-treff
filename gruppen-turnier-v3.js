@@ -231,6 +231,33 @@ function renderAlles(){
   const btn=$("koErstellenBtn");if(btn){btn.disabled=!alleGruppenFertig();btn.textContent=alleGruppenFertig()?(daten.aufteilung==="getrennt"?"Beide K.-o.-Phasen erstellen":"K.-o.-Phase erstellen"):"Erst alle Gruppenspiele abschließen"}renderTv();
 }
 
+function gruppenDashboardAktuellRendern(matches){
+  const container=$("dashboardAktuelleSpiele"),anzahl=$("aktuelleSpieleAnzahl");
+  if(!container)return;
+  container.replaceChildren();
+  const liste=matches.filter(m=>m.board).sort((a,b)=>a.board-b.board);
+  if(anzahl)anzahl.textContent=`${liste.length} ${liste.length===1?"Spiel":"Spiele"}`;
+  if(!liste.length){container.innerHTML='<div class="tv-leer">Zurzeit läuft kein Gruppenspiel.</div>';return}
+  liste.forEach(m=>{
+    const karte=document.createElement("article");karte.className="dashboard-current-match";
+    const board=Math.min(8,Math.max(1,Number(m.board)||1));
+    karte.innerHTML=`<div class="dashboard-current-meta"><span class="dashboard-board-badge board-${board}">BOARD ${m.board}</span><small>${m.id||"Gruppenspiel"} · Best of ${daten.bestOf}</small></div><div class="dashboard-current-pairing"><strong>${m.a}</strong><span>VS</span><strong>${m.b}</strong></div>`;
+    container.append(karte);
+  });
+}
+function gruppenDashboardTabellenRendern(){
+  const section=$("dashboardGruppenBereich"),container=$("dashboardGruppenTabellen");
+  if(!section||!container)return;
+  if(!daten?.gruppen?.length){section.classList.add("modus-versteckt");container.replaceChildren();return}
+  section.classList.remove("modus-versteckt");
+  container.replaceChildren();
+  daten.gruppen.forEach(g=>{
+    const card=renderGruppe(g,false);
+    card.classList.add("dashboard-group-card");
+    container.append(card);
+  });
+}
+
 function gruppenDashboardNaechsteRendern(matches){
   const container=$("dashboardNaechsteSpiele"),anzahl=$("naechsteSpieleAnzahl");
   if(!container)return;
@@ -267,7 +294,9 @@ function tvGruppenSpieleRendern(){
   });
   if(!laufend)aktuell.innerHTML='<div class="tv-leer">Zurzeit läuft kein Gruppenspiel.</div>';
   if(!wartend)naechste.innerHTML='<div class="tv-leer">Keine weiteren spielbereiten Partien.</div>';
+  gruppenDashboardAktuellRendern(matches);
   gruppenDashboardNaechsteRendern(matches);
+  gruppenDashboardTabellenRendern();
 }
 function renderTv(){
   gruppenBoardsVerteilen();

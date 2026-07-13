@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="turnier-live-v3.css?v=507">
   <link rel="stylesheet" href="turnier-tv-fit.css?v=10">
   <link rel="stylesheet" href="gruppen-turnier-v3.css?v=507">
-  <link rel="stylesheet" href="turnier-admin-menu.css?v=100">
+  <link rel="stylesheet" href="turnier-admin-menu.css?v=110">
   <link rel="manifest" href="manifest.json">
 
   <meta name="theme-color" content="#e00022">
@@ -49,7 +49,7 @@
     <button class="drawer-link admin-menu-only" data-admin-page="tv" type="button">📺 <span>TV-Modus</span></button>
     <button class="drawer-link admin-menu-only" data-admin-page="einstellungen" type="button">⚙️ <span>Einstellungen</span></button>
   </nav>
-  <div class="drawer-version">Version 1.0 – Grundversion</div>
+  <div class="drawer-version">Version 1.1 – Dashboard</div>
 </aside>
 
 <main class="turnier-center app-container">
@@ -98,6 +98,20 @@
 
   </section>
 
+  <!-- Öffentliche Anzeige der aktuell laufenden Partien -->
+  <section id="aktuelleSpieleBereich" class="content-card" data-admin-section="dashboard">
+    <div class="dashboard-section-head">
+      <div>
+        <h2>🎯 Jetzt an den Boards</h2>
+        <p class="section-text">Diese Partien werden gerade gespielt.</p>
+      </div>
+      <span id="aktuelleSpieleAnzahl" class="next-count-badge">0 Spiele</span>
+    </div>
+    <div id="dashboardAktuelleSpiele" class="dashboard-current-list">
+      <div class="tv-leer">Zurzeit läuft keine Partie.</div>
+    </div>
+  </section>
+
   <!-- Öffentliche Vorschau der nächsten Partien -->
   <section id="naechsteSpieleBereich" class="content-card" data-admin-section="dashboard">
     <div class="dashboard-section-head">
@@ -110,6 +124,17 @@
     <div id="dashboardNaechsteSpiele" class="dashboard-next-list">
       <div class="tv-leer">Noch keine nächsten Partien vorhanden.</div>
     </div>
+  </section>
+
+  <!-- Öffentliche Gruppentabellen im Dashboard -->
+  <section id="dashboardGruppenBereich" class="content-card dashboard-groups-section modus-versteckt" data-admin-section="dashboard">
+    <div class="dashboard-section-head">
+      <div>
+        <h2>📊 Gruppentabellen</h2>
+        <p class="section-text">Aktueller Stand der Gruppenphase.</p>
+      </div>
+    </div>
+    <div id="dashboardGruppenTabellen" class="dashboard-groups-grid"></div>
   </section>
 
   <!-- Turnierstatistik -->
@@ -582,7 +607,7 @@
 <script type="module" src="gruppen-turnier-v3.js?v=507"></script>
 <script src="turnier-tv-fit.js?v=400" defer></script>
 <script type="module" src="turnier-v4-live.js?v=400"></script>
-<script src="turnier-admin-menu.js?v=100" defer></script>
+<script src="turnier-admin-menu.js?v=110" defer></script>
 <script type="module" src="turnier-theme.js?v=507"></script>
 <script src="pwa.js" defer></script>
 

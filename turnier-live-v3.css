@@ -1255,3 +1255,21 @@ body.is-admin .admin-dashboard {
 .tv-tree-board[class*="board-"] { background: var(--board-color); border-color: var(--board-border); }
 .tv-bracket-match[class*="board-"] { border-left-color: var(--board-border); box-shadow: inset 4px 0 0 color-mix(in srgb, var(--board-color) 70%, transparent); }
 .gruppen-bracket-match[class*="board-"] { border-left: 4px solid var(--board-border); }
+
+/* Dashboard 1.1: laufende Partien und klar getrennte Gruppentabellen */
+.dashboard-current-list{display:grid;gap:12px}
+.dashboard-current-match{border:1px solid rgba(255,255,255,.13);background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));border-radius:16px;padding:14px;box-shadow:0 10px 26px rgba(0,0,0,.22)}
+.dashboard-current-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px;color:#aeb3bd}
+.dashboard-board-badge{display:inline-flex;align-items:center;justify-content:center;border-radius:10px;padding:7px 11px;font-size:12px;font-weight:1000;letter-spacing:.04em;color:#fff;border:1px solid rgba(255,255,255,.2);box-shadow:0 5px 16px rgba(0,0,0,.25)}
+.dashboard-current-pairing{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px}
+.dashboard-current-pairing strong{font-size:17px;overflow-wrap:anywhere}
+.dashboard-current-pairing strong:last-child{text-align:right}
+.dashboard-current-pairing span{font-size:12px;font-weight:1000;color:var(--theme-accent,#ffbe2d)}
+.dashboard-groups-grid{display:grid;gap:22px}
+.dashboard-groups-grid .gruppe-card{border-width:2px;box-shadow:0 14px 34px rgba(0,0,0,.28)}
+.dashboard-groups-grid .gruppe-card>h3{font-size:20px;padding:16px 18px}
+.dashboard-groups-grid .gruppe-card.turnier-1{outline:1px solid rgba(224,0,34,.2)}
+.dashboard-groups-grid .gruppe-card.turnier-2{outline:1px solid rgba(22,135,255,.25)}
+.dashboard-groups-grid .gruppen-tabelle tbody tr:nth-child(even){background:rgba(255,255,255,.035)}
+.dashboard-groups-grid .gruppen-tabelle tbody tr.qualifiziert{background:rgba(24,180,92,.16)}
+@media (min-width:820px){.dashboard-current-list,.dashboard-groups-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
