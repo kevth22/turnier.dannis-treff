@@ -30,11 +30,13 @@
       drawer?.classList.remove("open");
       drawer?.setAttribute("aria-hidden", "true");
       openButton?.setAttribute("aria-expanded", "false");
-      if (backdrop) backdrop.hidden = true;
+      backdrop?.classList.remove("open");
+      backdrop?.setAttribute("aria-hidden", "true");
       document.body.classList.remove("admin-menu-open");
     };
     const openDrawer = () => {
-      if (backdrop) backdrop.hidden = false;
+      backdrop?.classList.add("open");
+      backdrop?.setAttribute("aria-hidden", "false");
       drawer?.classList.add("open");
       drawer?.setAttribute("aria-hidden", "false");
       openButton?.setAttribute("aria-expanded", "true");

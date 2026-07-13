@@ -1,0 +1,2 @@
+Dart11en Turnier-Center Version 5.0.1
+Fix: Admin-Menü auf iPhone/iOS wird wieder sichtbar über dem Hintergrund eingeblendet.
