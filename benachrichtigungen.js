@@ -16,11 +16,22 @@ import {
 
 const VAPID_KEY = "BHFx79BbOtY791xPJ1Q9xOWh9vJQxwF_Opmc33zkYfpl6WINJslHVoVqTDvOBwXqGi9268J1B-i7cYjjJQdtUoQ";
 const TOKEN_DOC_STORAGE_KEY = "dart11enPushTokenDokument";
+const TIMEOUT_MS = 15000;
 
 const $ = id => document.getElementById(id);
 const user = getLogin();
+
 let messaging = null;
 let serviceWorkerRegistration = null;
+
+function withTimeout(promise, message, timeout = TIMEOUT_MS) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error(message)), timeout);
+    })
+  ]);
+}
 
 function showMessage(text, success = false) {
   const box = $("pushMessage");
@@ -39,6 +50,12 @@ function setButtons(enabled) {
   $("disablePushButton").hidden = !enabled;
 }
 
+function resetEnableButton() {
+  const button = $("enablePushButton");
+  button.disabled = false;
+  button.textContent = "Benachrichtigungen aktivieren";
+}
+
 function isStandalone() {
   return window.matchMedia("(display-mode: standalone)").matches
     || window.navigator.standalone === true;
@@ -47,6 +64,7 @@ function isStandalone() {
 async function tokenDocumentId(token) {
   const data = new TextEncoder().encode(token);
   const digest = await crypto.subtle.digest("SHA-256", data);
+
   return Array.from(new Uint8Array(digest))
     .map(byte => byte.toString(16).padStart(2, "0"))
     .join("");
@@ -55,17 +73,34 @@ async function tokenDocumentId(token) {
 async function savePushToken(token) {
   const docId = await tokenDocumentId(token);
 
-  await setDoc(doc(db, "pushAbos", docId), {
-    token,
-    benutzername: user.benutzername,
-    nickname: user.nickname || user.benutzername,
-    rolle: String(user.rolle || "gast").toLowerCase(),
-    aktiv: true,
-    userAgent: navigator.userAgent,
-    aktualisiertAm: serverTimestamp()
-  }, { merge: true });
+  await withTimeout(
+    setDoc(doc(db, "pushAbos", docId), {
+      token,
+      benutzername: user.benutzername,
+      nickname: user.nickname || user.benutzername,
+      rolle: String(user.rolle || "gast").toLowerCase(),
+      aktiv: true,
+      userAgent: navigator.userAgent,
+      aktualisiertAm: serverTimestamp()
+    }, { merge: true }),
+    "FIRESTORE_TIMEOUT"
+  );
 
   localStorage.setItem(TOKEN_DOC_STORAGE_KEY, docId);
+}
+
+async function getReadyServiceWorker() {
+  const registration = await withTimeout(
+    navigator.serviceWorker.register("./sw.js?v=6"),
+    "SERVICE_WORKER_REGISTER_TIMEOUT"
+  );
+
+  await withTimeout(
+    navigator.serviceWorker.ready,
+    "SERVICE_WORKER_READY_TIMEOUT"
+  );
+
+  return registration;
 }
 
 async function initialisePush() {
@@ -94,6 +129,7 @@ async function initialisePush() {
   }
 
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
   if (isIOS && !isStandalone()) {
     setStatus("App zuerst installieren");
     showMessage("Öffne Safari, tippe auf Teilen und dann auf „Zum Home-Bildschirm“.");
@@ -101,20 +137,36 @@ async function initialisePush() {
     return;
   }
 
-  serviceWorkerRegistration = await navigator.serviceWorker.register("./sw.js");
-  await navigator.serviceWorker.ready;
-  messaging = getMessaging();
+  try {
+    serviceWorkerRegistration = await getReadyServiceWorker();
+    messaging = getMessaging();
+  } catch (error) {
+    console.error(error);
+    setStatus("Service Worker fehlerhaft");
+    showMessage("Die App-Aktualisierung wurde noch nicht vollständig geladen. Schließe Dart11en komplett und öffne sie erneut.");
+    return;
+  }
 
   if (Notification.permission === "granted") {
-    const token = await getToken(messaging, {
-      vapidKey: VAPID_KEY,
-      serviceWorkerRegistration
-    });
+    try {
+      const token = await withTimeout(
+        getToken(messaging, {
+          vapidKey: VAPID_KEY,
+          serviceWorkerRegistration
+        }),
+        "FCM_TOKEN_TIMEOUT"
+      );
 
-    if (token) {
-      await savePushToken(token);
-      setStatus("Aktiv");
-      setButtons(true);
+      if (token) {
+        await savePushToken(token);
+        setStatus("Aktiv");
+        setButtons(true);
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+      setStatus("Einrichtung unvollständig");
+      showMessage(errorToMessage(error));
       return;
     }
   }
@@ -122,7 +174,7 @@ async function initialisePush() {
   if (Notification.permission === "denied") {
     setStatus("Blockiert");
     $("enablePushButton").disabled = true;
-    showMessage("Benachrichtigungen sind in den Geräteeinstellungen blockiert.");
+    showMessage("Benachrichtigungen sind in den iPhone-Einstellungen blockiert.");
     return;
   }
 
@@ -131,44 +183,70 @@ async function initialisePush() {
 }
 
 async function enablePush() {
-  $("enablePushButton").disabled = true;
-  $("enablePushButton").textContent = "Wird aktiviert …";
+  const button = $("enablePushButton");
+  button.disabled = true;
+  button.textContent = "Wird aktiviert …";
   $("pushMessage").hidden = true;
 
   try {
-    const permission = await Notification.requestPermission();
+    const permission = await withTimeout(
+      Notification.requestPermission(),
+      "PERMISSION_TIMEOUT"
+    );
 
     if (permission !== "granted") {
-      setStatus("Nicht aktiviert");
+      setStatus(permission === "denied" ? "Abgelehnt" : "Nicht aktiviert");
       showMessage("Ohne Zustimmung können keine Push-Benachrichtigungen gesendet werden.");
       return;
     }
 
-    serviceWorkerRegistration = serviceWorkerRegistration
-      || await navigator.serviceWorker.register("./sw.js");
-
-    await navigator.serviceWorker.ready;
+    serviceWorkerRegistration = serviceWorkerRegistration || await getReadyServiceWorker();
     messaging = messaging || getMessaging();
 
-    const token = await getToken(messaging, {
-      vapidKey: VAPID_KEY,
-      serviceWorkerRegistration
-    });
+    const token = await withTimeout(
+      getToken(messaging, {
+        vapidKey: VAPID_KEY,
+        serviceWorkerRegistration
+      }),
+      "FCM_TOKEN_TIMEOUT"
+    );
 
     if (!token) throw new Error("NO_TOKEN");
 
     await savePushToken(token);
+
     setStatus("Aktiv");
     setButtons(true);
     showMessage("Push-Benachrichtigungen wurden aktiviert.", true);
   } catch (error) {
     console.error(error);
     setStatus("Fehler");
-    showMessage("Push konnte nicht aktiviert werden. Möglicherweise fehlen Firestore-Berechtigungen.");
+    showMessage(errorToMessage(error));
   } finally {
-    $("enablePushButton").disabled = false;
-    $("enablePushButton").textContent = "Benachrichtigungen aktivieren";
+    resetEnableButton();
   }
+}
+
+function errorToMessage(error) {
+  const code = String(error?.message || error || "");
+
+  if (code.includes("SERVICE_WORKER")) {
+    return "Der Service Worker konnte nicht gestartet werden. Schließe die App komplett und öffne sie erneut.";
+  }
+
+  if (code.includes("FCM_TOKEN")) {
+    return "Firebase konnte innerhalb von 15 Sekunden kein Push-Gerät registrieren. Prüfe anschließend die FCM Registration API.";
+  }
+
+  if (code.includes("FIRESTORE")) {
+    return "Das Gerät wurde erkannt, aber Firestore blockiert das Speichern. Die Regeln für „pushAbos“ müssen ergänzt werden.";
+  }
+
+  if (code.includes("PERMISSION")) {
+    return "Die iPhone-Abfrage für Benachrichtigungen wurde nicht abgeschlossen.";
+  }
+
+  return "Push konnte nicht aktiviert werden. Öffne die App erneut und versuche es noch einmal.";
 }
 
 async function disablePush() {
@@ -178,7 +256,10 @@ async function disablePush() {
     if (messaging) await deleteToken(messaging);
 
     const docId = localStorage.getItem(TOKEN_DOC_STORAGE_KEY);
-    if (docId) await deleteDoc(doc(db, "pushAbos", docId));
+
+    if (docId) {
+      await deleteDoc(doc(db, "pushAbos", docId));
+    }
 
     localStorage.removeItem(TOKEN_DOC_STORAGE_KEY);
     setStatus("Deaktiviert");
@@ -194,8 +275,7 @@ async function disablePush() {
 
 async function showTestNotification() {
   try {
-    serviceWorkerRegistration = serviceWorkerRegistration
-      || await navigator.serviceWorker.ready;
+    serviceWorkerRegistration = serviceWorkerRegistration || await getReadyServiceWorker();
 
     await serviceWorkerRegistration.showNotification("Dart11en Test", {
       body: "Push-Benachrichtigungen funktionieren auf diesem Gerät.",
@@ -217,5 +297,6 @@ $("testPushButton")?.addEventListener("click", showTestNotification);
 initialisePush().catch(error => {
   console.error(error);
   setStatus("Fehler");
-  showMessage("Die Push-Einstellungen konnten nicht geladen werden.");
+  showMessage(errorToMessage(error));
+  resetEnableButton();
 });

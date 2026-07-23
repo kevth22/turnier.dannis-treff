@@ -14,7 +14,8 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(payload => {
   const title = payload.notification?.title || payload.data?.title || "Dart11en";
-  const options = {
+
+  return self.registration.showNotification(title, {
     body: payload.notification?.body || payload.data?.body || "Neue Mitteilung",
     icon: payload.notification?.icon || payload.data?.icon || "./icon-192.png",
     badge: "./icon-192.png",
@@ -22,14 +23,16 @@ messaging.onBackgroundMessage(payload => {
     data: {
       url: payload.data?.url || "./index.html"
     }
-  };
-
-  self.registration.showNotification(title, options);
+  });
 });
 
 self.addEventListener("notificationclick", event => {
   event.notification.close();
-  const targetUrl = new URL(event.notification.data?.url || "./index.html", self.location.href).href;
+
+  const targetUrl = new URL(
+    event.notification.data?.url || "./index.html",
+    self.location.href
+  ).href;
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then(windowClients => {
@@ -39,58 +42,92 @@ self.addEventListener("notificationclick", event => {
           return client.focus();
         }
       }
+
       return clients.openWindow(targetUrl);
     })
   );
 });
 
-const VERSION = "dart11en-v1-5-0";
-const APP_SHELL = [
-  "turnier-theme.css",
-  "turnier-theme.js",
-  "./", "./index.html", "./style.css", "./konto.css", "./konto-admin.css",
-  "./benachrichtigungen.html", "./benachrichtigungen.js", "./benachrichtigungen.css",
-  "./pwa.js", "./manifest.json",
-  "./login.html", "./login.js", "./auth-utils.js", "./account-ui.js",
-  "./registrieren.html", "./registrieren.js", "./konto-admin.html", "./konto-admin.js",
-  "./turniere.html", "./turnier-live.html", "./turnier-live-v3.css",
-  "./turnier-tv-fit.css", "./turnier-tv-fit.js",
-  "./gruppen-turnier-v3.css", "./gruppen-turnier-v3.js",
-  "./turnier-live-v3.js", "./turnier-v3-manager.js",
-  "./liga.html", "./kalender.html", "./kader.html", "./spieltag-center.html",
-  "./dart11enlogo.png", "./icon-192.png", "./icon-512.png", "./offline.html"
+const VERSION = "dart11en-v1-6-0";
+
+const CORE_FILES = [
+  "./",
+  "./index.html",
+  "./style.css",
+  "./konto.css",
+  "./manifest.json",
+  "./pwa.js",
+  "./auth-utils.js",
+  "./account-ui.js",
+  "./benachrichtigungen.html",
+  "./benachrichtigungen.js",
+  "./benachrichtigungen.css",
+  "./login.html",
+  "./login.js",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./dart11enlogo.png",
+  "./offline.html"
 ];
 
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(VERSION).then(cache => cache.addAll(APP_SHELL)));
+  event.waitUntil(
+    caches.open(VERSION).then(async cache => {
+      // Eine einzelne fehlende Datei darf die komplette Installation
+      // des Service Workers nicht mehr abbrechen.
+      await Promise.allSettled(
+        CORE_FILES.map(file => cache.add(file))
+      );
+    })
+  );
+
   self.skipWaiting();
 });
 
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(key => key !== VERSION).map(key => caches.delete(key)))
+      Promise.all(
+        keys
+          .filter(key => key !== VERSION)
+          .map(key => caches.delete(key))
+      )
     )
   );
+
   self.clients.claim();
 });
 
 self.addEventListener("fetch", event => {
-  if (event.request.method !== "GET" || event.request.url.includes("firestore.googleapis.com")) return;
+  if (
+    event.request.method !== "GET"
+    || event.request.url.includes("firestore.googleapis.com")
+    || event.request.url.includes("fcmregistrations.googleapis.com")
+  ) {
+    return;
+  }
 
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        if (response.ok && new URL(event.request.url).origin === self.location.origin) {
+        if (
+          response.ok
+          && new URL(event.request.url).origin === self.location.origin
+        ) {
           const copy = response.clone();
           caches.open(VERSION).then(cache => cache.put(event.request, copy));
         }
+
         return response;
       })
       .catch(async () => {
         const cached = await caches.match(event.request);
+
         if (cached) return cached;
-        if (event.request.mode === "navigate") return caches.match("./offline.html");
+        if (event.request.mode === "navigate") {
+          return caches.match("./offline.html");
+        }
+
         return Response.error();
       })
   );
