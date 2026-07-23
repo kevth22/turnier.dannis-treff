@@ -6,9 +6,15 @@
   <meta name="keywords" content="Dart11en, Dannis Treff, Dart Turnier Gelsenkirchen, Dart Liga, Ruhrpott Dart">
   <meta name="author" content="Dart11en">
   <script>
-    if (!sessionStorage.getItem("splashGesehen")) {
+    const gespeicherterLogin = localStorage.getItem("dart11enLogin");
+
+    if (gespeicherterLogin) {
+      // Wer „Angemeldet bleiben“ gewählt hat, soll beim erneuten Öffnen
+      // nicht wieder auf der Willkommens- oder Loginseite landen.
       sessionStorage.setItem("splashGesehen", "ja");
-      window.location.href = "welcome.html";
+    } else if (!sessionStorage.getItem("splashGesehen")) {
+      sessionStorage.setItem("splashGesehen", "ja");
+      window.location.replace("welcome.html");
     }
   </script>
   <meta charset="UTF-8">
