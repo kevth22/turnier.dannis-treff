@@ -5,13 +5,24 @@ import {
   verifyPassword,
   migrateLegacyPassword,
   saveLogin,
-  setNewPassword
+  setNewPassword,
+  getLogin
 } from "./auth-utils.js";
 
 import {
   doc,
   getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+
+// iPhones und installierte PWAs öffnen häufig die zuletzt besuchte Seite erneut.
+// Ist bereits ein dauerhafter Login vorhanden, darf das Loginformular nicht
+// erneut angezeigt werden.
+const existingLogin = getLogin();
+if (existingLogin && existingLogin.aktiv !== false) {
+  sessionStorage.setItem("splashGesehen", "ja");
+  window.location.replace("index.html");
+}
 
 let currentUser = null;
 let loginAttempts = [];
