@@ -1,3 +1,8 @@
+/* Verhindert, dass .konto-card das HTML-Attribut hidden überschreibt */
+[hidden] {
+  display: none !important;
+}
+
 .konto-container {
   max-width: 620px;
 }
