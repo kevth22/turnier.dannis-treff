@@ -1,8 +1,9 @@
-const VERSION = 'dart11en-v1-3-0';
+const VERSION = 'dart11en-v1-4-0';
 const APP_SHELL = [
   "turnier-theme.css",
   "turnier-theme.js",
-  './', './index.html', './style.css', './konto.css', './pwa.js', './manifest.json',
+  './', './index.html', './style.css', './konto.css', './konto-admin.css',
+  './pwa.js', './manifest.json',
   './login.html', './login.js', './auth-utils.js', './account-ui.js',
   './registrieren.html', './registrieren.js', './konto-admin.html', './konto-admin.js',
   './turniere.html', './turnier-live.html', './turnier-live-v3.css',

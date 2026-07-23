@@ -6,39 +6,75 @@
   <title>Kontoverwaltung | Dart11en</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="konto.css">
+  <link rel="stylesheet" href="konto-admin.css">
 </head>
 <body>
 <header class="app-header">
   <img src="dart11enlogo.png" class="logo" alt="Dart11en Logo">
   <h1>Kontoverwaltung</h1>
-  <p>Nur für Administratoren</p>
+  <p>Benutzer, Rollen und Passwörter verwalten</p>
 </header>
 
-<main class="app-container konto-container">
+<main class="app-container konto-admin-container">
   <section id="accessDenied" class="info-card konto-card" hidden>
     <h2>⛔ Kein Zugriff</h2>
     <p>Diese Seite ist ausschließlich für Administratoren verfügbar.</p>
     <a class="konto-link-button" href="index.html">Zur Startseite</a>
   </section>
 
-  <section id="adminPanel" class="info-card konto-card" hidden>
-    <h2>🔑 Passwort zurücksetzen</h2>
+  <div id="adminContent" hidden>
+    <section class="info-card konto-card">
+      <div class="admin-title-row">
+        <div>
+          <h2>👥 Benutzerübersicht</h2>
+          <p class="konto-hinweis">Passwörter selbst können nicht angezeigt werden. Es wird nur der Speicherstatus angezeigt.</p>
+        </div>
+        <button id="refreshUsersButton" class="small-admin-button" type="button">↻ Aktualisieren</button>
+      </div>
 
-    <label for="adminUsername">Benutzername</label>
-    <input id="adminUsername" type="text" maxlength="30">
+      <div class="admin-filter-row">
+        <input id="userSearch" type="search" placeholder="Name oder Benutzername suchen">
+        <select id="roleFilter">
+          <option value="">Alle Rollen</option>
+          <option value="admin">Admin</option>
+          <option value="captain">Captain</option>
+          <option value="kassenwart">Kassenwart</option>
+          <option value="mitglied">Mitglied</option>
+          <option value="gast">Gast</option>
+        </select>
+      </div>
 
-    <label for="temporaryPassword">Neues Startpasswort</label>
-    <input id="temporaryPassword" type="password" maxlength="100">
+      <div class="admin-stats">
+        <span id="totalUsers">0 Konten</span>
+        <span id="activeUsers">0 aktiv</span>
+        <span id="guestUsers">0 Gäste</span>
+      </div>
 
-    <label for="temporaryPasswordRepeat">Startpasswort wiederholen</label>
-    <input id="temporaryPasswordRepeat" type="password" maxlength="100">
+      <p id="usersMessage" class="konto-meldung" hidden></p>
+      <div id="usersList" class="users-list">
+        <p class="konto-hinweis">Benutzer werden geladen …</p>
+      </div>
+    </section>
 
-    <button id="resetButton" type="button">Passwort zurücksetzen</button>
-    <p class="konto-hinweis">
-      Teile das Startpasswort persönlich mit. Beim nächsten Login muss der Nutzer ein eigenes Passwort festlegen.
-    </p>
-    <p id="adminMessage" class="konto-meldung" hidden></p>
-  </section>
+    <section id="passwordResetSection" class="info-card konto-card">
+      <h2>🔑 Passwort zurücksetzen</h2>
+
+      <label for="adminUsername">Benutzername</label>
+      <input id="adminUsername" type="text" maxlength="30">
+
+      <label for="temporaryPassword">Neues Startpasswort</label>
+      <input id="temporaryPassword" type="password" maxlength="100">
+
+      <label for="temporaryPasswordRepeat">Startpasswort wiederholen</label>
+      <input id="temporaryPasswordRepeat" type="password" maxlength="100">
+
+      <button id="resetButton" type="button">Passwort zurücksetzen</button>
+      <p class="konto-hinweis">
+        Teile das Startpasswort persönlich mit. Beim nächsten Login muss der Nutzer ein eigenes Passwort festlegen.
+      </p>
+      <p id="adminMessage" class="konto-meldung" hidden></p>
+    </section>
+  </div>
 </main>
 
 <nav class="bottom-nav">
