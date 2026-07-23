@@ -1,0 +1,39 @@
+name: Spieltag Push-Erinnerungen
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Nur prüfen, keine Pushs senden"
+        required: false
+        default: true
+        type: boolean
+  schedule:
+    - cron: "0 9 * * *"
+      timezone: "Europe/Berlin"
+
+permissions:
+  contents: read
+
+jobs:
+  push-erinnerungen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Abhängigkeiten installieren
+        run: npm install
+
+      - name: Spieltagserinnerungen prüfen
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+        run: node scripts/spieltag-push.js
