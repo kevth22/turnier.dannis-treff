@@ -228,25 +228,29 @@ async function enablePush() {
 }
 
 function errorToMessage(error) {
-  const code = String(error?.message || error || "");
+  const name = String(error?.name || "");
+  const firebaseCode = String(error?.code || "");
+  const message = String(error?.message || error || "Unbekannter Fehler");
+  const combined = `${name} ${firebaseCode} ${message}`;
 
-  if (code.includes("SERVICE_WORKER")) {
+  if (combined.includes("SERVICE_WORKER")) {
     return "Der Service Worker konnte nicht gestartet werden. Schließe die App komplett und öffne sie erneut.";
   }
 
-  if (code.includes("FCM_TOKEN")) {
-    return "Firebase konnte innerhalb von 15 Sekunden kein Push-Gerät registrieren. Prüfe anschließend die FCM Registration API.";
+  if (combined.includes("FCM_TOKEN_TIMEOUT")) {
+    return "Firebase hat innerhalb von 15 Sekunden kein Geräte-Token geliefert. Fehler: FCM_TOKEN_TIMEOUT";
   }
 
-  if (code.includes("FIRESTORE")) {
-    return "Das Gerät wurde erkannt, aber Firestore blockiert das Speichern. Die Regeln für „pushAbos“ müssen ergänzt werden.";
+  if (combined.includes("FIRESTORE_TIMEOUT")) {
+    return "Das Speichern in Firestore hat zu lange gedauert. Fehler: FIRESTORE_TIMEOUT";
   }
 
-  if (code.includes("PERMISSION")) {
-    return "Die iPhone-Abfrage für Benachrichtigungen wurde nicht abgeschlossen.";
+  if (combined.includes("PERMISSION_TIMEOUT")) {
+    return "Die iPhone-Abfrage wurde nicht abgeschlossen. Fehler: PERMISSION_TIMEOUT";
   }
 
-  return "Push konnte nicht aktiviert werden. Öffne die App erneut und versuche es noch einmal.";
+  // Den echten Firebase-Fehler sichtbar machen, damit keine weitere Vermutung nötig ist.
+  return `Firebase-Fehler: ${firebaseCode || name || "unbekannt"} – ${message}`;
 }
 
 async function disablePush() {
