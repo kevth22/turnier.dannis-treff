@@ -10,7 +10,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDtQ3pECcZETIoI4QTV5G-7_QcoRvVGHL4",
+  apiKey: "AIzaSyDtQ3pECcZEIloI4QTV5G-7_QcoRvVGHL4",
   authDomain: "dannistreffturnier.firebaseapp.com",
   projectId: "dannistreffturnier",
   storageBucket: "dannistreffturnier.firebasestorage.app",
