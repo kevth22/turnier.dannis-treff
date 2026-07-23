@@ -9,8 +9,6 @@
     const gespeicherterLogin = localStorage.getItem("dart11enLogin");
 
     if (gespeicherterLogin) {
-      // Wer „Angemeldet bleiben“ gewählt hat, soll beim erneuten Öffnen
-      // nicht wieder auf der Willkommens- oder Loginseite landen.
       sessionStorage.setItem("splashGesehen", "ja");
     } else if (!sessionStorage.getItem("splashGesehen")) {
       sessionStorage.setItem("splashGesehen", "ja");
@@ -80,6 +78,12 @@
       <h3>Kader</h3>
       <p>Mitglieder & Teams</p>
     </a>
+
+    <a href="benachrichtigungen.html" class="quick-card">
+      🔔
+      <h3>Benachrichtigungen</h3>
+      <p>Push-Mitteilungen aktivieren</p>
+    </a>
   </section>
 
   <section class="info-card">
@@ -113,6 +117,6 @@
 
 <script type="module" src="account-ui.js"></script>
 <script type="module" src="index.js"></script>
-<script src="pwa.js?v=2" defer></script>
+<script src="pwa.js?v=3" defer></script>
 </body>
 </html>
