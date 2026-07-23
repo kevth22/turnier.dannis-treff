@@ -1,5 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore,
   collection,
@@ -7,6 +6,7 @@ import {
   doc,
   getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getLogin } from "./auth-utils.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDtQ3pECcZETIoI4QTV5G-7_QcoRvVGHL4",
@@ -17,7 +17,7 @@ const firebaseConfig = {
   appId: "1:829873084116:web:683bbf1ea3e58f1a4ecd41"
 };
 
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 function closeVotePopup() {
@@ -31,97 +31,70 @@ async function checkVotePopup() {
   const popup = document.getElementById("votePopup");
   if (!popup) return;
 
-  const gespeicherterUser = localStorage.getItem("dart11enLogin");
+  const user = getLogin();
+  if (!user) return;
 
-if (!gespeicherterUser) return;
+  const rolle = String(user.rolle || "").toLowerCase().trim();
+  const benutzername = String(user.benutzername || "").trim();
+  const erlaubteRollen = ["mitglied", "captain", "admin"];
 
-let user = null;
+  // Registrierte Gäste erhalten ausdrücklich keine Spieltagsbenachrichtigungen.
+  if (!benutzername || !erlaubteRollen.includes(rolle)) return;
 
-try {
-  user = JSON.parse(gespeicherterUser);
-} catch (e) {
-  localStorage.removeItem("dart11enLogin");
-  return;
-}
+  try {
+    const spieltageSnap = await getDocs(collection(db, "spieltage"));
+    let spieltage = [];
 
-const rolle = (user?.rolle || "").toLowerCase().trim();
-const benutzername = (user?.benutzername || "").trim();
-
-const erlaubteRollen = ["mitglied", "captain", "admin"];
-
-if (!benutzername || !erlaubteRollen.includes(rolle)) {
-  localStorage.removeItem("dart11enLogin");
-  return;
-}
-
-user.rolle = rolle;
-user.benutzername = benutzername;
-
-  const spieltageSnap = await getDocs(collection(db, "spieltage"));
-
-  let spieltage = [];
-
-  spieltageSnap.forEach((docSnap) => {
-    spieltage.push({
-      id: docSnap.id,
-      ...docSnap.data()
+    spieltageSnap.forEach(docSnap => {
+      spieltage.push({ id: docSnap.id, ...docSnap.data() });
     });
-  });
 
-  const heute = new Date();
-  heute.setHours(0, 0, 0, 0);
+    const heute = new Date();
+    heute.setHours(0, 0, 0, 0);
 
-  const in7Tagen = new Date();
-in7Tagen.setDate(heute.getDate() + 7);
-in7Tagen.setHours(23, 59, 59, 999);
+    const in7Tagen = new Date(heute);
+    in7Tagen.setDate(heute.getDate() + 7);
+    in7Tagen.setHours(23, 59, 59, 999);
 
-spieltage = spieltage
-  .filter(spieltag => {
-    const datum = new Date(spieltag.datum);
-    datum.setHours(0, 0, 0, 0);
+    spieltage = spieltage
+      .filter(spieltag => {
+        const datum = new Date(spieltag.datum);
+        datum.setHours(0, 0, 0, 0);
+        return datum >= heute && datum <= in7Tagen;
+      })
+      .sort((a, b) => new Date(a.datum) - new Date(b.datum));
 
-    return datum >= heute && datum <= in7Tagen;
-  })
-  .sort((a, b) => new Date(a.datum) - new Date(b.datum));
+    let offenerSpieltag = null;
 
-  if (spieltage.length === 0) return;
+    for (const spieltag of spieltage) {
+      const zusageId = `${spieltag.id}_${benutzername}`;
+      const zusageSnap = await getDoc(doc(db, "zusagen", zusageId));
+      if (!zusageSnap.exists()) {
+        offenerSpieltag = spieltag;
+        break;
+      }
+    }
 
-  let offenerSpieltag = null;
+    if (!offenerSpieltag) return;
 
-for (const spieltag of spieltage) {
-  const zusageId =
-    `${spieltag.id}_${user.benutzername}`;
-
-  const zusageRef = doc(db, "zusagen", zusageId);
-  const zusageSnap = await getDoc(zusageRef);
-
-  if (!zusageSnap.exists()) {
-    offenerSpieltag = spieltag;
-    break;
-  }
-}
-
-if (!offenerSpieltag) return;
-
-const popupText = document.getElementById("votePopupText");
-
-if (popupText) {
-  const gegnerText =
-    offenerSpieltag.typ === "heim"
+    const popupText = document.getElementById("votePopupText");
+    const gegnerText = offenerSpieltag.typ === "heim"
       ? `Dart11en : ${offenerSpieltag.ort}`
       : `${offenerSpieltag.ort} : Dart11en`;
 
-  popupText.innerHTML = `
-    Du hast für diesen Spieltag noch keine Verfügbarkeit angegeben:<br><br>
-    <strong>${offenerSpieltag.liga}</strong><br>
-    ${gegnerText}<br>
-    ${offenerSpieltag.datum}<br>
-    Treffen: ${offenerSpieltag.treffen || "-"}<br>
-    Anwurf: ${offenerSpieltag.anwurf}
-  `;
-}
+    popupText.innerHTML = `
+      Du hast für diesen Spieltag noch keine Verfügbarkeit angegeben:<br><br>
+      <strong>${offenerSpieltag.liga}</strong><br>
+      ${gegnerText}<br>
+      ${offenerSpieltag.datum}<br>
+      Treffen: ${offenerSpieltag.treffen || "-"}<br>
+      Anwurf: ${offenerSpieltag.anwurf}
+    `;
 
-popup.style.display = "flex";
+    popup.style.display = "flex";
+  } catch (error) {
+    console.error("Spieltag-Popup konnte nicht geprüft werden:", error);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", checkVotePopup);

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kontoverwaltung | Dart11en</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="konto.css">
+</head>
+<body>
+<header class="app-header">
+  <img src="dart11enlogo.png" class="logo" alt="Dart11en Logo">
+  <h1>Kontoverwaltung</h1>
+  <p>Nur für Administratoren</p>
+</header>
+
+<main class="app-container konto-container">
+  <section id="accessDenied" class="info-card konto-card" hidden>
+    <h2>⛔ Kein Zugriff</h2>
+    <p>Diese Seite ist ausschließlich für Administratoren verfügbar.</p>
+    <a class="konto-link-button" href="index.html">Zur Startseite</a>
+  </section>
+
+  <section id="adminPanel" class="info-card konto-card" hidden>
+    <h2>🔑 Passwort zurücksetzen</h2>
+
+    <label for="adminUsername">Benutzername</label>
+    <input id="adminUsername" type="text" maxlength="30">
+
+    <label for="temporaryPassword">Neues Startpasswort</label>
+    <input id="temporaryPassword" type="password" maxlength="100">
+
+    <label for="temporaryPasswordRepeat">Startpasswort wiederholen</label>
+    <input id="temporaryPasswordRepeat" type="password" maxlength="100">
+
+    <button id="resetButton" type="button">Passwort zurücksetzen</button>
+    <p class="konto-hinweis">
+      Teile das Startpasswort persönlich mit. Beim nächsten Login muss der Nutzer ein eigenes Passwort festlegen.
+    </p>
+    <p id="adminMessage" class="konto-meldung" hidden></p>
+  </section>
+</main>
+
+<nav class="bottom-nav">
+  <a href="index.html">🏠<br>Home</a>
+  <a href="login.html">🔐<br>Login</a>
+</nav>
+
+<script type="module" src="konto-admin.js"></script>
+</body>
+</html>

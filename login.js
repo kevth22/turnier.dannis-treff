@@ -1,144 +1,156 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  db,
+  normalizeUsername,
+  publicUserData,
+  verifyPassword,
+  migrateLegacyPassword,
+  saveLogin,
+  setNewPassword
+} from "./auth-utils.js";
 
 import {
-  getFirestore,
   doc,
-  getDoc,
-  updateDoc
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDtQ3pECcZETIoI4QTV5G-7_QcoRvVGHL4",
-  authDomain: "dannistreffturnier.firebaseapp.com",
-  projectId: "dannistreffturnier",
-  storageBucket: "dannistreffturnier.firebasestorage.app",
-  messagingSenderId: "829873084116",
-  appId: "1:829873084116:web:683bbf1ea3e58f1a4ecd41"
-};
+let currentUser = null;
+let loginAttempts = [];
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const $ = id => document.getElementById(id);
 
-let aktuellerBenutzer = null;
+function showMessage(element, message) {
+  element.textContent = message;
+  element.hidden = false;
+}
 
-window.login = async function () {
-  const benutzername = document.getElementById("loginUser").value.trim().toLowerCase();
-  const passwort = document.getElementById("loginPass").value.trim();
+function clearMessage(element) {
+  element.textContent = "";
+  element.hidden = true;
+}
 
-  const fehler = document.getElementById("loginFehler");
-  fehler.style.display = "none";
+function tooManyAttempts() {
+  const now = Date.now();
+  loginAttempts = loginAttempts.filter(time => now - time < 10 * 60 * 1000);
+  return loginAttempts.length >= 8;
+}
 
-  try {
-    if (!benutzername || !passwort) {
-      fehler.textContent = "Bitte Benutzername und Passwort eingeben.";
-      fehler.style.display = "block";
-      return;
-    }
+async function login() {
+  const errorBox = $("loginFehler");
+  clearMessage(errorBox);
 
-    const userRef = doc(db, "mitglieder", benutzername);
-    const userSnap = await getDoc(userRef);
-
-    if (!userSnap.exists()) {
-      fehler.textContent = "Benutzername nicht gefunden.";
-      fehler.style.display = "block";
-      return;
-    }
-
-    const daten = userSnap.data();
-
-    if (daten.aktiv !== true) {
-      fehler.textContent = "Dieser Benutzer ist nicht aktiv.";
-      fehler.style.display = "block";
-      return;
-    }
-
-    if (daten.passwort !== passwort) {
-      fehler.textContent = "Passwort falsch.";
-      fehler.style.display = "block";
-      return;
-    }
-
-    aktuellerBenutzer = {
-      ...daten,
-      benutzername: benutzername
-    };
-
-    if (aktuellerBenutzer.mussPasswortAendern === true) {
-      document.getElementById("loginBox").style.display = "none";
-      document.getElementById("passwortBox").style.display = "block";
-      return;
-    }
-
-    localStorage.setItem("dart11enLogin", JSON.stringify(aktuellerBenutzer));
-    sessionStorage.setItem("user", JSON.stringify(aktuellerBenutzer));
-    sessionStorage.setItem("rolle", aktuellerBenutzer.rolle || "mitglied");
-    window.location.replace("index.html");
-
-  } catch (error) {
-    fehler.textContent = "Fehler beim Login: " + error.message;
-    fehler.style.display = "block";
-    console.error(error);
+  if (tooManyAttempts()) {
+    showMessage(errorBox, "Zu viele Versuche. Bitte warte zehn Minuten.");
+    return;
   }
-};
 
-window.passwortAendern = async function () {
-  const p1 = document.getElementById("neuesPasswort").value.trim();
-  const p2 = document.getElementById("neuesPasswort2").value.trim();
+  const username = normalizeUsername($("loginUser").value);
+  const password = $("loginPass").value;
+  const remember = $("rememberLogin").checked;
 
-  const fehler = document.getElementById("passwortFehler");
-  fehler.style.display = "none";
+  if (!username || !password) {
+    showMessage(errorBox, "Bitte Benutzername und Passwort eingeben.");
+    return;
+  }
+
+  const button = $("loginButton");
+  button.disabled = true;
+  button.textContent = "Wird geprüft …";
 
   try {
-    if (p1.length < 4) {
-      fehler.textContent = "Das Passwort muss mindestens 4 Zeichen haben.";
-      fehler.style.display = "block";
+    const userRef = doc(db, "mitglieder", username);
+    const snapshot = await getDoc(userRef);
+
+    if (!snapshot.exists()) {
+      loginAttempts.push(Date.now());
+      throw new Error("LOGIN_FAILED");
+    }
+
+    const data = snapshot.data();
+
+    if (data.aktiv !== true) {
+      showMessage(errorBox, "Dieses Konto ist deaktiviert.");
       return;
     }
 
-    if (p1 !== p2) {
-      fehler.textContent = "Die Passwörter stimmen nicht überein.";
-      fehler.style.display = "block";
+    const valid = await verifyPassword(password, data);
+
+    if (!valid) {
+      loginAttempts.push(Date.now());
+      throw new Error("LOGIN_FAILED");
+    }
+
+    await migrateLegacyPassword(userRef, password, data);
+
+    currentUser = publicUserData(username, data);
+
+    if (currentUser.mussPasswortAendern) {
+      currentUser.rememberLogin = remember;
+      $("loginBox").hidden = true;
+      $("passwortBox").hidden = false;
       return;
     }
 
-    if (!aktuellerBenutzer) {
-      fehler.textContent = "Fehler: Kein Benutzer gefunden. Bitte neu einloggen.";
-      fehler.style.display = "block";
-      return;
-    }
-
-    const userRef = doc(db, "mitglieder", aktuellerBenutzer.benutzername);
-
-    await updateDoc(userRef, {
-      passwort: p1,
-      mussPasswortAendern: false
-    });
-
-    aktuellerBenutzer.passwort = p1;
-    aktuellerBenutzer.mussPasswortAendern = false;
-
-    localStorage.setItem("dart11enLogin", JSON.stringify(aktuellerBenutzer));
+    saveLogin(currentUser, remember);
     sessionStorage.setItem("splashGesehen", "ja");
-    sessionStorage.setItem("user", JSON.stringify(aktuellerBenutzer));
-    sessionStorage.setItem("rolle", aktuellerBenutzer.rolle || "mitglied");
-    localStorage.setItem("dart11enReminder", "true");
-window.location.replace("index.html");
-
+    window.location.replace("index.html");
   } catch (error) {
-    fehler.textContent = "Fehler beim Passwort ändern: " + error.message;
-    fehler.style.display = "block";
     console.error(error);
+    showMessage(errorBox, "Benutzername oder Passwort ist falsch.");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Einloggen";
   }
-};
-window.gastWeiter = function () {
+}
+
+async function changePassword() {
+  const errorBox = $("passwortFehler");
+  clearMessage(errorBox);
+
+  const password1 = $("neuesPasswort").value;
+  const password2 = $("neuesPasswort2").value;
+
+  if (!currentUser) {
+    showMessage(errorBox, "Bitte melde dich erneut an.");
+    return;
+  }
+
+  if (password1.length < 8) {
+    showMessage(errorBox, "Das Passwort muss mindestens 8 Zeichen haben.");
+    return;
+  }
+
+  if (password1 !== password2) {
+    showMessage(errorBox, "Die Passwörter stimmen nicht überein.");
+    return;
+  }
+
+  try {
+    await setNewPassword(currentUser.benutzername, password1, false);
+    currentUser.mussPasswortAendern = false;
+    saveLogin(currentUser, currentUser.rememberLogin === true);
+    window.location.replace("index.html");
+  } catch (error) {
+    console.error(error);
+    showMessage(errorBox, "Das Passwort konnte nicht gespeichert werden.");
+  }
+}
+
+function continueAsGuest() {
   localStorage.removeItem("dart11enLogin");
   localStorage.removeItem("dart11enReminder");
-
+  sessionStorage.removeItem("dart11enLogin");
   sessionStorage.removeItem("user");
   sessionStorage.removeItem("rolle");
 
   localStorage.setItem("dart11enGast", "true");
   sessionStorage.setItem("splashGesehen", "ja");
+  window.location.replace("index.html");
+}
 
-  window.location.href = "index.html?v=" + Date.now();
-};
+$("loginButton").addEventListener("click", login);
+$("passwordChangeButton").addEventListener("click", changePassword);
+$("guestButton").addEventListener("click", continueAsGuest);
+
+$("loginPass").addEventListener("keydown", event => {
+  if (event.key === "Enter") login();
+});
