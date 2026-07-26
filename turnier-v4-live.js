@@ -21,6 +21,18 @@ function anwenden(wert){
   const vorstart=document.querySelector("#tvVorstart p");if(vorstart)vorstart.textContent=cfg.tv;
   localStorage.setItem("dart11enV4LiveStatus",key);
 }
+
+function gruppenModusFuerSpielerAktivieren(snap){
+  if(!snap.exists())return;
+  let gruppenDaten=null;
+  try{gruppenDaten=JSON.parse(snap.data()?.datenJson||"null")}catch(e){return}
+  if(gruppenDaten?.modus!=="gruppenko")return;
+  localStorage.setItem("dart11enV3TurnierModus","gruppenko");
+  const feld=document.getElementById("turnierModus");
+  if(feld)feld.value="gruppenko";
+  window.dispatchEvent(new CustomEvent("dart11en:v3-mode",{detail:{mode:"gruppenko"}}));
+}
+
 document.addEventListener("DOMContentLoaded",()=>{
   anwenden(localStorage.getItem("dart11enV4LiveStatus")||"vorbereitung");
   const select=document.getElementById("turnierLiveStatus");
@@ -30,4 +42,5 @@ document.addEventListener("DOMContentLoaded",()=>{
     setDoc(doc(db,"turnierLive","steuerungV4"),{status:select.value,aktualisiert:Date.now()},{merge:true}).catch(console.error);
   });
   onSnapshot(doc(db,"turnierLive","steuerungV4"),snap=>{if(snap.exists())anwenden(snap.data().status)});
+  onSnapshot(doc(db,"turnierLive","gruppenTurnierV3"),gruppenModusFuerSpielerAktivieren);
 });
