@@ -22,7 +22,7 @@ export default {
     try {
       // Statusseite des Workers
       if (request.method === "GET" && url.pathname === "/") {
-        return corsResponse({ ok: true, status: "online", service: "dart11en-turnier-push", version: "9.0.3-turnier-id", version: "9.0.2-phase-1-fix" });
+        return corsResponse({ ok: true, status: "online", service: "dart11en-turnier-push", version: "10.0-basis" });
       }
 
       // Manueller Test-Push, z. B. /test-push?nickname=Red%20Dart
@@ -120,6 +120,7 @@ async function sendTestPush(env, accessToken, nickname) {
 }
 
 async function syncTournamentPushes(env, accessToken) {
+  const syncId = crypto.randomUUID();
   const sources = await Promise.all([
     readFirestoreDocument(env, accessToken, "turnierLive/aktuellesTurnierV3", "doppelko"),
     readFirestoreDocument(env, accessToken, "turnierLive/gruppenTurnierV3", "gruppenko")
@@ -129,7 +130,7 @@ async function syncTournamentPushes(env, accessToken) {
     .filter(source => source?.data?.datenJson)
     .sort((a, b) => Number(b.data.aktualisiert || 0) - Number(a.data.aktualisiert || 0))[0];
 
-  if (!active) return { status: "kein-aktives-turnier", gesendet: 0, uebersprungen: 0 };
+  if (!active) return { syncId, status: "kein-aktives-turnier", gesendet: 0, uebersprungen: 0, diagnose: [] };
 
   let tournament;
   try {
@@ -138,31 +139,29 @@ async function syncTournamentPushes(env, accessToken) {
     throw new Error("TURNIER_JSON_UNGUELTIG");
   }
 
-  // Neue Turniere besitzen eine explizite pushTurnierId. Für ältere
-  // gespeicherte Turniere verwenden wir als stabilen Ersatz den Erstellzeitpunkt.
-  // Wichtig: aktualisiert darf hier nicht verwendet werden, weil sich dieser
-  // Wert nach jedem Ergebnis ändert und sonst doppelte Pushs entstehen würden.
   const runId = tournament.pushTurnierId
     || active.data.pushTurnierId
     || (tournament.erstellt ? `legacy-${active.type}-${tournament.erstellt}` : null);
-  if (!runId) return { status: "turnier-id-fehlt", gesendet: 0, uebersprungen: 0 };
+  if (!runId) return { syncId, status: "turnier-id-fehlt", gesendet: 0, uebersprungen: 0, diagnose: [] };
 
   const matches = active.type === "gruppenko"
     ? extractGroupMatches(tournament)
     : extractDoubleKoMatches(tournament);
 
   const actionable = selectActionableMatches(matches, Number(tournament.bestOf) || 3);
-  if (!actionable.length) return { status: "keine-offenen-partien", gesendet: 0, uebersprungen: 0 };
+  if (!actionable.length) {
+    return { syncId, status: "keine-offenen-partien", runId, turnierTyp: active.type, gesendet: 0, uebersprungen: 0, diagnose: [] };
+  }
 
   const subscriptions = await listPushSubscriptions(env, accessToken);
   let sent = 0;
   let skipped = 0;
   let noSubscription = 0;
+  let failed = 0;
+  const diagnose = [];
 
   for (const entry of actionable) {
-    const players = entry.kind === "bye"
-      ? [entry.player]
-      : [entry.match.a, entry.match.b];
+    const players = entry.kind === "bye" ? [entry.player] : [entry.match.a, entry.match.b];
 
     for (const player of players) {
       const opponent = entry.kind === "bye"
@@ -175,11 +174,15 @@ async function syncTournamentPushes(env, accessToken) {
           : "naechster-gegner";
       const eventIdentity = `${runId}|${active.type}|${entry.match.id}|${normalizeName(player)}|${state}`;
       const eventId = await sha256Hex(eventIdentity);
-
-      if (await eventAlreadySent(env, accessToken, eventId)) {
-        skipped += 1;
-        continue;
-      }
+      const baseDiagnostic = {
+        spieler: player,
+        gegner: opponent,
+        matchId: entry.match.id,
+        art: entry.kind,
+        board: entry.match.board || null,
+        runId,
+        eventId
+      };
 
       const playerSubscriptions = subscriptions.filter(sub =>
         sub.aktiv !== false && normalizeName(sub.nickname || sub.benutzername) === normalizeName(player)
@@ -187,6 +190,28 @@ async function syncTournamentPushes(env, accessToken) {
 
       if (!playerSubscriptions.length) {
         noSubscription += 1;
+        diagnose.push({ ...baseDiagnostic, ergebnis: "ohne-abo" });
+        continue;
+      }
+
+      // Atomare Reservierung verhindert doppelte Pushs, wenn automatischer und
+      // manueller Sync nahezu gleichzeitig laufen.
+      const reservation = await reserveEvent(env, accessToken, eventId, {
+        ...baseDiagnostic,
+        status: "wird-gesendet",
+        syncId,
+        erstelltAm: Date.now()
+      });
+
+      if (!reservation.created) {
+        skipped += 1;
+        diagnose.push({
+          ...baseDiagnostic,
+          ergebnis: "bereits-gesendet-oder-in-bearbeitung",
+          vorhandenerStatus: reservation.existing?.status || null,
+          vorhandenerSyncId: reservation.existing?.syncId || null,
+          gesendetAm: reservation.existing?.gesendetAm || reservation.existing?.erstelltAm || null
+        });
         continue;
       }
 
@@ -213,9 +238,11 @@ async function syncTournamentPushes(env, accessToken) {
             };
 
       let successfulForPlayer = 0;
+      const sendErrors = [];
       for (const subscription of playerSubscriptions) {
         const result = await sendFcm(env, accessToken, subscription.token, notification);
         if (result.ok) successfulForPlayer += 1;
+        else sendErrors.push({ status: result.status || null, error: result.error || "FCM_FEHLER" });
       }
 
       if (successfulForPlayer > 0) {
@@ -230,23 +257,35 @@ async function syncTournamentPushes(env, accessToken) {
           gesendetAn: successfulForPlayer,
           runde: entry.match.pushRunde || null,
           gruppe: entry.match.pushGruppe || null,
+          status: "gesendet",
+          syncId,
+          gesendetAm: Date.now(),
           erstelltAm: Date.now()
         });
         sent += successfulForPlayer;
+        diagnose.push({ ...baseDiagnostic, ergebnis: "gesendet", gesendetAn: successfulForPlayer });
+      } else {
+        failed += 1;
+        await deleteEventReservation(env, accessToken, eventId);
+        diagnose.push({ ...baseDiagnostic, ergebnis: "fcm-fehler", fehler: sendErrors });
       }
     }
   }
 
   return {
+    syncId,
     status: "synchronisiert",
+    version: "10.0-basis",
+    runId,
     turnierTyp: active.type,
     partienGeprueft: actionable.length,
     gesendet: sent,
     uebersprungen: skipped,
-    ohneAbo: noSubscription
+    ohneAbo: noSubscription,
+    fehlgeschlagen: failed,
+    diagnose
   };
 }
-
 function extractDoubleKoMatches(data) {
   const matches = [];
 
@@ -422,13 +461,33 @@ async function listPushSubscriptions(env, accessToken) {
   return [...new Map(valid.map(subscription => [subscription.token, subscription])).values()];
 }
 
-async function eventAlreadySent(env, accessToken, eventId) {
+async function readSentEvent(env, accessToken, eventId) {
   const response = await fetch(`${FIRESTORE_BASE(env.FIREBASE_PROJECT_ID)}/turnierPushGesendet/${eventId}`, {
     headers: { Authorization: `Bearer ${accessToken}` }
   });
-  if (response.status === 404) return false;
-  if (!response.ok) throw new Error(`PUSHSTATUS_LESEN_${response.status}`);
-  return true;
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error(`PUSHSTATUS_LESEN_${response.status}:${await response.text()}`);
+  const json = await response.json();
+  return firestoreFieldsToObject(json.fields || {});
+}
+
+async function reserveEvent(env, accessToken, eventId, data) {
+  const url = new URL(`${FIRESTORE_BASE(env.FIREBASE_PROJECT_ID)}/turnierPushGesendet/${eventId}`);
+  url.searchParams.set("currentDocument.exists", "false");
+  const response = await fetch(url, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ fields: objectToFirestoreFields(data) })
+  });
+
+  if (response.ok) return { created: true, existing: null };
+  if ([409, 412].includes(response.status)) {
+    return { created: false, existing: await readSentEvent(env, accessToken, eventId) };
+  }
+  throw new Error(`PUSHSTATUS_RESERVIEREN_${response.status}:${await response.text()}`);
 }
 
 async function markEventSent(env, accessToken, eventId, data) {
@@ -443,6 +502,15 @@ async function markEventSent(env, accessToken, eventId, data) {
   if (!response.ok) throw new Error(`PUSHSTATUS_SPEICHERN_${response.status}:${await response.text()}`);
 }
 
+async function deleteEventReservation(env, accessToken, eventId) {
+  const response = await fetch(`${FIRESTORE_BASE(env.FIREBASE_PROJECT_ID)}/turnierPushGesendet/${eventId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+  if (![200, 204, 404].includes(response.status)) {
+    console.warn("Push-Reservierung konnte nicht entfernt werden:", response.status, await response.text());
+  }
+}
 async function sendFcm(env, accessToken, token, notification) {
   const response = await fetch(`https://fcm.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/messages:send`, {
     method: "POST",
