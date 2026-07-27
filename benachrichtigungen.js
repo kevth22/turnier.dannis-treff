@@ -92,7 +92,7 @@ async function savePushToken(token) {
 
 async function getReadyServiceWorker() {
   const registration = await withTimeout(
-    navigator.serviceWorker.register("./sw.js?v=7"),
+    navigator.serviceWorker.register("./sw.js?v=8"),
     "SERVICE_WORKER_REGISTER_TIMEOUT"
   );
 

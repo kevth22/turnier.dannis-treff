@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v1-6-3-pushfix";
+const VERSION = "dart11en-v1-6-4-foreground-push";
 
 const CORE_FILES = [
   "./",
@@ -63,6 +63,7 @@ const CORE_FILES = [
   "./benachrichtigungen.js",
   "./benachrichtigungen.css",
   "./turnier-push-sync.js",
+  "./push-foreground.js",
   "./login.html",
   "./login.js",
   "./icon-192.png",
