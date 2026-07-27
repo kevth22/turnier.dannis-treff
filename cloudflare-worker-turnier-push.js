@@ -18,19 +18,35 @@ export default {
     if (request.method === "OPTIONS") return corsResponse(null, 204);
 
     const url = new URL(request.url);
-    if (request.method === "GET") {
-      return corsResponse({ ok: true, status: "online", service: "dart11en-turnier-push" });
-    }
-
-    if (request.method !== "POST" || !["/", "/turnier-sync"].includes(url.pathname)) {
-      return corsResponse({ ok: false, error: "NOT_FOUND" }, 404);
-    }
 
     try {
-      validateSecrets(env);
-      const accessToken = await getGoogleAccessToken(env);
-      const result = await syncTournamentPushes(env, accessToken);
-      return corsResponse({ ok: true, ...result });
+      // Statusseite des Workers
+      if (request.method === "GET" && url.pathname === "/") {
+        return corsResponse({ ok: true, status: "online", service: "dart11en-turnier-push", version: "9.0.2-phase-1-fix" });
+      }
+
+      // Manueller Test-Push, z. B. /test-push?nickname=Red%20Dart
+      if (request.method === "GET" && (url.pathname === "/test-push" || (url.pathname === "/" && url.searchParams.has("nickname")))) {
+        validateSecrets(env);
+        const nickname = String(url.searchParams.get("nickname") || "").trim();
+        if (!nickname) {
+          return corsResponse({ ok: false, error: "NICKNAME_FEHLT", beispiel: "/test-push?nickname=Red%20Dart" }, 400);
+        }
+
+        const accessToken = await getGoogleAccessToken(env);
+        const result = await sendTestPush(env, accessToken, nickname);
+        return corsResponse({ ok: true, ...result });
+      }
+
+      // Automatische Turnier-Synchronisierung
+      if (["GET", "POST"].includes(request.method) && url.pathname === "/turnier-sync") {
+        validateSecrets(env);
+        const accessToken = await getGoogleAccessToken(env);
+        const result = await syncTournamentPushes(env, accessToken);
+        return corsResponse({ ok: true, ...result });
+      }
+
+      return corsResponse({ ok: false, error: "NOT_FOUND" }, 404);
     } catch (error) {
       console.error(error);
       return corsResponse({ ok: false, error: String(error?.message || error) }, 500);
@@ -54,6 +70,53 @@ function validateSecrets(env) {
   for (const key of ["FIREBASE_PROJECT_ID", "FIREBASE_CLIENT_EMAIL", "FIREBASE_PRIVATE_KEY"]) {
     if (!env[key]) throw new Error(`SECRET_FEHLT:${key}`);
   }
+}
+
+async function sendTestPush(env, accessToken, nickname) {
+  const subscriptions = await listPushSubscriptions(env, accessToken);
+  const normalizedNickname = normalizeName(nickname);
+  const matches = subscriptions.filter(subscription =>
+    subscription.aktiv !== false &&
+    normalizeName(subscription.nickname || subscription.benutzername) === normalizedNickname
+  );
+
+  if (!matches.length) {
+    return {
+      status: "kein-abo-gefunden",
+      nickname,
+      gefunden: 0,
+      gesendet: 0,
+      fehlgeschlagen: 0
+    };
+  }
+
+  const notification = {
+    title: "Dart11en Test-Push 🎯",
+    body: `Hallo ${nickname}, deine Push-Benachrichtigungen funktionieren.`,
+    tag: `dart11en-test-${Date.now()}`,
+    url: "https://kevth22.github.io/turnier.dannis-treff/turnier-live-v3.html"
+  };
+
+  let sent = 0;
+  const errors = [];
+
+  for (const subscription of matches) {
+    const result = await sendFcm(env, accessToken, subscription.token, notification);
+    if (result.ok) {
+      sent += 1;
+    } else {
+      errors.push({ status: result.status || null, error: result.error || "FCM_FEHLER" });
+    }
+  }
+
+  return {
+    status: sent > 0 ? "test-push-gesendet" : "test-push-fehlgeschlagen",
+    nickname,
+    gefunden: matches.length,
+    gesendet: sent,
+    fehlgeschlagen: matches.length - sent,
+    fehler: errors
+  };
 }
 
 async function syncTournamentPushes(env, accessToken) {
@@ -316,7 +379,13 @@ async function listPushSubscriptions(env, accessToken) {
     pageToken = json.nextPageToken || "";
   } while (pageToken);
 
-  return subscriptions.filter(subscription => typeof subscription.token === "string" && subscription.token.length > 20);
+  const valid = subscriptions.filter(subscription =>
+    typeof subscription.token === "string" && subscription.token.length > 20
+  );
+
+  // Derselbe Browser-Token darf nur einmal verwendet werden, auch wenn in
+  // Firestore versehentlich mehrere Dokumente dazu existieren.
+  return [...new Map(valid.map(subscription => [subscription.token, subscription])).values()];
 }
 
 async function eventAlreadySent(env, accessToken, eventId) {
@@ -356,14 +425,11 @@ async function sendFcm(env, accessToken, token, notification) {
           tag: notification.tag,
           url: notification.url
         },
+        // Nur Data-Payload senden. Der Service Worker zeigt daraus genau
+        // eine Benachrichtigung an. Eine zusätzliche notification-Payload
+        // würde auf iOS dieselbe Meldung doppelt erzeugen.
         webpush: {
-          notification: {
-            title: notification.title,
-            body: notification.body,
-            icon: "https://kevth22.github.io/turnier.dannis-treff/icon-192.png",
-            badge: "https://kevth22.github.io/turnier.dannis-treff/icon-192.png",
-            tag: notification.tag
-          },
+          headers: { Urgency: "high" },
           fcm_options: { link: notification.url }
         }
       }

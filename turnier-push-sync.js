@@ -13,12 +13,16 @@ export function turnierPushSynchronisieren() {
       const response = await fetch(TURNIER_PUSH_WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "turnier-sync" }),
-        keepalive: true
+        body: JSON.stringify({ action: "turnier-sync", zeit: Date.now() }),
+        keepalive: true,
+        cache: "no-store"
       });
 
-      if (!response.ok) {
-        console.warn("Turnier-Push-Synchronisierung fehlgeschlagen:", response.status);
+      const result = await response.json().catch(() => null);
+      window.__dart11enLetzterPushSync = result;
+      console.info("Turnier-Push-Synchronisierung:", result);
+      if (!response.ok || result?.ok === false) {
+        console.warn("Turnier-Push-Synchronisierung fehlgeschlagen:", response.status, result);
       }
     } catch (error) {
       // Der Turnierablauf darf niemals durch einen Push-Fehler gestört werden.
