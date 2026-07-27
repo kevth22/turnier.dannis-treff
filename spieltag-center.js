@@ -26,7 +26,7 @@ try {
 }
 
 const rolle = (aktuellerUser?.rolle || "").toLowerCase().trim();
-const erlaubteRollen = ["mitglied", "captain", "admin"];
+const erlaubteRollen = ["mitglied", "captain", "kassenwart", "admin"];
 
 if (!erlaubteRollen.includes(rolle)) {
   localStorage.removeItem("dart11enLogin");
