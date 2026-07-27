@@ -360,8 +360,8 @@ async function sendFcm(env, accessToken, token, notification) {
           notification: {
             title: notification.title,
             body: notification.body,
-            icon: "./icon-192.png",
-            badge: "./icon-192.png",
+            icon: "https://kevth22.github.io/turnier.dannis-treff/icon-192.png",
+            badge: "https://kevth22.github.io/turnier.dannis-treff/icon-192.png",
             tag: notification.tag
           },
           fcm_options: { link: notification.url }
