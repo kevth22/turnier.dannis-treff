@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v1-6-0";
+const VERSION = "dart11en-v1-6-1";
 
 const CORE_FILES = [
   "./",
@@ -62,6 +62,7 @@ const CORE_FILES = [
   "./benachrichtigungen.html",
   "./benachrichtigungen.js",
   "./benachrichtigungen.css",
+  "./turnier-push-sync.js",
   "./login.html",
   "./login.js",
   "./icon-192.png",

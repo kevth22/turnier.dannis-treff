@@ -78,6 +78,7 @@ async function savePushToken(token) {
       token,
       benutzername: user.benutzername,
       nickname: user.nickname || user.benutzername,
+      nicknameNormalisiert: String(user.nickname || user.benutzername).trim().toLocaleLowerCase("de"),
       rolle: String(user.rolle || "gast").toLowerCase(),
       aktiv: true,
       userAgent: navigator.userAgent,
@@ -91,7 +92,7 @@ async function savePushToken(token) {
 
 async function getReadyServiceWorker() {
   const registration = await withTimeout(
-    navigator.serviceWorker.register("./sw.js?v=6"),
+    navigator.serviceWorker.register("./sw.js?v=7"),
     "SERVICE_WORKER_REGISTER_TIMEOUT"
   );
 
@@ -106,11 +107,6 @@ async function getReadyServiceWorker() {
 async function initialisePush() {
   if (!user) {
     $("loginRequired").hidden = false;
-    return;
-  }
-
-  if (String(user.rolle || "gast").toLowerCase() === "gast") {
-    $("guestBlocked").hidden = false;
     return;
   }
 

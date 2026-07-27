@@ -1,5 +1,6 @@
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { addDoc, getFirestore, collection, deleteDoc, doc, onSnapshot, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { turnierPushSynchronisieren } from "./turnier-push-sync.js";
 
 console.log("Turnier-Center geladen");
 
@@ -425,6 +426,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function turnierSpeichernUndRendern() {
     if (!turnierDaten) return;
+    if (!turnierDaten.pushTurnierId) turnierDaten.pushTurnierId = crypto.randomUUID();
     boardsVerteilen();
     localStorage.setItem("dart11enV3DoppelKo", JSON.stringify(turnierDaten));
     turnierAnsichtRendern();
@@ -465,8 +467,10 @@ document.addEventListener("DOMContentLoaded", () => {
       await setDoc(doc(db, "turnierLive", "aktuellesTurnierV3"), {
         daten: null,
         datenJson: daten ? JSON.stringify(daten) : null,
+        pushTurnierId: daten?.pushTurnierId || null,
         aktualisiert: Date.now()
       });
+      turnierPushSynchronisieren();
     } catch (fehler) {
       console.error("Der öffentliche Turnierstand konnte nicht gespeichert werden:", fehler);
     }

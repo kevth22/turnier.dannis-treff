@@ -1,5 +1,6 @@
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, doc, onSnapshot, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { turnierPushSynchronisieren } from "./turnier-push-sync.js";
 
 const firebaseConfig={apiKey:"AIzaSyDtQ3pECcZETIoI4QTV5G-7_QcoRvVGHL4",authDomain:"dannistreffturnier.firebaseapp.com",projectId:"dannistreffturnier",storageBucket:"dannistreffturnier.firebasestorage.app",messagingSenderId:"829873084116",appId:"1:829873084116:web:683bbf1ea3e58f1a4ecd41"};
 const app=getApps().length?getApps()[0]:initializeApp(firebaseConfig);
@@ -148,7 +149,7 @@ function koPhasenErstellen({automatisch=false}={}){
   koErstellungLaeuft=false;
   return true;
 }
-function speichern(){gruppenBoardsVerteilen();localStorage.setItem("dart11enV3GruppenKo",JSON.stringify(daten));clearTimeout(speicherTimer);speicherTimer=setTimeout(()=>setDoc(doc(db,"turnierLive","gruppenTurnierV3"),{datenJson:JSON.stringify(daten),aktualisiert:Date.now()}).catch(console.error),250)}
+function speichern(){if(daten&&!daten.pushTurnierId)daten.pushTurnierId=crypto.randomUUID();gruppenBoardsVerteilen();localStorage.setItem("dart11enV3GruppenKo",JSON.stringify(daten));clearTimeout(speicherTimer);speicherTimer=setTimeout(async()=>{try{await setDoc(doc(db,"turnierLive","gruppenTurnierV3"),{datenJson:JSON.stringify(daten),pushTurnierId:daten?.pushTurnierId||null,aktualisiert:Date.now()});turnierPushSynchronisieren()}catch(error){console.error(error)}},250)}
 function scoreSelect(wert,onchange){const s=document.createElement("select");s.innerHTML='<option value="">–</option>'+Array.from({length:siegLegs()+1},(_,i)=>`<option value="${i}">${i}</option>`).join("");s.value=wert??"";s.onchange=()=>onchange(s.value===""?null:Number(s.value));return s}
 function maxGruppenPlaetze(){if(daten?.gruppen?.length)return Math.max(1,...daten.gruppen.map(g=>g.spieler.length));const gruppen=Math.max(1,Number($("gruppenAnzahl")?.value||1));const anwesend=teilnehmer.filter(p=>p.anwesend===true).length;return Math.max(1,Math.min(8,Math.ceil(Math.max(anwesend,2)/gruppen)))}
 function regelQuelle(){return daten?.regeln||entwurfRegeln}
