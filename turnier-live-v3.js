@@ -1131,7 +1131,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (namen.length < 2) { alert("Mindestens zwei anwesende Personen werden für die Auslosung benötigt."); return; }
     if (namen.length > turnierGroesse) { alert("Es sind mehr Personen anwesend als das Turnierfeld Plätze hat."); return; }
     ergebnisHistorieLeeren();
-    turnierDaten = turnierErstellen(namen); wegeBerechnen(); turnierSpeichernUndRendern();
+    turnierDaten = turnierErstellen(namen);
+    // Jede neue Auslosung ist für das Push-System ein eigenes Turnier.
+    // Dadurch können alte Einträge aus turnierPushGesendet niemals die
+    // Benachrichtigungen einer neuen Auslosung blockieren.
+    turnierDaten.pushTurnierId = crypto.randomUUID();
+    turnierDaten.pushTurnierStart = Date.now();
+    wegeBerechnen();
+    turnierSpeichernUndRendern();
     auslosungEventOnlineSpeichern();
   });
 

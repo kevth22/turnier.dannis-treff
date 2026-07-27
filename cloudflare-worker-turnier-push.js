@@ -22,7 +22,7 @@ export default {
     try {
       // Statusseite des Workers
       if (request.method === "GET" && url.pathname === "/") {
-        return corsResponse({ ok: true, status: "online", service: "dart11en-turnier-push", version: "9.0.2-phase-1-fix" });
+        return corsResponse({ ok: true, status: "online", service: "dart11en-turnier-push", version: "9.0.3-turnier-id", version: "9.0.2-phase-1-fix" });
       }
 
       // Manueller Test-Push, z. B. /test-push?nickname=Red%20Dart
@@ -138,7 +138,13 @@ async function syncTournamentPushes(env, accessToken) {
     throw new Error("TURNIER_JSON_UNGUELTIG");
   }
 
-  const runId = tournament.pushTurnierId || active.data.pushTurnierId;
+  // Neue Turniere besitzen eine explizite pushTurnierId. Für ältere
+  // gespeicherte Turniere verwenden wir als stabilen Ersatz den Erstellzeitpunkt.
+  // Wichtig: aktualisiert darf hier nicht verwendet werden, weil sich dieser
+  // Wert nach jedem Ergebnis ändert und sonst doppelte Pushs entstehen würden.
+  const runId = tournament.pushTurnierId
+    || active.data.pushTurnierId
+    || (tournament.erstellt ? `legacy-${active.type}-${tournament.erstellt}` : null);
   if (!runId) return { status: "turnier-id-fehlt", gesendet: 0, uebersprungen: 0 };
 
   const matches = active.type === "gruppenko"

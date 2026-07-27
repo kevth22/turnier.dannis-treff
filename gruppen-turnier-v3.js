@@ -367,7 +367,10 @@ function neuesGruppenTurnier(){
     koModi:{ko1:"einfach",ko2:"einfach"},
     regeln:clone(aktuelleRegeln),
     gruppen:neueGruppen,
-    koPhasen:[]
+    koPhasen:[],
+    // Jede neue Gruppenauslosung erhält eine eigene Push-ID.
+    pushTurnierId:crypto.randomUUID(),
+    pushTurnierStart:Date.now()
   };
   gruppenBoardsVerteilen();
   speichern();
