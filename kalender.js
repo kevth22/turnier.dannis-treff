@@ -45,7 +45,7 @@ let zusagen = [];
 let aktuellesDatum = new Date();
 let ausgewaehltesDatum = null;
 
-const erlaubteRollen = ["admin", "captain", "mitglied"];
+const erlaubteRollen = ["admin", "captain", "kassenwart", "mitglied"];
 
 if (!erlaubteRollen.includes(aktuellerUser.rolle)) {
   alert("Kein Zugriff auf den Kalender.");
@@ -239,23 +239,64 @@ window.spieltagSpeichern = async function () {
     return;
   }
 
-  await addDoc(spieltageRef, {
-    liga,
-    datum,
-    treffen,
-    anwurf,
-    ort,
-    typ,
-    erstelltAm: serverTimestamp()
-  });
+  const spieltagDokument = await addDoc(spieltageRef, {
+  liga,
+  datum,
+  treffen,
+  anwurf,
+  ort,
+  typ,
+  erstelltAm: serverTimestamp()
+});
 
-  document.getElementById("spieltagLiga").value = "";
-  document.getElementById("spieltagDatum").value = "";
-  document.getElementById("spieltagTreffen").value = "";
-  document.getElementById("spieltagAnwurf").value = "";
-  document.getElementById("spieltagOrt").value = "";
+let pushErfolgreich = false;
 
-  alert("Spieltag gespeichert.");
+try {
+  const pushAntwort = await fetch(
+    "https://dart11en-push.kevteha.workers.dev/spieltag-push",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        spieltagId: spieltagDokument.id,
+        aktion: "erstellt",
+        liga,
+        datum,
+        treffen,
+        anwurf,
+        ort,
+        typ
+      })
+    }
+  );
+
+  const pushErgebnis = await pushAntwort.json().catch(() => null);
+
+  if (!pushAntwort.ok) {
+    throw new Error(
+      pushErgebnis?.error ||
+      `Worker-Fehler ${pushAntwort.status}`
+    );
+  }
+
+  pushErfolgreich = true;
+  console.log("Spieltag-Push:", pushErgebnis);
+} catch (error) {
+  console.error("Spieltag-Push fehlgeschlagen:", error);
+}
+document.getElementById("spieltagLiga").value = "";
+document.getElementById("spieltagDatum").value = "";
+document.getElementById("spieltagTreffen").value = "";
+document.getElementById("spieltagAnwurf").value = "";
+document.getElementById("spieltagOrt").value = "";
+
+alert(
+  pushErfolgreich
+    ? "Spieltag gespeichert und Benachrichtigung versendet."
+    : "Spieltag gespeichert. Die Benachrichtigung konnte nicht versendet werden."
+);
 };
 /* =========================
    KALENDER ZEICHNEN
