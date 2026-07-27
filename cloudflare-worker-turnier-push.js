@@ -160,9 +160,19 @@ async function syncTournamentPushes(env, accessToken) {
   let noSubscription = 0;
 
   for (const entry of actionable) {
-    for (const player of [entry.match.a, entry.match.b]) {
-      const opponent = player === entry.match.a ? entry.match.b : entry.match.a;
-      const state = entry.kind === "board" ? `board-${entry.match.board}` : "naechster-gegner";
+    const players = entry.kind === "bye"
+      ? [entry.player]
+      : [entry.match.a, entry.match.b];
+
+    for (const player of players) {
+      const opponent = entry.kind === "bye"
+        ? "Freilos"
+        : (player === entry.match.a ? entry.match.b : entry.match.a);
+      const state = entry.kind === "board"
+        ? `board-${entry.match.board}`
+        : entry.kind === "bye"
+          ? "freilos"
+          : "naechster-gegner";
       const eventIdentity = `${runId}|${active.type}|${entry.match.id}|${normalizeName(player)}|${state}`;
       const eventId = await sha256Hex(eventIdentity);
 
@@ -188,12 +198,19 @@ async function syncTournamentPushes(env, accessToken) {
             tag: `dart11en-board-${eventId}`,
             url: notificationUrl
           }
-        : {
-            title: `${entry.match.pushRunde || "Nächster Gegner"} 🎯`,
-            body: `Dein kommender Gegner ist ${opponent}.`,
-            tag: `dart11en-gegner-${eventId}`,
-            url: notificationUrl
-          };
+        : entry.kind === "bye"
+          ? {
+              title: "Freilos erhalten 🎯",
+              body: "Du hast ein Freilos erhalten. Damit bist du automatisch eine Runde weiter 😮‍💨",
+              tag: `dart11en-freilos-${eventId}`,
+              url: notificationUrl
+            }
+          : {
+              title: "Dein nächster Gegner steht fest 🎯",
+              body: `Dein nächster Gegner ist ${opponent}.`,
+              tag: `dart11en-gegner-${eventId}`,
+              url: notificationUrl
+            };
 
       let successfulForPlayer = 0;
       for (const subscription of playerSubscriptions) {
@@ -318,11 +335,21 @@ function buildTournamentUrl(type, match) {
 }
 
 function selectActionableMatches(matches, bestOf) {
-  const open = matches.filter(match => isOpenMatch(match, bestOf));
-  const boardMatches = open.filter(match => Number(match.board) > 0);
+  // Freilose sind ein eigenes Ereignis. Nur der echte Spieler wird informiert.
+  const byeEntries = matches
+    .filter(match => match && ((match.a === "Freilos" && match.b) || (match.b === "Freilos" && match.a)))
+    .map(match => ({
+      kind: "bye",
+      match,
+      player: match.a === "Freilos" ? match.b : match.a
+    }));
 
-  // Pro Spieler wird nur die nächste wartende Partie ausgewählt. Dadurch
-  // verschickt die Gruppenphase nicht sofort alle späteren Gegner auf einmal.
+  const open = matches.filter(match => isOpenMatch(match, bestOf));
+
+  // Partien, die durch die aktuelle Board-Anzahl direkt starten, erhalten
+  // ausschließlich den Board-Push. Die übrigen spielbereiten Partien erhalten
+  // zunächst den Gegner-Push und später zusätzlich den Board-Push.
+  const boardMatches = open.filter(match => Number(match.board) > 0);
   const occupiedPlayers = new Set(
     boardMatches.flatMap(match => [normalizeName(match.a), normalizeName(match.b)])
   );
@@ -339,7 +366,8 @@ function selectActionableMatches(matches, bestOf) {
 
   return [
     ...boardMatches.map(match => ({ kind: "board", match })),
-    ...nextMatches.map(match => ({ kind: "next", match }))
+    ...nextMatches.map(match => ({ kind: "next", match })),
+    ...byeEntries
   ];
 }
 
