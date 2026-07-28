@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v1-6-4-foreground-push";
+const VERSION = "dart11en-v1-7-0-kasse";
 
 const CORE_FILES = [
   "./",
@@ -59,6 +59,9 @@ const CORE_FILES = [
   "./pwa.js",
   "./auth-utils.js",
   "./account-ui.js",
+  "./kasse.html",
+  "./kasse.js",
+  "./kasse.css",
   "./benachrichtigungen.html",
   "./benachrichtigungen.js",
   "./benachrichtigungen.css",

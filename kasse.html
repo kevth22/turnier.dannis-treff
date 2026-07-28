@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kasse | Dart11en</title>
+  <meta name="theme-color" content="#e00022">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="konto.css">
+  <link rel="stylesheet" href="kasse.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+<header class="app-header">
+  <img src="dart11enlogo.png" class="logo" alt="Dart11en Logo">
+  <h1>Kassen-Center</h1>
+  <p>Beiträge, Einnahmen und Ausgaben</p>
+</header>
+
+<main class="app-container kasse-app" id="kasseApp" hidden>
+  <section class="kasse-headline">
+    <div>
+      <p class="eyebrow">Dart11en Vereinskasse</p>
+      <h2 id="welcomeText">Übersicht</h2>
+    </div>
+    <span id="roleBadge" class="role-badge"></span>
+  </section>
+
+  <section class="kasse-summary" aria-label="Kassenübersicht">
+    <article class="summary-card balance-card">
+      <span>Kassenstand</span>
+      <strong id="balanceValue">0,00 €</strong>
+    </article>
+    <article class="summary-card">
+      <span>Einnahmen</span>
+      <strong id="incomeValue">0,00 €</strong>
+    </article>
+    <article class="summary-card">
+      <span>Ausgaben</span>
+      <strong id="expenseValue">0,00 €</strong>
+    </article>
+    <article class="summary-card warning-card">
+      <span>Offene Beiträge</span>
+      <strong id="openValue">0 · 0,00 €</strong>
+    </article>
+  </section>
+
+  <section class="kasse-panel">
+    <div class="panel-header">
+      <div>
+        <p class="eyebrow">Mitgliedsbeiträge</p>
+        <h2>Monatsübersicht</h2>
+      </div>
+      <label class="month-picker">
+        Monat
+        <input id="monthPicker" type="month">
+      </label>
+    </div>
+
+    <div class="contribution-stats">
+      <span><b id="paidCount">0</b> bezahlt</span>
+      <span><b id="openCount">0</b> offen</span>
+      <span><b id="exemptCount">0</b> befreit</span>
+    </div>
+
+    <p class="table-hint" id="tableHint">Der Monatsbeitrag ist jeweils am 1. fällig. Gäste werden nicht aufgeführt.</p>
+
+    <div class="member-table-wrap">
+      <table class="member-table">
+        <thead>
+          <tr>
+            <th>Mitglied</th>
+            <th>Beitrag</th>
+            <th>Status</th>
+            <th class="edit-column">Details</th>
+          </tr>
+        </thead>
+        <tbody id="memberRows">
+          <tr><td colspan="4" class="empty-cell">Beiträge werden geladen …</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="status-legend">
+      <span><i class="status-dot status-open"></i> Offen</span>
+      <span><i class="status-dot status-paid">✓</i> Bezahlt</span>
+      <span><i class="status-dot status-exempt">−</i> Befreit</span>
+    </div>
+  </section>
+
+  <section class="kasse-panel">
+    <div class="panel-header">
+      <div>
+        <p class="eyebrow">Kassenjournal</p>
+        <h2>Letzte Buchungen</h2>
+      </div>
+    </div>
+    <div id="journalList" class="journal-list">
+      <p class="empty-cell">Noch keine Buchungen vorhanden.</p>
+    </div>
+  </section>
+
+  <p id="kasseMessage" class="kasse-message" aria-live="polite"></p>
+</main>
+
+<section id="accessDenied" class="access-screen" hidden>
+  <div class="access-card">
+    <div class="access-icon">🔒</div>
+    <h1>Kein Zugriff</h1>
+    <p>Die Kasse ist nur für Admin, Captain und Kassenwart sichtbar.</p>
+    <a class="main-button" href="index.html">Zur Startseite</a>
+  </div>
+</section>
+
+<div id="memberModal" class="modal-overlay" hidden>
+  <form id="memberForm" class="kasse-modal">
+    <button class="modal-close" type="button" id="closeMemberModal" aria-label="Fenster schließen">×</button>
+    <p class="eyebrow">Mitglied bearbeiten</p>
+    <h2 id="memberModalTitle">Mitglied</h2>
+    <input id="memberUsername" type="hidden">
+
+    <label>
+      Monatsbeitrag
+      <div class="money-input"><input id="memberAmount" type="number" min="0" step="0.01" inputmode="decimal" required><span>€</span></div>
+    </label>
+
+    <label>
+      Gültig ab
+      <input id="memberValidFrom" type="month" required>
+    </label>
+
+    <label class="switch-row">
+      <input id="memberExempt" type="checkbox">
+      <span>Von Mitgliedsbeiträgen befreit</span>
+    </label>
+
+    <label>
+      Notizen
+      <textarea id="memberNotes" rows="4" maxlength="500" placeholder="Zum Beispiel: zahlt bar oder ermäßigter Beitrag"></textarea>
+    </label>
+
+    <button class="main-button" type="submit">Speichern</button>
+  </form>
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html">🏠<br>Home</a>
+  <a href="spieltag-center.html">🚌<br>Spieltag</a>
+  <a href="kalender.html">📅<br>Kalender</a>
+  <a href="liga.html">🏆<br>Liga</a>
+  <a href="kasse.html" class="active">💰<br>Kasse</a>
+</nav>
+
+<script type="module" src="kasse.js"></script>
+</body>
+</html>

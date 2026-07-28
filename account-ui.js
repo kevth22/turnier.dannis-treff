@@ -17,6 +17,11 @@ function renderAccountControls() {
 
   const role = String(user.rolle || "gast").toLowerCase();
 
+  const kasseCard = document.getElementById("kasseCard");
+  if (kasseCard) {
+    kasseCard.hidden = !["admin", "captain", "kassenwart"].includes(role);
+  }
+
   const adminLink = role === "admin"
     ? `
       <a href="konto-admin.html">
