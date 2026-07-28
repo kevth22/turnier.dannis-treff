@@ -39,7 +39,8 @@ const state = {
   members: [],
   profiles: new Map(),
   contributions: new Map(),
-  bookings: []
+  bookings: [],
+  savingContribution: new Set()
 };
 
 const $ = id => document.getElementById(id);
@@ -49,8 +50,12 @@ function currentMonthKey() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
 
+function memberId(member) {
+  return String(member?.mitgliedId || member?._docId || member?.benutzername || "").trim();
+}
+
 function displayName(member) {
-  return member.nickname || [member.vorname, member.nachname].filter(Boolean).join(" ") || member.benutzername;
+  return member.nickname || [member.vorname, member.nachname].filter(Boolean).join(" ") || member.benutzername || memberId(member);
 }
 
 function escapeHtml(value) {
@@ -103,7 +108,7 @@ function initAccess() {
 async function loadMembers() {
   const snap = await getDocs(collection(db, "mitglieder"));
   state.members = snap.docs
-    .map(item => ({ benutzername: item.id, ...item.data() }))
+    .map(item => ({ ...item.data(), _docId: item.id, mitgliedId: item.id, benutzername: item.data().benutzername || item.id }))
     .filter(member => member.aktiv !== false)
     .filter(member => CONTRIBUTION_ROLES.includes(String(member.rolle || "gast").toLowerCase()))
     .sort((a, b) => displayName(a).localeCompare(displayName(b), "de"));
@@ -111,7 +116,13 @@ async function loadMembers() {
 
 async function loadProfiles() {
   const snap = await getDocs(collection(db, "kassenProfile"));
-  state.profiles = new Map(snap.docs.map(item => [item.id, item.data()]));
+  state.profiles = new Map();
+  snap.docs.forEach(item => {
+    const data = item.data();
+    state.profiles.set(item.id, data);
+    if (data.mitgliedId) state.profiles.set(String(data.mitgliedId), data);
+    if (data.benutzername) state.profiles.set(String(data.benutzername), data);
+  });
 }
 
 async function loadContributions(monthKey) {
@@ -119,7 +130,12 @@ async function loadContributions(monthKey) {
   state.contributions = new Map();
   snap.forEach(item => {
     const data = item.data();
-    if (data.monat === monthKey) state.contributions.set(data.benutzername, { id: item.id, ...data });
+    if (data.monat === monthKey) {
+      const entry = { id: item.id, ...data };
+      const key = String(data.mitgliedId || data.benutzername || "").trim();
+      if (key) state.contributions.set(key, entry);
+      if (data.benutzername) state.contributions.set(String(data.benutzername), entry);
+    }
   });
 }
 
@@ -136,19 +152,26 @@ async function loadBookings() {
   });
 }
 
-function profileFor(username) {
-  return state.profiles.get(username) || { beitrag: DEFAULT_AMOUNT, befreit: false, notizen: "", gueltigAb: currentMonthKey() };
+function profileFor(idOrUsername) {
+  const key = String(idOrUsername || "");
+  const member = state.members.find(item => memberId(item) === key || item.benutzername === key);
+  return state.profiles.get(key)
+    || (member?.benutzername ? state.profiles.get(String(member.benutzername)) : null)
+    || { beitrag: DEFAULT_AMOUNT, befreit: false, notizen: "", gueltigAb: currentMonthKey() };
 }
 
 function amountFor(username, monthKey) {
-  const profile = profileFor(username);
+  const profile = profileFor(key);
   if (profile.gueltigAb && profile.gueltigAb > monthKey) return DEFAULT_AMOUNT;
   const amount = Number(profile.beitrag);
   return Number.isFinite(amount) ? amount : DEFAULT_AMOUNT;
 }
 
-function statusFor(username, monthKey) {
-  const contribution = state.contributions.get(username);
+function statusFor(idOrUsername, monthKey) {
+  const key = String(idOrUsername || "");
+  const member = state.members.find(item => memberId(item) === key || item.benutzername === key);
+  const contribution = state.contributions.get(key)
+    || (member?.benutzername ? state.contributions.get(String(member.benutzername)) : null);
   if (contribution?.status === "bezahlt") return "bezahlt";
   if (contribution?.status === "befreit") return "befreit";
   const profile = profileFor(username);
@@ -157,11 +180,12 @@ function statusFor(username, monthKey) {
 }
 
 function statusButton(member, monthKey) {
-  const status = statusFor(member.benutzername, monthKey);
+  const id = memberId(member);
+  const status = statusFor(id, monthKey);
   const className = status === "bezahlt" ? "status-paid" : status === "befreit" ? "status-exempt" : "status-open";
   const symbol = status === "bezahlt" ? "✓" : status === "befreit" ? "−" : "";
   const title = status === "bezahlt" ? "Bezahlt" : status === "befreit" ? "Befreit" : "Offen";
-  return `<button class="status-button ${className}" data-action="toggle-paid" data-user="${escapeHtml(member.benutzername)}" title="${title}" ${state.canEdit && status !== "befreit" ? "" : "disabled"}>${symbol}</button>`;
+  return `<button class="status-button ${className}" data-action="toggle-paid" data-member-id="${escapeHtml(id)}" title="${title}" ${state.canEdit && status !== "befreit" ? "" : "disabled"}>${symbol}</button>`;
 }
 
 function renderMembers() {
@@ -173,13 +197,14 @@ function renderMembers() {
   }
 
   host.innerHTML = state.members.map(member => {
-    const profile = profileFor(member.benutzername);
+    const id = memberId(member);
+    const profile = profileFor(id);
     return `
       <tr>
         <td><span class="member-name">${escapeHtml(displayName(member))}</span><span class="member-sub">${escapeHtml(roleLabel(String(member.rolle || "mitglied").toLowerCase()))}</span></td>
-        <td>${euro.format(amountFor(member.benutzername, monthKey))}</td>
+        <td>${euro.format(amountFor(id, monthKey))}</td>
         <td>${statusButton(member, monthKey)}</td>
-        <td class="edit-column">${state.canEdit ? `<button class="edit-member" data-action="edit-member" data-user="${escapeHtml(member.benutzername)}" title="Beitrag und Notiz bearbeiten">📝</button>` : (profile.notizen ? "📝" : "–")}</td>
+        <td class="edit-column">${state.canEdit ? `<button class="edit-member" data-action="edit-member" data-member-id="${escapeHtml(id)}" title="Beitrag und Notiz bearbeiten">📝</button>` : (profile.notizen ? "📝" : "–")}</td>
       </tr>`;
   }).join("");
 
@@ -190,10 +215,11 @@ function updateContributionStats() {
   const monthKey = $("monthPicker").value || currentMonthKey();
   let paid = 0, open = 0, exempt = 0, openAmount = 0;
   state.members.forEach(member => {
-    const status = statusFor(member.benutzername, monthKey);
+    const id = memberId(member);
+    const status = statusFor(id, monthKey);
     if (status === "bezahlt") paid++;
     else if (status === "befreit") exempt++;
-    else { open++; openAmount += amountFor(member.benutzername, monthKey); }
+    else { open++; openAmount += amountFor(id, monthKey); }
   });
   $("paidCount").textContent = paid;
   $("openCount").textContent = open;
@@ -477,53 +503,71 @@ async function saveBooking(event) {
   await refreshData();
 }
 
-async function togglePaid(username) {
-  if (!state.canEdit) return;
+async function togglePaid(id) {
+  if (!state.canEdit || !id || state.savingContribution.has(id)) return;
   const monthKey = $("monthPicker").value || currentMonthKey();
-  const member = state.members.find(item => item.benutzername === username);
-  if (!member || statusFor(username, monthKey) === "befreit") return;
-  const existing = state.contributions.get(username);
-  const amount = amountFor(username, monthKey);
-  const nowPaid = existing?.status !== "bezahlt";
-  const contributionId = `${monthKey}_${username}`;
-  const bookingId = `mitgliedsbeitrag_${monthKey}_${username}`;
-  const batch = writeBatch(db);
+  const member = state.members.find(item => memberId(item) === id);
+  if (!member || statusFor(id, monthKey) === "befreit") return;
 
-  batch.set(doc(db, "kassenBeitraege", contributionId), {
-    benutzername: username,
-    personName: displayName(member),
-    monat: monthKey,
-    betrag: amount,
-    status: nowPaid ? "bezahlt" : "offen",
-    geaendertVon: state.user.benutzername,
-    geaendertAm: serverTimestamp()
-  }, { merge: true });
+  state.savingContribution.add(id);
+  const button = document.querySelector(`button[data-action="toggle-paid"][data-member-id="${CSS.escape(id)}"]`);
+  if (button) button.disabled = true;
 
-  batch.set(doc(db, "kassenBuchungen", bookingId), {
-    typ: "einnahme",
-    kategorie: "mitgliedsbeitrag",
-    titel: `Mitgliedsbeitrag ${monthKey}`,
-    personName: displayName(member),
-    benutzername: username,
-    monat: monthKey,
-    datum: monthKey,
-    betrag: amount,
-    storniert: !nowPaid,
-    erstelltVon: state.user.benutzername,
-    erstelltAm: serverTimestamp()
-  }, { merge: true });
+  try {
+    const existing = state.contributions.get(id);
+    const amount = amountFor(id, monthKey);
+    const nowPaid = existing?.status !== "bezahlt";
+    const safeId = encodeURIComponent(id);
+    const contributionId = `${monthKey}_${safeId}`;
+    const bookingId = `mitgliedsbeitrag_${monthKey}_${safeId}`;
+    const batch = writeBatch(db);
 
-  await batch.commit();
-  showMessage(nowPaid ? "Beitrag als bezahlt gespeichert." : "Beitrag wieder auf offen gesetzt.");
-  await refreshData();
+    batch.set(doc(db, "kassenBeitraege", contributionId), {
+      mitgliedId: id,
+      benutzername: member.benutzername || id,
+      personName: displayName(member),
+      monat: monthKey,
+      betrag: amount,
+      status: nowPaid ? "bezahlt" : "offen",
+      geaendertVon: state.user.benutzername,
+      geaendertAm: serverTimestamp()
+    }, { merge: true });
+
+    batch.set(doc(db, "kassenBuchungen", bookingId), {
+      typ: "einnahme",
+      kategorie: "mitgliedsbeitrag",
+      titel: `Mitgliedsbeitrag ${monthKey}`,
+      personName: displayName(member),
+      mitgliedId: id,
+      benutzername: member.benutzername || id,
+      monat: monthKey,
+      datum: monthKey,
+      betrag: amount,
+      storniert: !nowPaid,
+      erstelltVon: state.user.benutzername,
+      erstelltAm: serverTimestamp()
+    }, { merge: true });
+
+    await batch.commit();
+    showMessage(nowPaid ? "Beitrag als bezahlt gespeichert." : "Beitrag wieder auf offen gesetzt.");
+    await loadContributions(monthKey);
+    await loadBookings();
+    renderMembers();
+    renderDashboard();
+    renderJournal();
+    renderMonthlyBookings();
+    updateClosingInfo();
+  } finally {
+    state.savingContribution.delete(id);
+  }
 }
 
-function openMemberModal(username) {
+function openMemberModal(id) {
   if (!state.canEdit) return;
-  const member = state.members.find(item => item.benutzername === username);
+  const member = state.members.find(item => memberId(item) === id);
   if (!member) return;
-  const profile = profileFor(username);
-  $("memberUsername").value = username;
+  const profile = profileFor(id);
+  $("memberUsername").value = id;
   $("memberModalTitle").textContent = displayName(member);
   $("memberAmount").value = Number(profile.beitrag ?? DEFAULT_AMOUNT).toFixed(2);
   $("memberValidFrom").value = profile.gueltigAb || $("monthPicker").value || currentMonthKey();
@@ -535,13 +579,14 @@ function openMemberModal(username) {
 async function saveMemberProfile(event) {
   event.preventDefault();
   if (!state.canEdit) return;
-  const username = $("memberUsername").value;
-  const member = state.members.find(item => item.benutzername === username);
+  const id = $("memberUsername").value;
+  const member = state.members.find(item => memberId(item) === id);
   const amount = Number($("memberAmount").value);
   if (!member || !Number.isFinite(amount) || amount < 0) return showMessage("Bitte einen gültigen Beitrag eingeben.", true);
 
-  await setDoc(doc(db, "kassenProfile", username), {
-    benutzername: username,
+  await setDoc(doc(db, "kassenProfile", encodeURIComponent(id)), {
+    mitgliedId: id,
+    benutzername: member.benutzername || id,
     personName: displayName(member),
     beitrag: amount,
     gueltigAb: $("memberValidFrom").value,
@@ -580,8 +625,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("memberRows").addEventListener("click", event => {
     const button = event.target.closest("button[data-action]");
     if (!button) return;
-    if (button.dataset.action === "toggle-paid") togglePaid(button.dataset.user).catch(error => showMessage(error.message, true));
-    if (button.dataset.action === "edit-member") openMemberModal(button.dataset.user);
+    if (button.dataset.action === "toggle-paid") togglePaid(button.dataset.memberId).catch(error => showMessage(error.message, true));
+    if (button.dataset.action === "edit-member") openMemberModal(button.dataset.memberId);
   });
   $("memberForm").addEventListener("submit", event => saveMemberProfile(event).catch(error => showMessage(error.message, true)));
   $("closeMemberModal").addEventListener("click", () => $("memberModal").hidden = true);
