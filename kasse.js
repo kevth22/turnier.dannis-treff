@@ -160,8 +160,8 @@ function profileFor(idOrUsername) {
     || { beitrag: DEFAULT_AMOUNT, befreit: false, notizen: "", gueltigAb: currentMonthKey() };
 }
 
-function amountFor(username, monthKey) {
-  const profile = profileFor(key);
+function amountFor(idOrUsername, monthKey) {
+  const profile = profileFor(idOrUsername);
   if (profile.gueltigAb && profile.gueltigAb > monthKey) return DEFAULT_AMOUNT;
   const amount = Number(profile.beitrag);
   return Number.isFinite(amount) ? amount : DEFAULT_AMOUNT;
@@ -174,7 +174,7 @@ function statusFor(idOrUsername, monthKey) {
     || (member?.benutzername ? state.contributions.get(String(member.benutzername)) : null);
   if (contribution?.status === "bezahlt") return "bezahlt";
   if (contribution?.status === "befreit") return "befreit";
-  const profile = profileFor(username);
+  const profile = profileFor(key);
   if (profile.befreit === true && (!profile.gueltigAb || profile.gueltigAb <= monthKey)) return "befreit";
   return "offen";
 }
