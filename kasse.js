@@ -10,7 +10,6 @@ import {
   serverTimestamp,
   query,
   orderBy,
-  limit,
   writeBatch
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -18,6 +17,19 @@ const VIEW_ROLES = ["admin", "captain", "kassenwart"];
 const EDIT_ROLES = ["admin", "kassenwart"];
 const CONTRIBUTION_ROLES = ["admin", "captain", "kassenwart", "mitglied"];
 const DEFAULT_AMOUNT = 20;
+const BOOKING_CATEGORIES = {
+  einnahme: [
+    ["preisgeld", "🏆 Preisgeld"],
+    ["strafe", "⚠️ Strafen"],
+    ["divers", "📦 Divers"]
+  ],
+  ausgabe: [
+    ["muenzgeld", "🪙 Münzgeld"],
+    ["automatenabgabe", "🎯 Automatenabgabe"],
+    ["liga_anmeldung", "🏅 Liga-Anmeldung"],
+    ["divers", "📦 Divers"]
+  ]
+};
 const euro = new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" });
 
 const state = {
@@ -74,9 +86,16 @@ function initAccess() {
   $("roleBadge").textContent = roleLabel(state.role);
   $("welcomeText").textContent = `Hallo ${displayName(state.user)}`;
   $("monthPicker").value = currentMonthKey();
+  $("journalMonthPicker").value = currentMonthKey();
+  $("bookingDate").value = new Date().toISOString().slice(0, 10);
+  updateCategoryOptions();
 
   if (!state.canEdit) {
+    $("bookingForm").hidden = true;
+    $("bookingReadOnly").hidden = false;
     $("tableHint").textContent = "Lesemodus: Beiträge können nur von Admin und Kassenwart geändert werden.";
+    $("downloadClosingPdf").hidden = true;
+    $("closingReadOnly").hidden = false;
   }
   return true;
 }
@@ -105,14 +124,16 @@ async function loadContributions(monthKey) {
 }
 
 async function loadBookings() {
-  try {
-    const snap = await getDocs(query(collection(db, "kassenBuchungen"), orderBy("erstelltAm", "desc"), limit(100)));
-    state.bookings = snap.docs.map(item => ({ id: item.id, ...item.data() }));
-  } catch (error) {
-    console.warn("Buchungen konnten nicht sortiert geladen werden:", error);
-    const snap = await getDocs(collection(db, "kassenBuchungen"));
-    state.bookings = snap.docs.map(item => ({ id: item.id, ...item.data() }));
-  }
+  const snap = await getDocs(collection(db, "kassenBuchungen"));
+  state.bookings = snap.docs.map(item => ({ id: item.id, ...item.data() }));
+  state.bookings.sort((a, b) => {
+    const aDate = String(a.datum || a.monat || "");
+    const bDate = String(b.datum || b.monat || "");
+    if (aDate !== bDate) return bDate.localeCompare(aDate);
+    const aTime = a.erstelltAm?.seconds || 0;
+    const bTime = b.erstelltAm?.seconds || 0;
+    return bTime - aTime;
+  });
 }
 
 function profileFor(username) {
@@ -185,8 +206,16 @@ function bookingValue(item) {
   return item.typ === "ausgabe" ? -amount : amount;
 }
 
+function isActual(item) {
+  return item.zahlungsstand !== "soll";
+}
+
+function bookingMonth(item) {
+  return String(item.datum || item.monat || "").slice(0, 7);
+}
+
 function renderDashboard() {
-  const active = state.bookings.filter(item => item.storniert !== true);
+  const active = state.bookings.filter(item => item.storniert !== true && isActual(item));
   const income = active.filter(item => item.typ !== "ausgabe").reduce((sum, item) => sum + (Number(item.betrag) || 0), 0);
   const expense = active.filter(item => item.typ === "ausgabe").reduce((sum, item) => sum + (Number(item.betrag) || 0), 0);
   $("incomeValue").textContent = euro.format(income);
@@ -198,22 +227,254 @@ function iconFor(category) {
   return ({ mitgliedsbeitrag: "👥", preisgeld: "🏆", strafe: "⚠️", divers: "📦", muenzgeld: "🪙", automatenabgabe: "🎯", liga_anmeldung: "🏅" })[category] || "💶";
 }
 
+function bookingCard(item) {
+  const expense = item.typ === "ausgabe";
+  const amount = Math.abs(Number(item.betrag) || 0);
+  const date = item.datum || item.monat || "";
+  const status = isActual(item) ? "ist" : "soll";
+  const statusLabel = status === "ist" ? "Ist · bezahlt" : "Soll · offen";
+  return `<article class="journal-item ${status === "soll" ? "is-planned" : ""}">
+    <div class="journal-icon">${iconFor(item.kategorie)}</div>
+    <div class="journal-main">
+      <strong>${escapeHtml(item.titel || item.beschreibung || "Buchung")}${item.storniert ? " (storniert)" : ""}</strong>
+      <small>${escapeHtml(date)}${item.personName ? ` · ${escapeHtml(item.personName)}` : ""}</small>
+      <div class="booking-badges"><span class="booking-badge ${status}">${statusLabel}</span><span class="booking-badge">${expense ? "Ausgabe" : "Einnahme"}</span></div>
+    </div>
+    <div class="journal-amount ${expense ? "expense" : "income"}">${expense ? "−" : "+"}${euro.format(amount)}</div>
+  </article>`;
+}
+
 function renderJournal() {
   const host = $("journalList");
   if (!state.bookings.length) {
     host.innerHTML = '<p class="empty-cell">Noch keine Buchungen vorhanden.</p>';
     return;
   }
-  host.innerHTML = state.bookings.slice(0, 12).map(item => {
-    const expense = item.typ === "ausgabe";
-    const amount = Math.abs(Number(item.betrag) || 0);
-    const date = item.datum || item.monat || "";
-    return `<article class="journal-item">
-      <div class="journal-icon">${iconFor(item.kategorie)}</div>
-      <div class="journal-main"><strong>${escapeHtml(item.titel || item.beschreibung || "Buchung")}${item.storniert ? " (storniert)" : ""}</strong><small>${escapeHtml(date)}${item.personName ? ` · ${escapeHtml(item.personName)}` : ""}</small></div>
-      <div class="journal-amount ${expense ? "expense" : "income"}">${expense ? "−" : "+"}${euro.format(amount)}</div>
-    </article>`;
-  }).join("");
+  host.innerHTML = state.bookings.slice(0, 12).map(bookingCard).join("");
+}
+
+function renderMonthlyBookings() {
+  const monthKey = $("journalMonthPicker").value || currentMonthKey();
+  const items = state.bookings.filter(item => bookingMonth(item) === monthKey && item.storniert !== true);
+  const actual = items.filter(isActual);
+  const income = actual.filter(item => item.typ !== "ausgabe").reduce((sum, item) => sum + (Number(item.betrag) || 0), 0);
+  const expense = actual.filter(item => item.typ === "ausgabe").reduce((sum, item) => sum + (Number(item.betrag) || 0), 0);
+  const planned = items.filter(item => !isActual(item)).reduce((sum, item) => sum + Math.abs(Number(item.betrag) || 0), 0);
+
+  $("monthIncomeValue").textContent = euro.format(income);
+  $("monthExpenseValue").textContent = euro.format(expense);
+  $("monthBalanceValue").textContent = euro.format(income - expense);
+  $("monthPlannedValue").textContent = euro.format(planned);
+
+  const host = $("monthlyBookingList");
+  host.innerHTML = items.length ? items.map(bookingCard).join("") : '<p class="empty-cell">Noch keine Zahlungen in diesem Monat.</p>';
+}
+
+
+function unexportedBookings() {
+  return state.bookings
+    .filter(item => !item.abschlussId)
+    .sort((a, b) => {
+      const aDate = String(a.datum || a.monat || "");
+      const bDate = String(b.datum || b.monat || "");
+      if (aDate !== bDate) return aDate.localeCompare(bDate);
+      return (a.erstelltAm?.seconds || 0) - (b.erstelltAm?.seconds || 0);
+    });
+}
+
+function updateClosingInfo() {
+  const count = unexportedBookings().length;
+  $("unexportedCount").textContent = `${count} ${count === 1 ? "Buchung" : "Buchungen"}`;
+  $("downloadClosingPdf").disabled = !state.canEdit || count === 0;
+}
+
+function formatDateGerman(value) {
+  const text = String(value || "");
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+    const [year, month, day] = text.split("-");
+    return `${day}.${month}.${year}`;
+  }
+  if (/^\d{4}-\d{2}$/.test(text)) {
+    const [year, month] = text.split("-");
+    return `${month}.${year}`;
+  }
+  return text || "–";
+}
+
+function categoryLabel(category) {
+  return ({
+    mitgliedsbeitrag: "Mitgliedsbeitrag",
+    preisgeld: "Preisgeld",
+    strafe: "Strafe",
+    divers: "Divers",
+    muenzgeld: "Münzgeld",
+    automatenabgabe: "Automatenabgabe",
+    liga_anmeldung: "Liga-Anmeldung"
+  })[category] || category || "Divers";
+}
+
+function makeClosingPdf(items, closingId, createdAt) {
+  if (!window.jspdf?.jsPDF) throw new Error("PDF-Modul konnte nicht geladen werden. Bitte Internetverbindung prüfen.");
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+
+  const activeActual = items.filter(item => item.storniert !== true && isActual(item));
+  const income = activeActual.filter(item => item.typ !== "ausgabe").reduce((sum, item) => sum + (Number(item.betrag) || 0), 0);
+  const expense = activeActual.filter(item => item.typ === "ausgabe").reduce((sum, item) => sum + (Number(item.betrag) || 0), 0);
+  const plannedIncome = items.filter(item => item.storniert !== true && !isActual(item) && item.typ !== "ausgabe").reduce((sum, item) => sum + (Number(item.betrag) || 0), 0);
+  const plannedExpense = items.filter(item => item.storniert !== true && !isActual(item) && item.typ === "ausgabe").reduce((sum, item) => sum + (Number(item.betrag) || 0), 0);
+  const dates = items.map(item => String(item.datum || item.monat || "")).filter(Boolean).sort();
+  const from = dates[0] || "–";
+  const to = dates.at(-1) || "–";
+
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(18);
+  pdf.text("Dart11en – Kassenabschluss", 14, 18);
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(10);
+  pdf.text(`Abschluss: ${closingId}`, 14, 25);
+  pdf.text(`Erstellt am: ${createdAt.toLocaleString("de-DE")}`, 14, 30);
+  pdf.text(`Zeitraum der Buchungen: ${formatDateGerman(from)} bis ${formatDateGerman(to)}`, 14, 35);
+  pdf.text(`Erstellt von: ${displayName(state.user)}`, 14, 40);
+
+  pdf.setFont("helvetica", "bold");
+  pdf.text(`Ist-Einnahmen: ${euro.format(income)}`, 14, 49);
+  pdf.text(`Ist-Ausgaben: ${euro.format(expense)}`, 75, 49);
+  pdf.text(`Ergebnis: ${euro.format(income - expense)}`, 136, 49);
+  pdf.setFont("helvetica", "normal");
+  pdf.text(`Soll-Einnahmen: ${euro.format(plannedIncome)} · Soll-Ausgaben: ${euro.format(plannedExpense)}`, 14, 55);
+
+  const rows = items.map((item, index) => [
+    String(index + 1),
+    formatDateGerman(item.datum || item.monat),
+    item.typ === "ausgabe" ? "Ausgabe" : "Einnahme",
+    categoryLabel(item.kategorie),
+    item.zahlungsstand === "soll" ? "Soll" : "Ist",
+    item.storniert === true ? "Storniert" : (item.titel || item.beschreibung || "–"),
+    item.personName || "–",
+    `${item.typ === "ausgabe" ? "−" : "+"}${euro.format(Math.abs(Number(item.betrag) || 0))}`
+  ]);
+
+  pdf.autoTable({
+    startY: 62,
+    head: [["Nr.", "Datum", "Art", "Kategorie", "Stand", "Notiz", "Person", "Betrag"]],
+    body: rows,
+    styles: { font: "helvetica", fontSize: 7.5, cellPadding: 1.8, overflow: "linebreak" },
+    headStyles: { fillColor: [35, 35, 40] },
+    columnStyles: {
+      0: { cellWidth: 8 }, 1: { cellWidth: 18 }, 2: { cellWidth: 17 }, 3: { cellWidth: 23 },
+      4: { cellWidth: 12 }, 5: { cellWidth: 48 }, 6: { cellWidth: 28 }, 7: { cellWidth: 25, halign: "right" }
+    },
+    didDrawPage: data => {
+      const pageCount = pdf.internal.getNumberOfPages();
+      pdf.setFontSize(8);
+      pdf.setTextColor(110);
+      pdf.text(`Seite ${pageCount}`, 196, 290, { align: "right" });
+      pdf.setTextColor(0);
+    }
+  });
+
+  return pdf.output("blob");
+}
+
+async function markBookingsClosed(items, closingId, createdAt) {
+  const chunks = [];
+  for (let i = 0; i < items.length; i += 450) chunks.push(items.slice(i, i + 450));
+  for (const chunk of chunks) {
+    const batch = writeBatch(db);
+    chunk.forEach(item => batch.set(doc(db, "kassenBuchungen", item.id), {
+      abschlussId: closingId,
+      abgeschlossenAm: createdAt,
+      abgeschlossenVon: state.user.benutzername
+    }, { merge: true }));
+    await batch.commit();
+  }
+}
+
+async function downloadClosingPdf() {
+  if (!state.canEdit) return;
+  const items = unexportedBookings();
+  if (!items.length) return showMessage("Seit dem letzten Abschluss gibt es keine neuen Buchungen.", true);
+
+  const button = $("downloadClosingPdf");
+  button.disabled = true;
+  button.textContent = "PDF wird erstellt …";
+  try {
+    const now = new Date();
+    const closingId = `KA-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}-${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`;
+    const blob = makeClosingPdf(items, closingId, now);
+
+    const activeActual = items.filter(item => item.storniert !== true && isActual(item));
+    const income = activeActual.filter(item => item.typ !== "ausgabe").reduce((sum, item) => sum + (Number(item.betrag) || 0), 0);
+    const expense = activeActual.filter(item => item.typ === "ausgabe").reduce((sum, item) => sum + (Number(item.betrag) || 0), 0);
+    const closingRef = doc(db, "kassenAbschluesse", closingId);
+    await setDoc(closingRef, {
+      abschlussId: closingId,
+      anzahlBuchungen: items.length,
+      einnahmen: income,
+      ausgaben: expense,
+      ergebnis: income - expense,
+      erstelltVon: state.user.benutzername,
+      erstelltAm: serverTimestamp()
+    });
+    await markBookingsClosed(items, closingId, serverTimestamp());
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Dart11en-Kassenabschluss-${closingId}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+
+    showMessage(`${items.length} Buchungen wurden abgeschlossen und als PDF heruntergeladen.`);
+    await refreshData();
+  } catch (error) {
+    console.error(error);
+    showMessage(error.message || "Der PDF-Abschluss konnte nicht erstellt werden.", true);
+  } finally {
+    button.textContent = "📄 PDF-Abschluss erstellen";
+    updateClosingInfo();
+  }
+}
+
+function updateCategoryOptions() {
+  const type = $("bookingType")?.value || "einnahme";
+  const select = $("bookingCategory");
+  if (!select) return;
+  select.innerHTML = BOOKING_CATEGORIES[type].map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
+}
+
+async function saveBooking(event) {
+  event.preventDefault();
+  if (!state.canEdit) return;
+  const type = $("bookingType").value;
+  const amount = Number($("bookingAmount").value);
+  const note = $("bookingNote").value.trim();
+  const date = $("bookingDate").value;
+  if (!["einnahme", "ausgabe"].includes(type) || !Number.isFinite(amount) || amount <= 0 || !note || !date) {
+    return showMessage("Bitte Art, Betrag, Datum und Notiz vollständig eintragen.", true);
+  }
+
+  await addDoc(collection(db, "kassenBuchungen"), {
+    typ: type,
+    kategorie: $("bookingCategory").value,
+    zahlungsstand: $("bookingStatus").value,
+    titel: note,
+    beschreibung: note,
+    betrag: amount,
+    datum: date,
+    monat: date.slice(0, 7),
+    storniert: false,
+    erstelltVon: state.user.benutzername,
+    erstelltAm: serverTimestamp()
+  });
+
+  $("bookingAmount").value = "";
+  $("bookingNote").value = "";
+  showMessage("Buchung wurde gespeichert.");
+  await refreshData();
 }
 
 async function togglePaid(username) {
@@ -301,6 +562,8 @@ async function refreshData() {
   renderMembers();
   renderDashboard();
   renderJournal();
+  renderMonthlyBookings();
+  updateClosingInfo();
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -310,6 +573,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadContributions($("monthPicker").value);
     renderMembers();
   });
+  $("journalMonthPicker").addEventListener("change", renderMonthlyBookings);
+  $("bookingType").addEventListener("change", updateCategoryOptions);
+  $("downloadClosingPdf").addEventListener("click", downloadClosingPdf);
+  $("bookingForm").addEventListener("submit", event => saveBooking(event).catch(error => showMessage(error.message, true)));
   $("memberRows").addEventListener("click", event => {
     const button = event.target.closest("button[data-action]");
     if (!button) return;

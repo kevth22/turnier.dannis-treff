@@ -46,6 +46,97 @@
     </article>
   </section>
 
+
+  <section class="kasse-panel booking-panel" id="bookingPanel">
+    <div class="panel-header">
+      <div>
+        <p class="eyebrow">Neue Buchung</p>
+        <h2>Einnahme oder Ausgabe hinzufügen</h2>
+      </div>
+    </div>
+
+    <form id="bookingForm" class="booking-form">
+      <label>
+        Art
+        <select id="bookingType" required>
+          <option value="einnahme">➕ Einnahme</option>
+          <option value="ausgabe">➖ Ausgabe</option>
+        </select>
+      </label>
+
+      <label>
+        Kategorie
+        <select id="bookingCategory" required></select>
+      </label>
+
+      <label>
+        Stand
+        <select id="bookingStatus" required>
+          <option value="ist">Ist – bereits bezahlt</option>
+          <option value="soll">Soll – noch geplant/offen</option>
+        </select>
+      </label>
+
+      <label>
+        Betrag
+        <div class="money-input"><input id="bookingAmount" type="number" min="0.01" step="0.01" inputmode="decimal" required><span>€</span></div>
+      </label>
+
+      <label>
+        Datum
+        <input id="bookingDate" type="date" required>
+      </label>
+
+      <label class="booking-note">
+        Notiz / Beschreibung
+        <textarea id="bookingNote" rows="3" maxlength="300" placeholder="Zum Beispiel: Automatenabgabe Juli oder Preisgeld Turnier" required></textarea>
+      </label>
+
+      <button class="main-button booking-submit" type="submit">Buchung speichern</button>
+    </form>
+    <p id="bookingReadOnly" class="table-hint" hidden>Captains können die Kasse ansehen, aber keine Buchungen hinzufügen.</p>
+  </section>
+
+  <section class="kasse-panel monthly-panel">
+    <div class="panel-header">
+      <div>
+        <p class="eyebrow">Monatsauswertung</p>
+        <h2>Zahlungen im ausgewählten Monat</h2>
+      </div>
+      <label class="month-picker">
+        Monat
+        <input id="journalMonthPicker" type="month">
+      </label>
+    </div>
+
+    <div class="monthly-summary">
+      <article><span>Plus im Monat</span><strong id="monthIncomeValue">0,00 €</strong></article>
+      <article><span>Minus im Monat</span><strong id="monthExpenseValue">0,00 €</strong></article>
+      <article><span>Monatsergebnis</span><strong id="monthBalanceValue">0,00 €</strong></article>
+      <article><span>Noch im Soll</span><strong id="monthPlannedValue">0,00 €</strong></article>
+    </div>
+
+    <div id="monthlyBookingList" class="journal-list">
+      <p class="empty-cell">Noch keine Zahlungen in diesem Monat.</p>
+    </div>
+  </section>
+
+
+  <section class="kasse-panel closing-panel" id="closingPanel">
+    <div class="panel-header">
+      <div>
+        <p class="eyebrow">Kassenabschluss</p>
+        <h2>Neue Buchungen als PDF sichern</h2>
+      </div>
+      <button id="downloadClosingPdf" class="main-button closing-button" type="button">📄 PDF-Abschluss erstellen</button>
+    </div>
+    <div class="closing-info">
+      <div><span>Noch nicht abgeschlossen</span><strong id="unexportedCount">0 Buchungen</strong></div>
+      <p>Der PDF-Abschluss enthält alle seit dem letzten Abschluss angelegten Buchungen. Danach beginnt automatisch ein neuer Abschlusszeitraum.</p>
+    </div>
+    <p id="closingReadOnly" class="table-hint" hidden>Nur Admin und Kassenwart können einen Kassenabschluss erstellen.</p>
+  </section>
+
   <section class="kasse-panel">
     <div class="panel-header">
       <div>
@@ -152,6 +243,8 @@
   <a href="kasse.html" class="active">💰<br>Kasse</a>
 </nav>
 
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 <script type="module" src="kasse.js"></script>
 </body>
 </html>
