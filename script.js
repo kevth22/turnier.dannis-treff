@@ -1,8 +1,6 @@
-import { getLogin } from "./auth-utils.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";  
-  
+import { getLogin, db } from "./auth-utils.js";
+
 import {  
-  getFirestore,  
   collection,  
   addDoc,  
   onSnapshot,  
@@ -12,18 +10,6 @@ import {
   getDocs  
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";  
   
-const firebaseConfig = {  
-  apiKey: "AIzaSyDtQ3pECcZETIoI4QTV5G-7_QcoRvVGHL4",  
-  authDomain: "dannistreffturnier.firebaseapp.com",  
-  projectId: "dannistreffturnier",  
-  storageBucket: "dannistreffturnier.firebasestorage.app",  
-  messagingSenderId: "829873084116",  
-  appId: "1:829873084116:web:683bbf1ea3e58f1a4ecd41",  
-  measurementId: "G-QEL7FSWMLG"  
-};  
-  
-const app = initializeApp(firebaseConfig);  
-const db = getFirestore(app);  
 const warteschlangeRef = collection(db, "warteschlange");
 const aktuellerLogin = getLogin();  
   
@@ -154,17 +140,20 @@ const wartendeSpieler = spieler.filter((person) => person.bezahlt !== true);
 const belegte = bezahlteSpieler.length;
 const wartend = wartendeSpieler.length;
 
-document.getElementById("belegt").textContent = belegte + " / 32";
-
-document.getElementById("wartend").textContent = wartend;
+const belegtAnzeige = document.getElementById("belegt");
+const wartendAnzeige = document.getElementById("wartend");
+if (belegtAnzeige) belegtAnzeige.textContent = belegte + " / 32";
+if (wartendAnzeige) wartendAnzeige.textContent = wartend;
 
 const maxPlaetze = 32;
 
 const prozentBelegt = (belegte / maxPlaetze) * 100;
 const prozentWartend = Math.min((wartend / maxPlaetze) * 100, 100);
 
-document.getElementById("barBelegt").style.width = prozentBelegt + "%";
-document.getElementById("barWartend").style.width = prozentWartend + "%";
+const barBelegt = document.getElementById("barBelegt");
+const barWartend = document.getElementById("barWartend");
+if (barBelegt) barBelegt.style.width = prozentBelegt + "%";
+if (barWartend) barWartend.style.width = prozentWartend + "%";
   const anzahlAnzeige = document.getElementById("anzahl");  
   if (anzahlAnzeige) {  
     anzahlAnzeige.textContent = spieler.length;  

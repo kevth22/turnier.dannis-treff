@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v28-dashboard-anwesenheit";
+const VERSION = "dart11en-v29-turnieranzeige-ohne-folieneditor";
 
 const CORE_FILES = [
   "./",
