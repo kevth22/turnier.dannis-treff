@@ -1251,3 +1251,15 @@ body.is-admin .admin-dashboard {
 
 @media(max-width:800px){.tv-slide-canvas{min-width:0!important;width:100%!important}.teilnehmer-admin-zeile{grid-template-columns:repeat(3,minmax(0,1fr))!important}.teilnehmer-name,.teilnehmer-loeschen-button{grid-column:1/-1!important}}
 .tv-editor-element{z-index:auto;touch-action:none!important;-webkit-user-drag:none}.tv-slide-canvas{touch-action:none!important}
+
+/* TV-Folien-Editor Version 26 */
+.tv-editor-menu{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px;padding:6px;background:#111217;border:1px solid #30323a;border-radius:14px;position:sticky;top:8px;z-index:30}
+.tv-editor-menu-button{appearance:none;border:0;border-radius:10px;padding:11px 14px;background:transparent;color:#d7d8de;font:inherit;font-weight:800;text-decoration:none;cursor:pointer}
+.tv-editor-menu-button.active{background:var(--turnier-primary,#e00022);color:#fff}
+.tv-editor-panel[hidden]{display:none!important}.tv-slide-list-actions{display:grid;gap:8px;margin-bottom:10px}.tv-slide-list-actions .main-button{width:100%;margin:0}
+.tv-slide-list-item{cursor:pointer}.tv-slide-list-item span{font-weight:800}.tv-slide-list-item small{font-size:12px}
+.tv-slide-canvas{background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:5% 5%}
+.tv-editor-element.selected{border:2px solid #ffbe2d;background-color:rgba(255,190,45,.04)}
+.resize-handle:after{content:'↘';display:grid;place-items:center;width:100%;height:100%;color:#111;font-size:20px;font-weight:900}
+.tv-position-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.tv-position-controls label{margin:0}.tv-nudge-controls{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.tv-nudge-controls button{min-height:44px}
+@media(max-width:800px){.tv-editor-menu{position:static}.tv-slide-editor-layout{display:flex;flex-direction:column}.tv-slide-editor-layout aside{order:0}.tv-slide-workspace{order:1}.tv-slide-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-height:230px;overflow:auto}.tv-slide-list-actions{grid-template-columns:1fr 1fr}.tv-slide-canvas-wrap{padding:0}.tv-slide-canvas{aspect-ratio:16/9;border-radius:6px}.tv-position-controls{grid-template-columns:1fr 1fr}.tv-slide-actions{display:grid;grid-template-columns:1fr}.tv-slide-actions .main-button{width:100%;margin:0}}

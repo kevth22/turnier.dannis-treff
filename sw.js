@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v23-tv-editor-payment-lists";
+const VERSION = "dart11en-v26-slide-editor";
 
 const CORE_FILES = [
   "./",

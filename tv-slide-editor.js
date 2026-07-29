@@ -35,6 +35,7 @@ function normalize(slide){
   return { ...defaultSlide(), ...slide, elements:Array.isArray(slide.elements)?slide.elements:[] };
 }
 function setMessage(text, error=false){ if(message){ message.textContent=text; message.classList.toggle('error',error); } }
+function fillMeta(){ if(!current)return; document.getElementById('tvSlideTitle').value=current.title||'';document.getElementById('tvSlideDuration').value=current.duration||10;document.getElementById('tvSlideOrder').value=Number(current.order)||100;document.getElementById('tvSlideActive').checked=current.active!==false;document.getElementById('tvSlideBackground').value=current.background||'#08090d'; }
 
 function renderList(){
   if(!list) return;
@@ -45,11 +46,7 @@ function renderList(){
 function selectSlide(id){
   const found=slides.find(s=>s.id===id); if(!found) return;
   current=structuredClone(found); selectedId=null;
-  document.getElementById('tvSlideTitle').value=current.title||'';
-  document.getElementById('tvSlideDuration').value=current.duration||10;
-  document.getElementById('tvSlideOrder').value=Number(current.order)||100;
-  document.getElementById('tvSlideActive').checked=current.active!==false;
-  document.getElementById('tvSlideBackground').value=current.background||'#08090d';
+  fillMeta();
   renderList(); renderCanvas();
 }
 
@@ -75,12 +72,21 @@ function renderProperties(){
   if(!el){ box.innerHTML='<p class="section-text">Wähle ein Element auf der Folie aus.</p>'; return; }
   box.innerHTML=`
     ${el.type==='text'?`<label>Text<textarea id="propText" rows="3">${safe(el.text)}</textarea></label><div class="tv-prop-grid"><label>Schriftgröße<input id="propFont" type="range" min="16" max="120" value="${el.fontSize||42}"></label><label>Farbe<input id="propColor" type="color" value="${el.color||'#ffffff'}"></label><label>Ausrichtung<select id="propAlign"><option value="left">Links</option><option value="center">Mittig</option><option value="right">Rechts</option></select></label><label class="settings-row"><span>Fett</span><input id="propBold" type="checkbox" ${el.bold===false?'':'checked'}></label></div>`:''}
+    <div class="tv-position-controls">
+      <label>Position links/rechts<input id="propX" type="range" min="0" max="${Math.max(0,100-el.w)}" step="0.5" value="${el.x}"></label>
+      <label>Position oben/unten<input id="propY" type="range" min="0" max="${Math.max(0,100-el.h)}" step="0.5" value="${el.y}"></label>
+      <label>Breite<input id="propW" type="range" min="5" max="${100-el.x}" step="0.5" value="${el.w}"></label>
+      <label>Höhe<input id="propH" type="range" min="5" max="${100-el.y}" step="0.5" value="${el.h}"></label>
+    </div>
+    <div class="tv-nudge-controls"><button type="button" data-nudge="left">←</button><button type="button" data-nudge="up">↑</button><button type="button" data-nudge="down">↓</button><button type="button" data-nudge="right">→</button></div>
     <div class="tv-prop-grid"><label>Ebene<input id="propZ" type="number" min="1" max="99" value="${el.z||1}"></label><button id="propDelete" type="button" class="main-button danger-button">Element löschen</button></div>`;
   if(el.type==='text'){
     box.querySelector('#propAlign').value=el.align||'center';
     [['propText','input','text'],['propFont','input','fontSize'],['propColor','input','color'],['propAlign','change','align']].forEach(([id,event,key])=>box.querySelector('#'+id)?.addEventListener(event,e=>{ el[key]=key==='fontSize'?Number(e.target.value):e.target.value; renderCanvas(); }));
     box.querySelector('#propBold')?.addEventListener('change',e=>{el.bold=e.target.checked;renderCanvas();});
   }
+  [['propX','x'],['propY','y'],['propW','w'],['propH','h']].forEach(([id,key])=>box.querySelector('#'+id)?.addEventListener('input',e=>{el[key]=Number(e.target.value);renderCanvas();}));
+  box.querySelectorAll('[data-nudge]').forEach(btn=>btn.addEventListener('click',()=>{const d=btn.dataset.nudge;if(d==='left')el.x=clamp(el.x-1,0,100-el.w);if(d==='right')el.x=clamp(el.x+1,0,100-el.w);if(d==='up')el.y=clamp(el.y-1,0,100-el.h);if(d==='down')el.y=clamp(el.y+1,0,100-el.h);renderCanvas();}));
   box.querySelector('#propZ')?.addEventListener('input',e=>{el.z=Number(e.target.value);renderCanvas();});
   box.querySelector('#propDelete')?.addEventListener('click',()=>{current.elements=current.elements.filter(e=>e.id!==selectedId);selectedId=null;renderCanvas();});
 }
@@ -88,7 +94,7 @@ function renderProperties(){
 function pointOf(e){const t=e.touches?.[0]||e.changedTouches?.[0]||e;return {x:t.clientX,y:t.clientY};}
 function startPointer(e){
   if(!current) return;
-  if(e.cancelable)e.preventDefault();
+  if(e.cancelable)e.preventDefault(); e.stopPropagation();
   const target=e.currentTarget;
   selectedId=target.dataset.eid;
   const el=current.elements.find(x=>x.id===selectedId); if(!el) return;
@@ -106,7 +112,7 @@ function movePointer(e){
   const dom=canvas.querySelector(`[data-eid="${operation.el.id}"]`);if(dom){dom.style.left=operation.el.x+'%';dom.style.top=operation.el.y+'%';dom.style.width=operation.el.w+'%';dom.style.height=operation.el.h+'%'}
 }
 function endPointer(e){if(!operation)return;if(e?.cancelable)e.preventDefault();operation=null;canvas.classList.remove('dragging');renderCanvas();}
-document.addEventListener('pointermove',movePointer,{passive:false});document.addEventListener('pointerup',endPointer,{passive:false});document.addEventListener('pointercancel',endPointer,{passive:false});
+window.addEventListener('pointermove',movePointer,{passive:false,capture:true});window.addEventListener('pointerup',endPointer,{passive:false,capture:true});window.addEventListener('pointercancel',endPointer,{passive:false,capture:true});
 
 async function imageToDataUrl(file){
   if(!file.type.startsWith('image/')) throw new Error('Bitte eine Bilddatei auswählen.');
@@ -134,10 +140,14 @@ async function saveCurrent(){
 
 if(editor && isAdmin){
   editor.hidden=false;
-  document.getElementById('tvSlideNew')?.addEventListener('click',()=>{ current=defaultSlide(); selectedId=null; renderList();renderCanvas(); document.getElementById('tvSlideTitle').value=current.title; });
+  document.querySelectorAll('.tv-editor-menu-button[data-tv-panel]').forEach(btn=>btn.addEventListener('click',()=>{const name=btn.dataset.tvPanel;document.querySelectorAll('.tv-editor-menu-button[data-tv-panel]').forEach(b=>b.classList.toggle('active',b===btn));document.querySelectorAll('[data-tv-panel-content]').forEach(panel=>panel.hidden=panel.dataset.tvPanelContent!==name);}));
+  const newSlide=()=>{ current=defaultSlide(); selectedId=null; fillMeta(); renderList();renderCanvas();setMessage('Neue Folie angelegt. Füge Text oder Bilder hinzu und speichere sie.'); };
+  document.getElementById('tvSlideNew')?.addEventListener('click',newSlide);
   document.getElementById('tvAddText')?.addEventListener('click',()=>{ if(!current) current=defaultSlide(); const el={id:uid(),type:'text',text:'Neuer Text',x:15,y:20,w:70,h:18,z:2,color:'#ffffff',fontSize:48,align:'center',bold:true};current.elements.push(el);selectedId=el.id;renderCanvas();});
   document.getElementById('tvAddImage')?.addEventListener('change',async e=>{ const file=e.target.files?.[0];if(!file)return;try{setMessage('Bild wird vorbereitet …');const src=await imageToDataUrl(file);if(!current)current=defaultSlide();const el={id:uid(),type:'image',src,x:20,y:15,w:60,h:65,z:1};current.elements.push(el);selectedId=el.id;renderCanvas();setMessage('Bild hinzugefügt. Position und Größe können direkt verändert werden.');}catch(err){setMessage(err.message,true);}e.target.value='';});
+  document.getElementById('tvSlideDuplicate')?.addEventListener('click',()=>{if(!current)return newSlide();current={...structuredClone(current),id:undefined,title:(current.title||'Folie')+' – Kopie',order:(Number(current.order)||100)+1};current.elements=current.elements.map(e=>({...e,id:uid()}));selectedId=null;fillMeta();renderList();renderCanvas();setMessage('Kopie erstellt. Speichere sie als zusätzliche Folie.');});
   document.getElementById('tvSlideSave')?.addEventListener('click',saveCurrent);
+  document.getElementById('tvSlideSaveNew')?.addEventListener('click',async()=>{await saveCurrent();newSlide();});
   document.getElementById('tvSlideDelete')?.addEventListener('click',async()=>{if(!current?.id||!confirm('Diese TV-Folie endgültig löschen?'))return;await deleteDoc(doc(db,'tvSlides',current.id));current=null;canvas.innerHTML='';});
   document.getElementById('tvSlideBackground')?.addEventListener('input',e=>{if(current){current.background=e.target.value;renderCanvas();}});
 }
@@ -158,8 +168,7 @@ onSnapshot(doc(db,'tvSettings','rotation'),snap=>{rotationSettings=snap.exists()
 
 onSnapshot(query(collection(db,'tvSlides'),orderBy('order','asc')),(snapshot)=>{
   slides=snapshot.docs.map(d=>normalize({id:d.id,...d.data()}));
-  if(editor&&isAdmin){ if(current?.id){const fresh=slides.find(s=>s.id===current.id);if(fresh)current=structuredClone(fresh);} else if(!current&&slides[0])current=structuredClone(slides[0]); renderList();if(current){document.getElementById('tvSlideTitle').value=current.title||'';document.getElementById('tvSlideDuration').value=current.duration||10;
-  document.getElementById('tvSlideOrder').value=Number(current.order)||100;document.getElementById('tvSlideActive').checked=current.active!==false;document.getElementById('tvSlideBackground').value=current.background||'#08090d';renderCanvas();} }
+  if(editor&&isAdmin){ if(current?.id){const fresh=slides.find(s=>s.id===current.id);if(fresh)current=structuredClone(fresh);} else if(!current&&slides[0])current=structuredClone(slides[0]); renderList();if(current){fillMeta();renderCanvas();} }
   renderTvSlides();
 },err=>{console.error('TV-Slides konnten nicht geladen werden',err);setMessage('TV-Slides konnten nicht geladen werden.',true);});
 

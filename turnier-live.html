@@ -409,14 +409,27 @@
     </a>
 
     <div id="tvSlideEditor" class="tv-slide-editor" hidden>
-      <h3>🔁 Reihenfolge der TV-Folien</h3>
-      <p class="section-text">Lege für die vorhandenen TV-Folien Reihenfolge, Anzeigedauer und Sichtbarkeit fest.</p>
-      <div id="tvBuiltInSlideSettings" class="tv-built-in-settings"></div>
-      <h3>🖼️ Eigene TV-Folien</h3>
-      <p class="section-text">Erstelle Folien aus Texten und eigenen Bildern. Elemente lassen sich direkt auf der Vorschau verschieben und unten rechts in der Größe verändern.</p>
+      <div class="tv-editor-menu" role="tablist" aria-label="TV-Folien-Menü">
+        <button type="button" class="tv-editor-menu-button active" data-tv-panel="custom">🖼️ Eigene Folien</button>
+        <button type="button" class="tv-editor-menu-button" data-tv-panel="standard">🔁 Standardfolien</button>
+        <a class="tv-editor-menu-button" href="turnier-live.html?tv=true&mode=auto" target="_blank" rel="noopener">📺 TV-Vorschau</a>
+      </div>
+
+      <div class="tv-editor-panel" data-tv-panel-content="standard" hidden>
+        <h3>Standardfolien</h3>
+        <p class="section-text">Hier stellst du Reihenfolge, Dauer und Sichtbarkeit der automatischen Turnierfolien ein.</p>
+        <div id="tvBuiltInSlideSettings" class="tv-built-in-settings"></div>
+      </div>
+
+      <div class="tv-editor-panel" data-tv-panel-content="custom">
+      <h3>Eigene TV-Folien</h3>
+      <p class="section-text">Lege mehrere Folien an. Tippe ein Element an und ziehe es. Mit dem gelben Griff unten rechts änderst du die Größe. Alternativ kannst du die Regler unter der Vorschau benutzen.</p>
       <div class="tv-slide-editor-layout">
         <aside>
-          <button id="tvSlideNew" class="main-button" type="button">＋ Neue Folie</button>
+          <div class="tv-slide-list-actions">
+            <button id="tvSlideNew" class="main-button" type="button">＋ Neue Folie</button>
+            <button id="tvSlideDuplicate" class="main-button secondary-button" type="button">⧉ Duplizieren</button>
+          </div>
           <div id="tvSlideList" class="tv-slide-list"></div>
         </aside>
         <div class="tv-slide-workspace">
@@ -436,10 +449,12 @@
           <div id="tvElementProperties" class="tv-element-properties"><p class="section-text">Wähle ein Element auf der Folie aus.</p></div>
           <div class="tv-slide-actions">
             <button id="tvSlideSave" class="main-button" type="button">💾 Folie speichern</button>
+            <button id="tvSlideSaveNew" class="main-button secondary-button" type="button">💾 Speichern + neue Folie</button>
             <button id="tvSlideDelete" class="main-button danger-button" type="button">🗑️ Folie löschen</button>
           </div>
           <p id="tvSlideMessage" class="section-text tv-slide-message" role="status"></p>
         </div>
+      </div>
       </div>
     </div>
 
@@ -630,7 +645,7 @@
 <script type="module" src="turnier-v4-live.js?v=400"></script>
 <script src="turnier-admin-menu.js?v=110" defer></script>
 <script type="module" src="turnier-theme.js?v=507"></script>
-<script type="module" src="tv-slide-editor.js?v=24"></script>
+<script type="module" src="tv-slide-editor.js?v=26"></script>
 <script type="module" src="push-foreground.js?v=10.0.1"></script>
 <script src="pwa.js" defer></script>
 
