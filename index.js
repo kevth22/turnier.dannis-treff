@@ -4,7 +4,8 @@ import {
   collection,
   getDocs,
   doc,
-  getDoc
+  getDoc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getLogin } from "./auth-utils.js";
 
@@ -98,3 +99,56 @@ async function checkVotePopup() {
 }
 
 document.addEventListener("DOMContentLoaded", checkVotePopup);
+
+
+async function turnierAnwesenheitImDashboard() {
+  const card = document.getElementById("turnierAnwesenheitCard");
+  const text = document.getElementById("turnierAnwesenheitText");
+  const button = document.getElementById("turnierAnwesenheitBtn");
+  const user = getLogin();
+  if (!card || !text || !button || !user?.benutzername) return;
+
+  try {
+    const snap = await getDocs(collection(db, "warteschlange"));
+    let eigenerEintrag = null;
+    snap.forEach(d => {
+      const data = d.data();
+      const konto = String(data.kontoBenutzername || data.mitgliedId || "").toLowerCase();
+      if (konto && konto === String(user.benutzername).toLowerCase()) {
+        eigenerEintrag = { id: d.id, ...data };
+      }
+    });
+
+    if (!eigenerEintrag) return;
+    card.hidden = false;
+
+    if (eigenerEintrag.anwesend === true) {
+      text.textContent = `Du bist für das Turnier als anwesend bestätigt (${eigenerEintrag.nickname || user.nickname || user.benutzername}).`;
+      button.textContent = "Anwesenheit bestätigt ✓";
+      button.disabled = true;
+      return;
+    }
+
+    text.textContent = `Bestätige hier deine Anwesenheit für das Turnier als ${eigenerEintrag.nickname || user.nickname || user.benutzername}.`;
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      try {
+        await updateDoc(doc(db, "warteschlange", eigenerEintrag.id), {
+          anwesend: true,
+          anwesenheitBestaetigtAm: Date.now(),
+          anwesenheitBestaetigtVon: user.benutzername
+        });
+        text.textContent = "Deine Anwesenheit wurde bestätigt.";
+        button.textContent = "Anwesenheit bestätigt ✓";
+      } catch (error) {
+        console.error("Turnier-Anwesenheit konnte nicht gespeichert werden:", error);
+        button.disabled = false;
+        alert("Die Anwesenheit konnte nicht gespeichert werden.");
+      }
+    }, { once: true });
+  } catch (error) {
+    console.error("Turnieranmeldung konnte im Dashboard nicht geprüft werden:", error);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", turnierAnwesenheitImDashboard);

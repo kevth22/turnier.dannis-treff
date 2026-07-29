@@ -925,35 +925,63 @@ document.addEventListener("DOMContentLoaded", () => {
     tvSpieleRendern();
     tvTurnierbaumRendern();
 
-    const slides = [...document.querySelectorAll(".tv-slide")];
     const status = document.getElementById("tvRotationStatus");
+    let slides = [];
+    let punkte = [];
     let index = 0;
-    const punkte = slides.map((slide, i) => {
-      const punkt = document.createElement("i");
-      punkt.classList.toggle("active", i === 0);
-      status?.appendChild(punkt);
-      return punkt;
-    });
+    const slidesAktualisieren = () => {
+      slides = [...document.querySelectorAll("#tvAnsicht .tv-slide")];
+      if (status) status.innerHTML = "";
+      punkte = slides.map((slide, i) => {
+        const punkt = document.createElement("i");
+        punkt.classList.toggle("active", i === index);
+        status?.appendChild(punkt);
+        return punkt;
+      });
+      if (slides.length && index >= slides.length) index = 0;
+    };
     const slideZeigen = (neu) => {
-      index = neu % slides.length;
+      slidesAktualisieren();
+      if (!slides.length) return;
+      index = ((neu % slides.length) + slides.length) % slides.length;
       slides.forEach((slide, i) => slide.classList.toggle("active", i === index));
       punkte.forEach((punkt, i) => punkt.classList.toggle("active", i === index));
+    };
+    const naechsteFoliePlanen = () => {
+      if (tvDiashowIntervall) clearTimeout(tvDiashowIntervall);
+      const aktuelleFolie = slides[index];
+      const dauer = Math.max(3, Math.min(120, Number(aktuelleFolie?.dataset?.duration) || 10));
+      tvDiashowIntervall = setTimeout(() => {
+        slideZeigen(index + 1);
+        naechsteFoliePlanen();
+      }, dauer * 1000);
     };
     tvDiashowStarten = () => {
       document.body.classList.add("tv-started");
       if (status) status.style.display = "flex";
       if (tvDiashowIntervall) return;
       slideZeigen(0);
-      tvDiashowIntervall = setInterval(() => slideZeigen(index + 1), 10000);
+      naechsteFoliePlanen();
     };
     tvVorstartAnzeigen = () => {
       document.body.classList.remove("tv-started");
       if (status) status.style.display = "none";
+      slidesAktualisieren();
       slides.forEach(slide => slide.classList.remove("active"));
-      if (tvDiashowIntervall) clearInterval(tvDiashowIntervall);
+      if (tvDiashowIntervall) clearTimeout(tvDiashowIntervall);
       tvDiashowIntervall = null;
       index = 0;
     };
+    window.addEventListener("dart11en-tv-slides-updated", () => {
+      const lief = Boolean(tvDiashowIntervall);
+      if (tvDiashowIntervall) clearTimeout(tvDiashowIntervall);
+      tvDiashowIntervall = null;
+      slidesAktualisieren();
+      if (lief || turnierDaten) {
+        slideZeigen(index);
+        naechsteFoliePlanen();
+      }
+    });
     tvVorstartAnzeigen();
     if (turnierDaten) tvDiashowStarten();
 

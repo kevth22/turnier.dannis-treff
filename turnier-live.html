@@ -216,7 +216,7 @@
     <h2>👥 Teilnehmer verwalten</h2>
 
     <p class="section-text">
-      Hier steuerst du bezahlt, anwesend und wer später ins Turnier übernommen wird.
+      Hier steuerst du Barzahlung, PayPal-Zahlung und Anwesenheit. Bar oder PayPal zählt jeweils als bezahlt. Nur bezahlte und anwesende Personen werden ausgelost.
     </p>
 
     <form id="spielerHinzufuegenForm" class="spieler-hinzufuegen-form">
@@ -407,6 +407,37 @@
     <a id="tvAnsichtLink" href="turnier-live.html?tv=true&mode=auto" class="main-button" target="_blank" rel="noopener">
       📺 TV-Ansicht öffnen
     </a>
+
+    <div id="tvSlideEditor" class="tv-slide-editor" hidden>
+      <h3>🖼️ Eigene TV-Folien</h3>
+      <p class="section-text">Erstelle Folien aus Texten und eigenen Bildern. Elemente lassen sich direkt auf der Vorschau verschieben und unten rechts in der Größe verändern.</p>
+      <div class="tv-slide-editor-layout">
+        <aside>
+          <button id="tvSlideNew" class="main-button" type="button">＋ Neue Folie</button>
+          <div id="tvSlideList" class="tv-slide-list"></div>
+        </aside>
+        <div class="tv-slide-workspace">
+          <div class="tv-slide-meta">
+            <label>Titel<input id="tvSlideTitle" type="text" maxlength="80" placeholder="z. B. Getränkeangebot"></label>
+            <label>Dauer in Sekunden<input id="tvSlideDuration" type="number" min="3" max="120" value="10"></label>
+            <label>Hintergrund<input id="tvSlideBackground" type="color" value="#08090d"></label>
+            <label class="settings-row"><span><strong>In TV-Rotation aktiv</strong></span><input id="tvSlideActive" type="checkbox" checked></label>
+          </div>
+          <div class="tv-slide-toolbar">
+            <button id="tvAddText" class="main-button secondary-button" type="button">T Text hinzufügen</button>
+            <label class="main-button secondary-button" for="tvAddImage">🖼️ Bild hinzufügen</label>
+            <input id="tvAddImage" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+          </div>
+          <div class="tv-slide-canvas-wrap"><div id="tvSlideCanvas" class="tv-slide-canvas"></div></div>
+          <div id="tvElementProperties" class="tv-element-properties"><p class="section-text">Wähle ein Element auf der Folie aus.</p></div>
+          <div class="tv-slide-actions">
+            <button id="tvSlideSave" class="main-button" type="button">💾 Folie speichern</button>
+            <button id="tvSlideDelete" class="main-button danger-button" type="button">🗑️ Folie löschen</button>
+          </div>
+          <p id="tvSlideMessage" class="section-text tv-slide-message" role="status"></p>
+        </div>
+      </div>
+    </div>
 
     <div id="tvVorschau" class="tv-preview">
 
@@ -605,6 +636,7 @@
 <script type="module" src="turnier-v4-live.js?v=400"></script>
 <script src="turnier-admin-menu.js?v=110" defer></script>
 <script type="module" src="turnier-theme.js?v=507"></script>
+<script type="module" src="tv-slide-editor.js?v=22"></script>
 <script type="module" src="push-foreground.js?v=10.0.1"></script>
 <script src="pwa.js" defer></script>
 

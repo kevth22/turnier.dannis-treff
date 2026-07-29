@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v1-7-0-kasse";
+const VERSION = "dart11en-v21-turnier-status-dashboard";
 
 const CORE_FILES = [
   "./",

@@ -141,6 +141,7 @@ onSnapshot(warteschlangeRef, (snapshot) => {
   const warteschlangeListe = document.getElementById("warteschlange");
 const bezahlteListe = document.getElementById("bezahlteListe");
 
+if (!warteschlangeListe || !bezahlteListe) return;
 warteschlangeListe.innerHTML = "";
 bezahlteListe.innerHTML = "";  
   
@@ -154,7 +155,10 @@ bezahlteListe.innerHTML = "";
   });  
   
   spieler.sort((a, b) => a.zeit - b.zeit);  
-const bezahlteSpieler = spieler.filter((person) => person.bezahlt === true);  
+spieler.forEach(person => {
+  person.bezahlt = person.bezahlt === true || person.zahlungBar === true || person.zahlungPaypal === true;
+});
+const bezahlteSpieler = spieler.filter((person) => person.bezahlt === true);
 const wartendeSpieler = spieler.filter((person) => person.bezahlt !== true);  
 
 const belegte = bezahlteSpieler.length;
@@ -244,26 +248,6 @@ if (person.bezahlt === true) {
     <span class="status-wartend">Warteschlange</span>
   `;
 }
-
-    const istEigenerEintrag = aktuellerLogin && person.kontoBenutzername === aktuellerLogin.benutzername;
-    if (istEigenerEintrag) {
-      const anwesenheitButton = document.createElement("button");
-      anwesenheitButton.type = "button";
-      anwesenheitButton.className = "anwesenheit-button";
-      anwesenheitButton.textContent = person.anwesend ? "Anwesenheit bestätigt ✓" : "Anwesenheit bestätigen";
-      anwesenheitButton.disabled = person.anwesend === true;
-      anwesenheitButton.addEventListener("click", async () => {
-        anwesenheitButton.disabled = true;
-        try {
-          await updateDoc(doc(db, "warteschlange", person.id), { anwesend: true });
-        } catch (fehler) {
-          console.error(fehler);
-          anwesenheitButton.disabled = false;
-          alert("Die Anwesenheit konnte nicht gespeichert werden.");
-        }
-      });
-      eintrag.appendChild(anwesenheitButton);
-    }
 
     if (person.bezahlt === true) {
       bezahlteListe.appendChild(eintrag);
