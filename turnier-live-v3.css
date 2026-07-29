@@ -1273,3 +1273,17 @@ body.is-admin .admin-dashboard {
 .dashboard-groups-grid .gruppen-tabelle tbody tr:nth-child(even){background:rgba(255,255,255,.035)}
 .dashboard-groups-grid .gruppen-tabelle tbody tr.qualifiziert{background:rgba(24,180,92,.16)}
 @media (min-width:820px){.dashboard-current-list,.dashboard-groups-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* Version 30: Anwesenheitsbestätigung direkt im Turnier-Center */
+.spieler-anwesenheit-card {
+  border: 1px solid rgba(46, 204, 113, .42);
+}
+.spieler-anwesenheit-card .main-button {
+  width: 100%;
+  margin-top: 14px;
+}
+.spieler-anwesenheit-card.is-confirmed {
+  border-color: rgba(46, 204, 113, .8);
+  box-shadow: 0 0 0 1px rgba(46, 204, 113, .18) inset;
+}

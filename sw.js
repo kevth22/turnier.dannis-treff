@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v29-turnieranzeige-ohne-folieneditor";
+const VERSION = "dart11en-v30-anwesenheit-turniercenter";
 
 const CORE_FILES = [
   "./",

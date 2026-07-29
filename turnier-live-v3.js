@@ -80,6 +80,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const spielerSuche = document.getElementById("spielerSuche");
   const spielerAuswahl = document.getElementById("spielerAuswahl");
   const spielerInfos = document.getElementById("spielerInfos");
+  const spielerAnwesenheitCard = document.getElementById("spielerAnwesenheitCard");
+  const spielerAnwesenheitText = document.getElementById("spielerAnwesenheitText");
+  const spielerAnwesenheitStatus = document.getElementById("spielerAnwesenheitStatus");
+  const spielerAnwesenheitBtn = document.getElementById("spielerAnwesenheitBtn");
 
   let letzteTeilnehmer = [];
   let anwesendeAnzahl = 0;
@@ -1421,6 +1425,81 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("Die TV-Auslosung konnte nicht geladen werden:", fehler);
   });
 
+  let aktuellerTurnierStatus = "vorbereitung";
+
+  function vergleichswert(wert) {
+    return String(wert || "").trim().toLowerCase().replace(/\s+/g, " ");
+  }
+
+  function eigeneAnmeldungFinden() {
+    if (!aktuellerUser) return null;
+    const benutzername = vergleichswert(aktuellerUser.benutzername);
+    const nickname = vergleichswert(aktuellerUser.nickname);
+    const vollerName = vergleichswert([aktuellerUser.vorname, aktuellerUser.nachname].filter(Boolean).join(" "));
+
+    return letzteTeilnehmer.find((person) => {
+      const kontowerte = [
+        person.kontoBenutzername, person.mitgliedId, person.benutzername, person.kontoId
+      ].map(vergleichswert).filter(Boolean);
+      if (benutzername && kontowerte.includes(benutzername)) return true;
+
+      const anmeldungsNickname = vergleichswert(person.nickname);
+      const anmeldungsName = vergleichswert([person.vorname, person.nachname].filter(Boolean).join(" "));
+      return Boolean(
+        (nickname && nickname === anmeldungsNickname) ||
+        (benutzername && benutzername === anmeldungsNickname) ||
+        (vollerName && vollerName === anmeldungsName)
+      );
+    }) || null;
+  }
+
+  function spielerAnwesenheitRendern() {
+    if (!spielerAnwesenheitCard || !spielerAnwesenheitBtn || !spielerAnwesenheitText) return;
+    const eigenerEintrag = eigeneAnmeldungFinden();
+    const istAnmeldephase = aktuellerTurnierStatus === "anmeldung";
+
+    if (!istAnmeldephase || !aktuellerUser || !eigenerEintrag || istTvModus) {
+      spielerAnwesenheitCard.hidden = true;
+      spielerAnwesenheitBtn.onclick = null;
+      return;
+    }
+
+    spielerAnwesenheitCard.hidden = false;
+    const istAnwesend = eigenerEintrag.anwesend === true;
+    const anzeigename = eigenerEintrag.nickname || aktuellerUser.nickname || aktuellerUser.benutzername || "Spieler";
+    spielerAnwesenheitCard.classList.toggle("is-confirmed", istAnwesend);
+    if (spielerAnwesenheitStatus) spielerAnwesenheitStatus.textContent = istAnwesend ? "Anwesend ✓" : "Noch offen";
+    spielerAnwesenheitText.textContent = istAnwesend
+      ? `${anzeigename}, du bist für dieses Turnier als anwesend eingetragen.`
+      : `${anzeigename}, bestätige hier deine Anwesenheit für das Turnier.`;
+    spielerAnwesenheitBtn.textContent = istAnwesend ? "Doch nicht anwesend" : "Ich bin anwesend";
+    spielerAnwesenheitBtn.disabled = false;
+
+    spielerAnwesenheitBtn.onclick = async () => {
+      spielerAnwesenheitBtn.disabled = true;
+      try {
+        await updateDoc(doc(db, "warteschlange", eigenerEintrag.id), {
+          anwesend: !istAnwesend,
+          anwesenheitBestaetigtAm: Date.now(),
+          anwesenheitBestaetigtVon: aktuellerUser.benutzername || aktuellerUser.nickname || "spieler",
+          kontoBenutzername: eigenerEintrag.kontoBenutzername || aktuellerUser.benutzername || "",
+          mitgliedId: eigenerEintrag.mitgliedId || aktuellerUser.benutzername || ""
+        });
+      } catch (fehler) {
+        console.error("Anwesenheit konnte nicht gespeichert werden:", fehler);
+        spielerAnwesenheitBtn.disabled = false;
+        alert("Die Anwesenheit konnte nicht gespeichert werden. Bitte prüfe deine Verbindung oder Berechtigung.");
+      }
+    };
+  }
+
+  onSnapshot(doc(db, "turnierLive", "steuerungV4"), (snapshot) => {
+    aktuellerTurnierStatus = String(snapshot.data()?.status || "vorbereitung").toLowerCase();
+    spielerAnwesenheitRendern();
+  }, (fehler) => {
+    console.error("Turnierstatus konnte für die Anwesenheit nicht geladen werden:", fehler);
+  });
+
   onSnapshot(collection(db, "warteschlange"), (snapshot) => {
     let bezahlt = 0;
     let anwesend = 0;
@@ -1442,6 +1521,7 @@ document.addEventListener("DOMContentLoaded", () => {
     anwesendeAnzahl = anwesend;
     turnierZahlenAktualisieren();
     teilnehmerRendern();
+    spielerAnwesenheitRendern();
   }, (fehler) => {
     console.error("Anmeldungen konnten nicht geladen werden:", fehler);
   });
