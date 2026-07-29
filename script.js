@@ -1,3 +1,4 @@
+import { getLogin } from "./auth-utils.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";  
   
 import {  
@@ -22,7 +23,8 @@ const firebaseConfig = {
   
 const app = initializeApp(firebaseConfig);  
 const db = getFirestore(app);  
-const warteschlangeRef = collection(db, "warteschlange");  
+const warteschlangeRef = collection(db, "warteschlange");
+const aktuellerLogin = getLogin();  
   
  let istAdmin = sessionStorage.getItem("admin") === "true"; 
   
@@ -81,11 +83,13 @@ if (
     snapshot.forEach((dokument) => {  
       const spieler = dokument.data();  
   
-      if (
-  spieler.nickname &&
-  spieler.nickname.toLowerCase() === nickname.toLowerCase()
-) {
-  gefunden = true;
+      const gleicherNickname = spieler.nickname &&
+        spieler.nickname.toLowerCase() === nickname.toLowerCase();
+      const gleichesKonto = aktuellerLogin?.benutzername &&
+        spieler.mitgliedId === aktuellerLogin.benutzername;
+
+      if (gleicherNickname || gleichesKonto) {
+        gefunden = true;
       }
     });  
   
@@ -102,6 +106,11 @@ await addDoc(warteschlangeRef, {
   vorname: vorname,
   nachname: nachname,
   bezahlt: false,
+  zahlungBar: false,
+  zahlungPaypal: false,
+  anwesend: false,
+  kontoBenutzername: aktuellerLogin?.benutzername || null,
+  mitgliedId: aktuellerLogin?.benutzername || null,
   zeit: Date.now()
 });  
 const msg = document.getElementById("successMessage");
@@ -113,15 +122,19 @@ setTimeout(() => {
 }, 6000);  
 letzteAnmeldung = Date.now();  
   
-const paypalLink = document.getElementById("paypalLink");  
-paypalLink.href = "https://paypal.me/DanielaRoth222";  
-paypalLink.classList.remove("disabled");  
+const paypalLink = document.getElementById("paypalLink");
+paypalLink.href = "https://paypal.me/DanielaRoth222/10.62EUR";
+paypalLink.classList.remove("disabled");
+
+alert("Anmeldung gespeichert. Bar: 10,00 € oder PayPal: 10,62 €. Davon fließen 10,00 € vollständig ins Preisgeld.");  
   
-alert("Anmeldung gespeichert. Bitte jetzt 10€ per PayPal zahlen.");  
-  
-nicknameFeld.value = "";
-vornameFeld.value = "";
-nachnameFeld.value = "";  
+if (aktuellerLogin) {
+  kontoDatenUebernehmen();
+} else {
+  nicknameFeld.value = "";
+  vornameFeld.value = "";
+  nachnameFeld.value = "";
+}
 };  
   
 onSnapshot(warteschlangeRef, (snapshot) => {  
@@ -202,7 +215,8 @@ document.getElementById("barWartend").style.width = prozentWartend + "%";
 
     bezahltButton.onclick = async function () {
       await updateDoc(doc(db, "warteschlange", person.id), {
-        bezahlt: true
+        bezahlt: true,
+        zahlungPaypal: true
       });
     };
 
@@ -230,6 +244,26 @@ if (person.bezahlt === true) {
     <span class="status-wartend">Warteschlange</span>
   `;
 }
+
+    const istEigenerEintrag = aktuellerLogin && person.kontoBenutzername === aktuellerLogin.benutzername;
+    if (istEigenerEintrag) {
+      const anwesenheitButton = document.createElement("button");
+      anwesenheitButton.type = "button";
+      anwesenheitButton.className = "anwesenheit-button";
+      anwesenheitButton.textContent = person.anwesend ? "Anwesenheit bestätigt ✓" : "Anwesenheit bestätigen";
+      anwesenheitButton.disabled = person.anwesend === true;
+      anwesenheitButton.addEventListener("click", async () => {
+        anwesenheitButton.disabled = true;
+        try {
+          await updateDoc(doc(db, "warteschlange", person.id), { anwesend: true });
+        } catch (fehler) {
+          console.error(fehler);
+          anwesenheitButton.disabled = false;
+          alert("Die Anwesenheit konnte nicht gespeichert werden.");
+        }
+      });
+      eintrag.appendChild(anwesenheitButton);
+    }
 
     if (person.bezahlt === true) {
       bezahlteListe.appendChild(eintrag);
@@ -284,3 +318,23 @@ document.getElementById("timer").innerHTML =
 }
 
 starteCountdown();
+
+
+function kontoDatenUebernehmen() {
+  if (!aktuellerLogin) return;
+  const nickname = document.getElementById("nickname");
+  const vorname = document.getElementById("vorname");
+  const nachname = document.getElementById("nachname");
+  if (nickname) nickname.value = aktuellerLogin.nickname || aktuellerLogin.benutzername || "";
+  if (vorname) vorname.value = aktuellerLogin.vorname || "";
+  if (nachname) nachname.value = aktuellerLogin.nachname || "";
+  [nickname, vorname, nachname].forEach(feld => {
+    if (feld) {
+      feld.readOnly = true;
+      feld.classList.add("konto-uebernommen");
+    }
+  });
+  document.dispatchEvent(new Event("kontoDatenUebernommen"));
+}
+
+document.addEventListener("DOMContentLoaded", kontoDatenUebernehmen);

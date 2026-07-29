@@ -2349,3 +2349,8 @@ body.spieltag-page {
 
   box-shadow:0 0 14px rgba(196,0,48,0.16);
 }
+
+
+.konto-anmeldung-hinweis { opacity:.85; margin-top:-4px; }
+.konto-uebernommen { background: rgba(255,255,255,.08); cursor:not-allowed; }
+.anwesenheit-button { margin-left:10px; width:auto; padding:7px 10px; font-size:13px; }

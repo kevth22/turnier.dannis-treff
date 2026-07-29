@@ -1070,6 +1070,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const kopf = document.createElement("div");
+    kopf.className = "teilnehmer-admin-kopf";
+    kopf.innerHTML = "<span>Spieler</span><span>Bar</span><span>PayPal</span><span>Anwesend</span><span>Aktion</span>";
+    teilnehmerListe.appendChild(kopf);
+
     letzteTeilnehmer.forEach((person) => {
       const zeile = document.createElement("article");
       zeile.className = "teilnehmer-admin-zeile";
@@ -1082,13 +1087,21 @@ document.addEventListener("DOMContentLoaded", () => {
       klarname.textContent = [person.vorname, person.nachname].filter(Boolean).join(" ");
       name.append(nickname, klarname);
 
-      const bezahltLabel = document.createElement("label");
-      bezahltLabel.className = "admin-status-toggle";
-      const bezahltCheck = document.createElement("input");
-      bezahltCheck.type = "checkbox";
-      bezahltCheck.checked = person.bezahlt === true;
-      bezahltCheck.setAttribute("aria-label", `${person.nickname || "Person"} als bezahlt markieren`);
-      bezahltLabel.append(bezahltCheck, document.createTextNode(" Bezahlt"));
+      const barLabel = document.createElement("label");
+      barLabel.className = "admin-status-toggle";
+      const barCheck = document.createElement("input");
+      barCheck.type = "checkbox";
+      barCheck.checked = person.zahlungBar === true;
+      barCheck.setAttribute("aria-label", `${person.nickname || "Person"} Barzahlung`);
+      barLabel.append(barCheck, document.createTextNode(" Bar"));
+
+      const paypalLabel = document.createElement("label");
+      paypalLabel.className = "admin-status-toggle";
+      const paypalCheck = document.createElement("input");
+      paypalCheck.type = "checkbox";
+      paypalCheck.checked = person.zahlungPaypal === true || (person.bezahlt === true && person.zahlungBar !== true);
+      paypalCheck.setAttribute("aria-label", `${person.nickname || "Person"} PayPal-Zahlung`);
+      paypalLabel.append(paypalCheck, document.createTextNode(" PayPal"));
 
       const anwesendLabel = document.createElement("label");
       anwesendLabel.className = "admin-status-toggle";
@@ -1117,7 +1130,33 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       };
 
-      bezahltCheck.addEventListener("change", () => statusSpeichern("bezahlt", bezahltCheck.checked, bezahltCheck));
+      const zahlungsstatusSpeichern = async (zahlungsart) => {
+        barCheck.disabled = true;
+        paypalCheck.disabled = true;
+
+        // Bar und PayPal sind alternative Zahlungsarten. Es kann nur eine aktiv sein.
+        if (zahlungsart === "bar" && barCheck.checked) paypalCheck.checked = false;
+        if (zahlungsart === "paypal" && paypalCheck.checked) barCheck.checked = false;
+
+        try {
+          const zahlungBar = barCheck.checked;
+          const zahlungPaypal = paypalCheck.checked;
+          await updateDoc(doc(db, "warteschlange", person.id), {
+            zahlungBar,
+            zahlungPaypal,
+            zahlungsart: zahlungBar ? "bar" : (zahlungPaypal ? "paypal" : null),
+            bezahlt: zahlungBar || zahlungPaypal
+          });
+        } catch (fehler) {
+          console.error("Zahlungsstatus konnte nicht gespeichert werden:", fehler);
+          alert("Der Zahlungsstatus konnte nicht gespeichert werden.");
+        } finally {
+          barCheck.disabled = false;
+          paypalCheck.disabled = false;
+        }
+      };
+      barCheck.addEventListener("change", () => zahlungsstatusSpeichern("bar"));
+      paypalCheck.addEventListener("change", () => zahlungsstatusSpeichern("paypal"));
       anwesendCheck.addEventListener("change", () => statusSpeichern("anwesend", anwesendCheck.checked, anwesendCheck));
 
       loeschenButton.addEventListener("click", async () => {
@@ -1134,7 +1173,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      zeile.append(name, bezahltLabel, anwesendLabel, loeschenButton);
+      zeile.append(name, barLabel, paypalLabel, anwesendLabel, loeschenButton);
       teilnehmerListe.appendChild(zeile);
     });
   }
@@ -1146,7 +1185,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const nickname = document.getElementById("neuerSpielerNickname").value.trim();
     const vorname = document.getElementById("neuerSpielerVorname").value.trim();
     const nachname = document.getElementById("neuerSpielerNachname").value.trim();
-    const bezahlt = document.getElementById("neuerSpielerBezahlt").checked;
+    const zahlungBar = document.getElementById("neuerSpielerBar").checked;
+    const zahlungPaypal = document.getElementById("neuerSpielerPaypal").checked;
+    const bezahlt = zahlungBar || zahlungPaypal;
     const anwesend = document.getElementById("neuerSpielerAnwesend").checked;
 
     if (nickname.length < 2) {
@@ -1165,7 +1206,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       await addDoc(collection(db, "warteschlange"), {
-        nickname, vorname, nachname, bezahlt, anwesend,
+        nickname, vorname, nachname, bezahlt, zahlungBar, zahlungPaypal, anwesend,
         manuellHinzugefuegt: true,
         zeit: Date.now()
       });

@@ -117,6 +117,7 @@
 
     <section class="anmeldung">
       <h2>👥 Jetzt anmelden</h2>
+      <p class="konto-anmeldung-hinweis">Mit Konto werden Spitzname, Vorname und Nachname automatisch übernommen.</p>
 
       <input id="nickname" type="text" placeholder="Spitzname" required>
       <input id="vorname" type="text" placeholder="Vorname" required>
@@ -256,10 +257,11 @@
   <div class="zahlung-box">
     <h2>💳 Zahlung per PayPal</h2>
 
-    <p>Bitte sende das Startgeld in Höhe von <strong>10,00 €</strong> an:</p>
+    <p>Bei PayPal beträgt der Zahlbetrag <strong>10,62 €</strong>.</p>
+    <p><strong>10,00 €</strong> davon fließen vollständig in das Preisgeld; <strong>0,62 €</strong> decken die PayPal-Gebühr.</p>
 
     <a
-  href="https://paypal.me/DanielaRoth222"
+  href="https://paypal.me/DanielaRoth222/10.62EUR"
   id="paypalLink"
   class="paypal-btn"
   target="_blank"
@@ -270,7 +272,10 @@
     <div class="hinweis-zahlung">
       <p><strong>Wichtig:</strong></p>
       <ul>
-        <li>Bitte Name + Turniertag angeben</li>
+        <li>Bitte den exakt angemeldeten Spitznamen + Turniertag als Verwendungszweck angeben</li>
+        <li>Barzahlung: 10,00 €</li>
+        <li>PayPal-Zahlung: 10,62 € inklusive Gebührenausgleich</li>
+        <li>Beide Zahlungsarten gelten gleichwertig als bezahlt</li>
         <li>Anmeldung erst nach Zahlung gültig</li>
         <li>Keine Rückerstattung bei Nichterscheinen</li>
       </ul>
@@ -336,6 +341,7 @@ checkboxRegel.addEventListener("change", checkForm);
 nicknameInput.addEventListener("input", checkForm);
 vornameInput.addEventListener("input", checkForm);
 nachnameInput.addEventListener("input", checkForm);
+document.addEventListener("kontoDatenUebernommen", checkForm);
 </script>
 
 <script type="module" src="push-foreground.js?v=10.0.1"></script>

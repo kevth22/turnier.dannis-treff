@@ -1219,3 +1219,24 @@ body.is-admin .admin-dashboard {
 .dashboard-next-pairing span{color:#ffbe2d;font-weight:1000;font-size:12px}
 .dashboard-next-format{display:block;margin-top:9px;color:#969ca7;font-size:11px}
 @media (min-width:720px){.dashboard-next-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* Version 20: klare Statusspalten im Teilnehmer-Center */
+.teilnehmer-admin-kopf {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) 74px 86px 100px 90px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  font-weight: 800;
+  border-bottom: 1px solid rgba(255,255,255,.18);
+}
+.teilnehmer-admin-zeile {
+  grid-template-columns: minmax(150px, 1fr) 74px 86px 100px 90px !important;
+}
+@media (max-width: 720px) {
+  .teilnehmer-admin-kopf { display: none; }
+  .teilnehmer-admin-zeile { grid-template-columns: 1fr !important; }
+  .admin-status-toggle { justify-content: flex-start; }
+}
