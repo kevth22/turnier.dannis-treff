@@ -43,7 +43,8 @@ const state = {
   contributions: new Map(),
   legacyContributionsByUsername: new Map(),
   bookings: [],
-  savingContribution: new Set()
+  savingContribution: new Set(),
+  settings: { openingBalance: 0, countedBalance: null }
 };
 
 const $ = id => document.getElementById(id);
@@ -104,8 +105,29 @@ function initAccess() {
     $("tableHint").textContent = "Lesemodus: Beiträge können nur von Admin und Kassenwart geändert werden.";
     $("downloadClosingPdf").hidden = true;
     $("closingReadOnly").hidden = false;
+    $("cashCheckReadOnly").hidden = false;
+    $("cashCheckForm").querySelectorAll("input,button").forEach(el => { el.disabled = true; });
   }
   return true;
+}
+
+function userLabel() { return state.user?.benutzername || displayName(state.user) || "unbekannt"; }
+
+function makeReceiptNumber(dateValue = new Date()) {
+  const d = dateValue instanceof Date ? dateValue : new Date(dateValue);
+  const pad = n => String(n).padStart(2, "0");
+  return `KB-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
+}
+
+async function writeAudit(action, bookingId, details = {}) {
+  await addDoc(collection(db, "kassenProtokoll"), { action, buchungId: bookingId || null, details, benutzer: userLabel(), erstelltAm: serverTimestamp() });
+}
+
+async function loadSettings() {
+  const snap = await getDoc(doc(db, "kassenEinstellungen", "haupt"));
+  if (snap.exists()) state.settings = { ...state.settings, ...snap.data() };
+  $("openingBalance").value = Number(state.settings.openingBalance || 0).toFixed(2);
+  $("countedBalance").value = state.settings.countedBalance == null ? "" : Number(state.settings.countedBalance).toFixed(2);
 }
 
 async function loadMembers() {
@@ -274,7 +296,11 @@ function renderDashboard() {
   const expense = active.filter(item => item.typ === "ausgabe").reduce((sum, item) => sum + (Number(item.betrag) || 0), 0);
   $("incomeValue").textContent = euro.format(income);
   $("expenseValue").textContent = euro.format(expense);
-  $("balanceValue").textContent = euro.format(income - expense);
+  const expected = Number(state.settings.openingBalance || 0) + income - expense;
+  $("balanceValue").textContent = euro.format(expected);
+  if ($("expectedBalance")) $("expectedBalance").textContent = euro.format(expected);
+  const counted = state.settings.countedBalance;
+  if ($("cashDifference")) $("cashDifference").textContent = counted == null || counted === "" ? "–" : euro.format(Number(counted) - expected);
 }
 
 function iconFor(category) {
@@ -291,8 +317,9 @@ function bookingCard(item) {
     <div class="journal-icon">${iconFor(item.kategorie)}</div>
     <div class="journal-main">
       <strong>${escapeHtml(item.titel || item.beschreibung || "Buchung")}${item.storniert ? " (storniert)" : ""}</strong>
-      <small>${escapeHtml(date)}${item.personName ? ` · ${escapeHtml(item.personName)}` : ""}</small>
-      <div class="booking-badges"><span class="booking-badge ${status}">${statusLabel}</span><span class="booking-badge">${expense ? "Ausgabe" : "Einnahme"}</span></div>
+      <small>${escapeHtml(date)}${item.personName ? ` · ${escapeHtml(item.personName)}` : ""}${item.belegnummer ? ` · ${escapeHtml(item.belegnummer)}` : ""}</small>
+      ${item.storniert && item.stornogrund ? `<small>Stornogrund: ${escapeHtml(item.stornogrund)}</small>` : ""}
+      <div class="booking-badges"><span class="booking-badge ${status}">${statusLabel}</span><span class="booking-badge">${expense ? "Ausgabe" : "Einnahme"}</span>${item.abschlussId ? `<span class="booking-badge">🔒 Abgeschlossen</span>` : ""}</div>
     </div>
     <div class="journal-side">
       <div class="journal-amount ${expense ? "expense" : "income"}">${expense ? "−" : "+"}${euro.format(amount)}</div>
@@ -304,13 +331,27 @@ function bookingCard(item) {
   </article>`;
 }
 
+function filteredBookings() {
+  const search = ($("journalSearch")?.value || "").trim().toLowerCase();
+  const type = $("journalTypeFilter")?.value || "";
+  const status = $("journalStatusFilter")?.value || "";
+  return state.bookings.filter(item => {
+    if (type && item.typ !== type) return false;
+    if (status === "storniert" && item.storniert !== true) return false;
+    if (status === "ist" && (item.storniert || !isActual(item))) return false;
+    if (status === "soll" && (item.storniert || isActual(item))) return false;
+    if (search) {
+      const haystack = [item.titel,item.beschreibung,item.personName,item.belegnummer,item.kategorie].join(" ").toLowerCase();
+      if (!haystack.includes(search)) return false;
+    }
+    return true;
+  });
+}
+
 function renderJournal() {
   const host = $("journalList");
-  if (!state.bookings.length) {
-    host.innerHTML = '<p class="empty-cell">Noch keine Buchungen vorhanden.</p>';
-    return;
-  }
-  host.innerHTML = state.bookings.slice(0, 12).map(bookingCard).join("");
+  const items = filteredBookings();
+  host.innerHTML = items.length ? items.map(bookingCard).join("") : '<p class="empty-cell">Keine passenden Buchungen gefunden.</p>';
 }
 
 function renderMonthlyBookings() {
@@ -517,7 +558,8 @@ async function saveBooking(event) {
     return showMessage("Bitte Art, Betrag, Datum und Notiz vollständig eintragen.", true);
   }
 
-  await addDoc(collection(db, "kassenBuchungen"), {
+  const belegnummer = makeReceiptNumber();
+  const bookingRef = await addDoc(collection(db, "kassenBuchungen"), {
     typ: type,
     kategorie: $("bookingCategory").value,
     zahlungsstand: $("bookingStatus").value,
@@ -527,9 +569,13 @@ async function saveBooking(event) {
     datum: date,
     monat: date.slice(0, 7),
     storniert: false,
-    erstelltVon: state.user.benutzername,
-    erstelltAm: serverTimestamp()
+    belegnummer,
+    erstelltVon: userLabel(),
+    erstelltAm: serverTimestamp(),
+    geaendertVon: userLabel(),
+    geaendertAm: serverTimestamp()
   });
+  await writeAudit("erstellt", bookingRef.id, { belegnummer, betrag: amount, typ: type });
 
   $("bookingAmount").value = "";
   $("bookingNote").value = "";
@@ -578,7 +624,8 @@ async function togglePaid(id) {
       datum: monthKey,
       betrag: amount,
       storniert: !nowPaid,
-      erstelltVon: state.user.benutzername,
+      belegnummer: existing?.belegnummer || makeReceiptNumber(),
+      erstelltVon: userLabel(),
       erstelltAm: serverTimestamp()
     }, { merge: true });
 
@@ -641,11 +688,19 @@ async function toggleBookingCancelled(id) {
   if (!item) return showMessage("Buchung wurde nicht gefunden.", true);
 
   const cancelled = item.storniert !== true;
+  let reason = "";
+  if (cancelled) {
+    reason = window.prompt(`Stornogrund für „${item.titel || item.beschreibung || item.belegnummer || "Buchung"}“:`)?.trim() || "";
+    if (!reason) return showMessage("Für eine Stornierung ist ein Grund erforderlich.", true);
+  }
   const batch = writeBatch(db);
   batch.set(doc(db, "kassenBuchungen", id), {
     storniert: cancelled,
     storniertVon: cancelled ? state.user.benutzername : null,
-    storniertAm: cancelled ? serverTimestamp() : null
+    storniertAm: cancelled ? serverTimestamp() : null,
+    stornogrund: cancelled ? reason : null,
+    geaendertVon: userLabel(),
+    geaendertAm: serverTimestamp()
   }, { merge: true });
 
   // Bei automatisch erzeugten Mitgliedsbeiträgen muss auch der Tabellenstatus
@@ -665,6 +720,7 @@ async function toggleBookingCancelled(id) {
   }
 
   await batch.commit();
+  await writeAudit(cancelled ? "storniert" : "reaktiviert", id, { grund: reason, belegnummer: item.belegnummer || null, abgeschlossen: Boolean(item.abschlussId) });
   showMessage(cancelled ? "Buchung wurde storniert." : "Stornierung wurde aufgehoben.");
   await refreshData();
 }
@@ -705,9 +761,23 @@ function handleBookingAction(event) {
   promise.catch(error => showMessage(error.message || "Aktion fehlgeschlagen.", true)).finally(() => { button.disabled = false; });
 }
 
+async function saveCashCheck(event) {
+  event.preventDefault();
+  if (!state.canEdit) return;
+  const opening = Number($("openingBalance").value || 0);
+  const countedRaw = $("countedBalance").value;
+  const counted = countedRaw === "" ? null : Number(countedRaw);
+  if (!Number.isFinite(opening) || (counted !== null && !Number.isFinite(counted))) return showMessage("Bitte gültige Bestände eingeben.", true);
+  await setDoc(doc(db, "kassenEinstellungen", "haupt"), { openingBalance: opening, countedBalance: counted, geaendertVon: userLabel(), geaendertAm: serverTimestamp() }, { merge: true });
+  state.settings = { openingBalance: opening, countedBalance: counted };
+  await writeAudit("bestand_geprueft", null, { openingBalance: opening, countedBalance: counted });
+  renderDashboard();
+  showMessage("Kassenbestände wurden gespeichert.");
+}
+
 async function refreshData() {
   const monthKey = $("monthPicker").value || currentMonthKey();
-  await Promise.all([loadMembers(), loadProfiles(), loadContributions(monthKey), loadBookings()]);
+  await Promise.all([loadMembers(), loadProfiles(), loadContributions(monthKey), loadBookings(), loadSettings()]);
   renderMembers();
   renderDashboard();
   renderJournal();
@@ -723,6 +793,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderMembers();
   });
   $("journalMonthPicker").addEventListener("change", renderMonthlyBookings);
+  ["journalSearch","journalTypeFilter","journalStatusFilter"].forEach(id => $(id).addEventListener("input", renderJournal));
+  $("cashCheckForm").addEventListener("submit", event => saveCashCheck(event).catch(error => showMessage(error.message, true)));
   $("journalList").addEventListener("click", handleBookingAction);
   $("monthlyBookingList").addEventListener("click", handleBookingAction);
   $("bookingType").addEventListener("change", updateCategoryOptions);

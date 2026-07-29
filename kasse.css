@@ -137,3 +137,84 @@
   .journal-side { grid-column:2; justify-items:start; }
   .booking-actions { justify-content:flex-start; }
 }
+
+/* Kassenprüfung und Journalfilter */
+.cash-check-form { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:14px; align-items:end; margin-top:16px; }
+.cash-check-form label { display:grid; gap:7px; color:#ddd; font-size:.88rem; }
+.cash-check-form input, .journal-filters input, .journal-filters select { width:100%; box-sizing:border-box; color:#fff; background:#151519; border:1px solid #34343c; border-radius:10px; padding:11px 12px; font:inherit; }
+.cash-result { min-height:44px; display:grid; gap:4px; padding:9px 12px; border:1px solid rgba(255,255,255,.08); border-radius:10px; background:#141418; }
+.cash-result span { color:var(--kasse-muted); font-size:.72rem; }
+.cash-result strong { font-size:1rem; }
+.journal-filters { display:grid; grid-template-columns:minmax(220px,2fr) 1fr 1fr; gap:10px; margin-top:16px; }
+@media (max-width:850px) { .cash-check-form { grid-template-columns:repeat(2,minmax(0,1fr)); } .cash-check-form button { grid-column:1/-1; } }
+@media (max-width:560px) { .cash-check-form,.journal-filters { grid-template-columns:1fr; } .cash-check-form button { grid-column:auto; } }
+
+/* Version 17: Statuskreise dürfen auf Touch-Geräten nicht die globale rote
+   Button-Hoverfarbe übernehmen. iOS hält :hover nach einem Tippen teilweise
+   fest und zeigt sonst nach dem Neurendern scheinbar eine andere Person rot an. */
+.status-button.status-open,
+.status-button.status-open:hover,
+.status-button.status-open:focus,
+.status-button.status-open:active {
+  background: transparent !important;
+  border-color: #777 !important;
+  color: #fff !important;
+}
+.status-button.status-paid,
+.status-button.status-paid:hover,
+.status-button.status-paid:focus,
+.status-button.status-paid:active {
+  background: #28c76f !important;
+  border-color: #28c76f !important;
+  color: #07180e !important;
+}
+.status-button.status-exempt,
+.status-button.status-exempt:hover,
+.status-button.status-exempt:focus,
+.status-button.status-exempt:active {
+  background: #45454d !important;
+  border-color: #8d8d98 !important;
+  color: #fff !important;
+}
+.status-button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  outline: none;
+}
+
+/* Version 17: Auf Touch-Geräten darf der globale rote Button-Hover
+   nicht auf die Statuskreise der Mitgliedsbeiträge überspringen. */
+.status-button:hover,
+.status-button:focus,
+.status-button:focus-visible,
+.status-button:active {
+  transform: none !important;
+  box-shadow: none !important;
+}
+.status-button.status-open,
+.status-button.status-open:hover,
+.status-button.status-open:focus,
+.status-button.status-open:focus-visible,
+.status-button.status-open:active {
+  border: 2px solid #777 !important;
+  background: transparent !important;
+  color: #fff !important;
+}
+.status-button.status-paid,
+.status-button.status-paid:hover,
+.status-button.status-paid:focus,
+.status-button.status-paid:focus-visible,
+.status-button.status-paid:active {
+  border: 2px solid #28c76f !important;
+  background: #28c76f !important;
+  color: #07180e !important;
+}
+.status-button.status-exempt,
+.status-button.status-exempt:hover,
+.status-button.status-exempt:focus,
+.status-button.status-exempt:focus-visible,
+.status-button.status-exempt:active {
+  border: 2px solid #8d8d98 !important;
+  background: #45454d !important;
+  color: #fff !important;
+}

@@ -47,6 +47,21 @@
   </section>
 
 
+
+  <section class="kasse-panel" id="cashCheckPanel">
+    <div class="panel-header">
+      <div><p class="eyebrow">Kassenprüfung</p><h2>Startbestand und gezählter Bestand</h2></div>
+    </div>
+    <form id="cashCheckForm" class="cash-check-form">
+      <label>Startbestand<div class="money-input"><input id="openingBalance" type="number" step="0.01" inputmode="decimal"><span>€</span></div></label>
+      <label>Gezählter Istbestand<div class="money-input"><input id="countedBalance" type="number" step="0.01" inputmode="decimal"><span>€</span></div></label>
+      <div class="cash-result"><span>Erwarteter Bestand</span><strong id="expectedBalance">0,00 €</strong></div>
+      <div class="cash-result"><span>Differenz</span><strong id="cashDifference">0,00 €</strong></div>
+      <button class="main-button" type="submit">Bestände speichern</button>
+    </form>
+    <p id="cashCheckReadOnly" class="table-hint" hidden>Nur Admin und Kassenwart können Bestände speichern.</p>
+  </section>
+
   <section class="kasse-panel booking-panel" id="bookingPanel">
     <div class="panel-header">
       <div>
@@ -182,10 +197,12 @@
 
   <section class="kasse-panel">
     <div class="panel-header">
-      <div>
-        <p class="eyebrow">Kassenjournal</p>
-        <h2>Letzte Buchungen</h2>
-      </div>
+      <div><p class="eyebrow">Kassenjournal</p><h2>Buchungen suchen und filtern</h2></div>
+    </div>
+    <div class="journal-filters">
+      <input id="journalSearch" type="search" placeholder="Name, Notiz oder Belegnummer suchen">
+      <select id="journalTypeFilter"><option value="">Alle Arten</option><option value="einnahme">Einnahmen</option><option value="ausgabe">Ausgaben</option></select>
+      <select id="journalStatusFilter"><option value="">Alle Status</option><option value="ist">Ist</option><option value="soll">Soll</option><option value="storniert">Storniert</option></select>
     </div>
     <div id="journalList" class="journal-list">
       <p class="empty-cell">Noch keine Buchungen vorhanden.</p>
