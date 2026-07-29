@@ -37,6 +37,35 @@ function normalize(slide){
 function setMessage(text, error=false){ if(message){ message.textContent=text; message.classList.toggle('error',error); } }
 function fillMeta(){ if(!current)return; document.getElementById('tvSlideTitle').value=current.title||'';document.getElementById('tvSlideDuration').value=current.duration||10;document.getElementById('tvSlideOrder').value=Number(current.order)||100;document.getElementById('tvSlideActive').checked=current.active!==false;document.getElementById('tvSlideBackground').value=current.background||'#08090d'; }
 
+function applyElementStyle(dom, el){
+  if(!dom || !el) return;
+  dom.style.left = `${Number(el.x)||0}%`;
+  dom.style.top = `${Number(el.y)||0}%`;
+  dom.style.width = `${Number(el.w)||10}%`;
+  dom.style.height = `${Number(el.h)||10}%`;
+  dom.style.zIndex = String(Number(el.z)||1);
+  if(el.type === 'text'){
+    dom.style.color = el.color || '#ffffff';
+    dom.style.fontSize = `${Number(el.fontSize)||42}px`;
+    dom.style.textAlign = el.align || 'center';
+    dom.style.fontWeight = el.bold === false ? '400' : '800';
+    const textNode = dom.querySelector('[data-editor-text]');
+    if(textNode) textNode.textContent = el.text || 'Text';
+  }
+}
+function updateElementPreview(el){
+  if(!el || !canvas) return;
+  applyElementStyle(canvas.querySelector(`[data-eid="${el.id}"]`), el);
+  updatePropertyReadouts(el);
+}
+function updatePropertyReadouts(el){
+  const values={propX:el.x,propY:el.y,propW:el.w,propH:el.h,propFont:el.fontSize};
+  Object.entries(values).forEach(([id,value])=>{
+    const out=document.querySelector(`[data-value-for="${id}"]`);
+    if(out) out.textContent = `${Number(value)||0}${id==='propFont'?' px':' %'}`;
+  });
+}
+
 function renderList(){
   if(!list) return;
   list.innerHTML = slides.length ? slides.map((s,i)=>`<button type="button" class="tv-slide-list-item ${current?.id===s.id?'active':''}" data-id="${s.id}"><span>${i+1}. ${safe(s.title || 'Ohne Titel')}</span><small>${s.active===false?'deaktiviert':`${Number(s.duration)||10} Sek.`}</small></button>`).join('') : '<p class="section-text">Noch keine eigenen Folien vorhanden.</p>';
@@ -57,7 +86,7 @@ function renderCanvas(){
     const common=`left:${el.x}%;top:${el.y}%;width:${el.w}%;height:${el.h}%;z-index:${el.z||1};`;
     const cls=`tv-editor-element ${selectedId===el.id?'selected':''}`;
     if(el.type==='image') return `<div class="${cls}" data-eid="${el.id}" style="${common}"><img src="${el.src}" alt=""><span class="resize-handle" aria-hidden="true"></span></div>`;
-    return `<div class="${cls} tv-editor-text" data-eid="${el.id}" style="${common}color:${el.color||'#fff'};font-size:${el.fontSize||42}px;text-align:${el.align||'center'};font-weight:${el.bold===false?400:800};"><div>${safe(el.text||'Text')}</div><span class="resize-handle" aria-hidden="true"></span></div>`;
+    return `<div class="${cls} tv-editor-text" data-eid="${el.id}" style="${common}color:${el.color||'#fff'};font-size:${el.fontSize||42}px;text-align:${el.align||'center'};font-weight:${el.bold===false?400:800};"><div data-editor-text>${safe(el.text||'Text')}</div><span class="resize-handle" aria-hidden="true"></span></div>`;
   }).join('');
   canvas.querySelectorAll('.tv-editor-element').forEach(el=>{
     el.addEventListener('pointerdown',startPointer,{passive:false});
@@ -69,26 +98,34 @@ function renderCanvas(){
 function renderProperties(){
   const box=document.getElementById('tvElementProperties'); if(!box) return;
   const el=current?.elements.find(e=>e.id===selectedId);
-  if(!el){ box.innerHTML='<p class="section-text">Wähle ein Element auf der Folie aus.</p>'; return; }
+  if(!el){ box.innerHTML='<p class="section-text">Tippe in der Vorschau auf ein Bild oder einen Text.</p>'; return; }
+  const slider=(id,label,min,max,value,step='0.5',unit='%')=>`<label class="tv-live-control"><span>${label}<output data-value-for="${id}">${Number(value)||0} ${unit}</output></span><input id="${id}" type="range" min="${min}" max="${max}" step="${step}" value="${value}"></label>`;
   box.innerHTML=`
-    ${el.type==='text'?`<label>Text<textarea id="propText" rows="3">${safe(el.text)}</textarea></label><div class="tv-prop-grid"><label>Schriftgröße<input id="propFont" type="range" min="16" max="120" value="${el.fontSize||42}"></label><label>Farbe<input id="propColor" type="color" value="${el.color||'#ffffff'}"></label><label>Ausrichtung<select id="propAlign"><option value="left">Links</option><option value="center">Mittig</option><option value="right">Rechts</option></select></label><label class="settings-row"><span>Fett</span><input id="propBold" type="checkbox" ${el.bold===false?'':'checked'}></label></div>`:''}
+    <div class="tv-selected-head"><strong>${el.type==='image'?'🖼️ Bild':'T Text'} ausgewählt</strong><span>Änderungen erscheinen sofort oben.</span></div>
+    ${el.type==='text'?`<label>Text<textarea id="propText" rows="3">${safe(el.text)}</textarea></label><div class="tv-prop-grid">${slider('propFont','Schriftgröße',16,120,el.fontSize||42,1,'px')}<label>Farbe<input id="propColor" type="color" value="${el.color||'#ffffff'}"></label><label>Ausrichtung<select id="propAlign"><option value="left">Links</option><option value="center">Mittig</option><option value="right">Rechts</option></select></label><label class="settings-row"><span>Fett</span><input id="propBold" type="checkbox" ${el.bold===false?'':'checked'}></label></div>`:''}
     <div class="tv-position-controls">
-      <label>Position links/rechts<input id="propX" type="range" min="0" max="${Math.max(0,100-el.w)}" step="0.5" value="${el.x}"></label>
-      <label>Position oben/unten<input id="propY" type="range" min="0" max="${Math.max(0,100-el.h)}" step="0.5" value="${el.y}"></label>
-      <label>Breite<input id="propW" type="range" min="5" max="${100-el.x}" step="0.5" value="${el.w}"></label>
-      <label>Höhe<input id="propH" type="range" min="5" max="${100-el.y}" step="0.5" value="${el.h}"></label>
+      ${slider('propX','Links / rechts',0,Math.max(0,100-el.w),el.x)}
+      ${slider('propY','Oben / unten',0,Math.max(0,100-el.h),el.y)}
+      ${slider('propW','Breite',5,Math.max(5,100-el.x),el.w)}
+      ${slider('propH','Höhe',5,Math.max(5,100-el.y),el.h)}
     </div>
     <div class="tv-nudge-controls"><button type="button" data-nudge="left">←</button><button type="button" data-nudge="up">↑</button><button type="button" data-nudge="down">↓</button><button type="button" data-nudge="right">→</button></div>
     <div class="tv-prop-grid"><label>Ebene<input id="propZ" type="number" min="1" max="99" value="${el.z||1}"></label><button id="propDelete" type="button" class="main-button danger-button">Element löschen</button></div>`;
   if(el.type==='text'){
     box.querySelector('#propAlign').value=el.align||'center';
-    [['propText','input','text'],['propFont','input','fontSize'],['propColor','input','color'],['propAlign','change','align']].forEach(([id,event,key])=>box.querySelector('#'+id)?.addEventListener(event,e=>{ el[key]=key==='fontSize'?Number(e.target.value):e.target.value; renderCanvas(); }));
-    box.querySelector('#propBold')?.addEventListener('change',e=>{el.bold=e.target.checked;renderCanvas();});
+    [['propText','input','text'],['propFont','input','fontSize'],['propColor','input','color'],['propAlign','change','align']].forEach(([id,event,key])=>box.querySelector('#'+id)?.addEventListener(event,e=>{ el[key]=key==='fontSize'?Number(e.target.value):e.target.value; updateElementPreview(el); }));
+    box.querySelector('#propBold')?.addEventListener('change',e=>{el.bold=e.target.checked;updateElementPreview(el);});
   }
-  [['propX','x'],['propY','y'],['propW','w'],['propH','h']].forEach(([id,key])=>box.querySelector('#'+id)?.addEventListener('input',e=>{el[key]=Number(e.target.value);renderCanvas();}));
-  box.querySelectorAll('[data-nudge]').forEach(btn=>btn.addEventListener('click',()=>{const d=btn.dataset.nudge;if(d==='left')el.x=clamp(el.x-1,0,100-el.w);if(d==='right')el.x=clamp(el.x+1,0,100-el.w);if(d==='up')el.y=clamp(el.y-1,0,100-el.h);if(d==='down')el.y=clamp(el.y+1,0,100-el.h);renderCanvas();}));
-  box.querySelector('#propZ')?.addEventListener('input',e=>{el.z=Number(e.target.value);renderCanvas();});
+  [['propX','x'],['propY','y'],['propW','w'],['propH','h']].forEach(([id,key])=>box.querySelector('#'+id)?.addEventListener('input',e=>{
+    el[key]=Number(e.target.value);
+    if(key==='x') box.querySelector('#propW')?.setAttribute('max',String(Math.max(5,100-el.x)));
+    if(key==='y') box.querySelector('#propH')?.setAttribute('max',String(Math.max(5,100-el.y)));
+    updateElementPreview(el);
+  }));
+  box.querySelectorAll('[data-nudge]').forEach(btn=>btn.addEventListener('click',()=>{const d=btn.dataset.nudge;if(d==='left')el.x=clamp(el.x-1,0,100-el.w);if(d==='right')el.x=clamp(el.x+1,0,100-el.w);if(d==='up')el.y=clamp(el.y-1,0,100-el.h);if(d==='down')el.y=clamp(el.y+1,0,100-el.h);updateElementPreview(el);renderProperties();}));
+  box.querySelector('#propZ')?.addEventListener('input',e=>{el.z=Number(e.target.value);updateElementPreview(el);});
   box.querySelector('#propDelete')?.addEventListener('click',()=>{current.elements=current.elements.filter(e=>e.id!==selectedId);selectedId=null;renderCanvas();});
+  updatePropertyReadouts(el);
 }
 
 function pointOf(e){const t=e.touches?.[0]||e.changedTouches?.[0]||e;return {x:t.clientX,y:t.clientY};}
@@ -109,9 +146,9 @@ function movePointer(e){
   if(!operation)return;if(e.cancelable)e.preventDefault();
   const pt=pointOf(e);const dx=(pt.x-operation.sx)/operation.rect.width*100;const dy=(pt.y-operation.sy)/operation.rect.height*100;
   if(operation.resize){operation.el.w=clamp(operation.w+dx,5,100-operation.el.x);operation.el.h=clamp(operation.h+dy,5,100-operation.el.y)}else{operation.el.x=clamp(operation.x+dx,0,100-operation.el.w);operation.el.y=clamp(operation.y+dy,0,100-operation.el.h)}
-  const dom=canvas.querySelector(`[data-eid="${operation.el.id}"]`);if(dom){dom.style.left=operation.el.x+'%';dom.style.top=operation.el.y+'%';dom.style.width=operation.el.w+'%';dom.style.height=operation.el.h+'%'}
+  updateElementPreview(operation.el);
 }
-function endPointer(e){if(!operation)return;if(e?.cancelable)e.preventDefault();operation=null;canvas.classList.remove('dragging');renderCanvas();}
+function endPointer(e){if(!operation)return;if(e?.cancelable)e.preventDefault();operation=null;canvas.classList.remove('dragging');renderProperties();}
 window.addEventListener('pointermove',movePointer,{passive:false,capture:true});window.addEventListener('pointerup',endPointer,{passive:false,capture:true});window.addEventListener('pointercancel',endPointer,{passive:false,capture:true});
 
 async function imageToDataUrl(file){
@@ -149,7 +186,7 @@ if(editor && isAdmin){
   document.getElementById('tvSlideSave')?.addEventListener('click',saveCurrent);
   document.getElementById('tvSlideSaveNew')?.addEventListener('click',async()=>{await saveCurrent();newSlide();});
   document.getElementById('tvSlideDelete')?.addEventListener('click',async()=>{if(!current?.id||!confirm('Diese TV-Folie endgültig löschen?'))return;await deleteDoc(doc(db,'tvSlides',current.id));current=null;canvas.innerHTML='';});
-  document.getElementById('tvSlideBackground')?.addEventListener('input',e=>{if(current){current.background=e.target.value;renderCanvas();}});
+  document.getElementById('tvSlideBackground')?.addEventListener('input',e=>{if(current){current.background=e.target.value;canvas.style.background=current.background;}});
 }
 
 

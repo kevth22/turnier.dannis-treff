@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v26-slide-editor";
+const VERSION = "dart11en-v28-dashboard-anwesenheit";
 
 const CORE_FILES = [
   "./",

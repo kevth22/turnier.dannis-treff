@@ -5,7 +5,8 @@ import {
   getDocs,
   doc,
   getDoc,
-  updateDoc
+  updateDoc,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getLogin } from "./auth-utils.js";
 
@@ -101,54 +102,131 @@ async function checkVotePopup() {
 document.addEventListener("DOMContentLoaded", checkVotePopup);
 
 
-async function turnierAnwesenheitImDashboard() {
+function normalisiereVergleichswert(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
+
+function istEigeneTurnieranmeldung(data, user) {
+  const benutzername = normalisiereVergleichswert(user?.benutzername);
+  const nickname = normalisiereVergleichswert(user?.nickname);
+  const vollerName = normalisiereVergleichswert(
+    [user?.vorname, user?.nachname].filter(Boolean).join(" ")
+  );
+
+  const gespeicherteKonten = [
+    data.kontoBenutzername,
+    data.mitgliedId,
+    data.benutzername,
+    data.kontoId
+  ].map(normalisiereVergleichswert).filter(Boolean);
+
+  if (benutzername && gespeicherteKonten.includes(benutzername)) return true;
+
+  // Übergang für ältere Anmeldungen, bei denen noch keine Konto-ID gespeichert wurde.
+  const anmeldungsNickname = normalisiereVergleichswert(data.nickname);
+  const anmeldungsName = normalisiereVergleichswert(
+    [data.vorname, data.nachname].filter(Boolean).join(" ")
+  );
+
+  return Boolean(
+    (nickname && anmeldungsNickname === nickname)
+    || (benutzername && anmeldungsNickname === benutzername)
+    || (vollerName && anmeldungsName === vollerName)
+  );
+}
+
+async function eigeneTurnieranmeldungLaden(user) {
+  const snap = await getDocs(collection(db, "warteschlange"));
+  let eigenerEintrag = null;
+
+  snap.forEach(d => {
+    if (eigenerEintrag) return;
+    const data = d.data();
+    if (istEigeneTurnieranmeldung(data, user)) {
+      eigenerEintrag = { id: d.id, ...data };
+    }
+  });
+
+  return eigenerEintrag;
+}
+
+function turnierAnwesenheitImDashboard() {
   const card = document.getElementById("turnierAnwesenheitCard");
   const text = document.getElementById("turnierAnwesenheitText");
   const button = document.getElementById("turnierAnwesenheitBtn");
   const user = getLogin();
+
   if (!card || !text || !button || !user?.benutzername) return;
 
-  try {
-    const snap = await getDocs(collection(db, "warteschlange"));
-    let eigenerEintrag = null;
-    snap.forEach(d => {
-      const data = d.data();
-      const konto = String(data.kontoBenutzername || data.mitgliedId || "").toLowerCase();
-      if (konto && konto === String(user.benutzername).toLowerCase()) {
-        eigenerEintrag = { id: d.id, ...data };
-      }
-    });
+  let ladeNummer = 0;
 
-    if (!eigenerEintrag) return;
-    card.hidden = false;
+  const statusRef = doc(db, "turnierLive", "steuerungV4");
+  onSnapshot(statusRef, async statusSnap => {
+    const aktuelleLadeNummer = ++ladeNummer;
+    const status = String(statusSnap.data()?.status || "vorbereitung").toLowerCase();
 
-    if (eigenerEintrag.anwesend === true) {
-      text.textContent = `Du bist für das Turnier als anwesend bestätigt (${eigenerEintrag.nickname || user.nickname || user.benutzername}).`;
-      button.textContent = "Anwesenheit bestätigt ✓";
-      button.disabled = true;
+    // Die Selbstbestätigung ist ausschließlich während der Anmeldephase möglich.
+    if (status !== "anmeldung") {
+      card.hidden = true;
+      button.disabled = false;
+      button.onclick = null;
       return;
     }
 
-    text.textContent = `Bestätige hier deine Anwesenheit für das Turnier als ${eigenerEintrag.nickname || user.nickname || user.benutzername}.`;
-    button.addEventListener("click", async () => {
-      button.disabled = true;
-      try {
-        await updateDoc(doc(db, "warteschlange", eigenerEintrag.id), {
-          anwesend: true,
-          anwesenheitBestaetigtAm: Date.now(),
-          anwesenheitBestaetigtVon: user.benutzername
-        });
-        text.textContent = "Deine Anwesenheit wurde bestätigt.";
-        button.textContent = "Anwesenheit bestätigt ✓";
-      } catch (error) {
-        console.error("Turnier-Anwesenheit konnte nicht gespeichert werden:", error);
-        button.disabled = false;
-        alert("Die Anwesenheit konnte nicht gespeichert werden.");
+    try {
+      const eigenerEintrag = await eigeneTurnieranmeldungLaden(user);
+      if (aktuelleLadeNummer !== ladeNummer) return;
+
+      if (!eigenerEintrag) {
+        card.hidden = true;
+        return;
       }
-    }, { once: true });
-  } catch (error) {
-    console.error("Turnieranmeldung konnte im Dashboard nicht geprüft werden:", error);
-  }
+
+      card.hidden = false;
+      const anzeigename = eigenerEintrag.nickname || user.nickname || user.benutzername;
+
+      if (eigenerEintrag.anwesend === true) {
+        text.textContent = `Du bist für das Turnier als anwesend bestätigt (${anzeigename}).`;
+        button.textContent = "Anwesenheit bestätigt ✓";
+        button.disabled = true;
+        button.onclick = null;
+        return;
+      }
+
+      text.textContent = `Die Anmeldung ist geöffnet. Bestätige hier deine Anwesenheit als ${anzeigename}.`;
+      button.textContent = "Ich bin anwesend";
+      button.disabled = false;
+
+      button.onclick = async () => {
+        button.disabled = true;
+        try {
+          await updateDoc(doc(db, "warteschlange", eigenerEintrag.id), {
+            anwesend: true,
+            anwesenheitBestaetigtAm: Date.now(),
+            anwesenheitBestaetigtVon: user.benutzername,
+            kontoBenutzername: eigenerEintrag.kontoBenutzername || user.benutzername,
+            mitgliedId: eigenerEintrag.mitgliedId || user.benutzername
+          });
+          text.textContent = "Deine Anwesenheit wurde bestätigt.";
+          button.textContent = "Anwesenheit bestätigt ✓";
+          button.onclick = null;
+        } catch (error) {
+          console.error("Turnier-Anwesenheit konnte nicht gespeichert werden:", error);
+          button.disabled = false;
+          alert("Die Anwesenheit konnte nicht gespeichert werden. Bitte prüfe deine Verbindung oder Berechtigung.");
+        }
+      };
+    } catch (error) {
+      console.error("Turnieranmeldung konnte im Dashboard nicht geprüft werden:", error);
+      card.hidden = true;
+    }
+  }, error => {
+    console.error("Turnierstatus konnte im Dashboard nicht geladen werden:", error);
+    card.hidden = true;
+  });
 }
 
 document.addEventListener("DOMContentLoaded", turnierAnwesenheitImDashboard);
