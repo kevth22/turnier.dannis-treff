@@ -10,7 +10,9 @@ import {
   serverTimestamp,
   query,
   orderBy,
-  writeBatch
+  writeBatch,
+  updateDoc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const VIEW_ROLES = ["admin", "captain", "kassenwart"];
@@ -39,6 +41,7 @@ const state = {
   members: [],
   profiles: new Map(),
   contributions: new Map(),
+  legacyContributionsByUsername: new Map(),
   bookings: [],
   savingContribution: new Set()
 };
@@ -128,14 +131,27 @@ async function loadProfiles() {
 async function loadContributions(monthKey) {
   const snap = await getDocs(collection(db, "kassenBeitraege"));
   state.contributions = new Map();
+  state.legacyContributionsByUsername = new Map();
+
   snap.forEach(item => {
     const data = item.data();
-    if (data.monat === monthKey) {
-      const entry = { id: item.id, ...data };
-      const key = String(data.mitgliedId || data.benutzername || "").trim();
-      if (key) state.contributions.set(key, entry);
-      if (data.benutzername) state.contributions.set(String(data.benutzername), entry);
+    if (data.monat !== monthKey) return;
+
+    const entry = { id: item.id, ...data };
+    const mitgliedId = String(data.mitgliedId || "").trim();
+    const benutzername = String(data.benutzername || "").trim();
+
+    // Neue Datensätze werden ausschließlich über die unveränderliche
+    // Firestore-Dokument-ID der Person zugeordnet. So kann der Status nach
+    // Sortieren, Umbenennen oder einer Nickname-Änderung nicht verrutschen.
+    if (mitgliedId) {
+      state.contributions.set(mitgliedId, entry);
+      return;
     }
+
+    // Nur wirklich alte Datensätze ohne mitgliedId dürfen noch über den
+    // Benutzernamen gelesen werden. Diese Zuordnung wird niemals bevorzugt.
+    if (benutzername) state.legacyContributionsByUsername.set(benutzername, entry);
   });
 }
 
@@ -167,11 +183,23 @@ function amountFor(idOrUsername, monthKey) {
   return Number.isFinite(amount) ? amount : DEFAULT_AMOUNT;
 }
 
+function contributionFor(idOrUsername) {
+  const key = String(idOrUsername || "").trim();
+  const member = state.members.find(item => memberId(item) === key || String(item.benutzername || "") === key);
+  const stableId = member ? memberId(member) : key;
+
+  const exact = state.contributions.get(stableId);
+  if (exact) return exact;
+
+  // Rückwärtskompatibilität nur für alte Dokumente, denen noch keine
+  // mitgliedId mitgegeben wurde.
+  const username = String(member?.benutzername || "").trim();
+  return username ? state.legacyContributionsByUsername.get(username) || null : null;
+}
+
 function statusFor(idOrUsername, monthKey) {
   const key = String(idOrUsername || "");
-  const member = state.members.find(item => memberId(item) === key || item.benutzername === key);
-  const contribution = state.contributions.get(key)
-    || (member?.benutzername ? state.contributions.get(String(member.benutzername)) : null);
+  const contribution = contributionFor(key);
   if (contribution?.status === "bezahlt") return "bezahlt";
   if (contribution?.status === "befreit") return "befreit";
   const profile = profileFor(key);
@@ -266,7 +294,13 @@ function bookingCard(item) {
       <small>${escapeHtml(date)}${item.personName ? ` · ${escapeHtml(item.personName)}` : ""}</small>
       <div class="booking-badges"><span class="booking-badge ${status}">${statusLabel}</span><span class="booking-badge">${expense ? "Ausgabe" : "Einnahme"}</span></div>
     </div>
-    <div class="journal-amount ${expense ? "expense" : "income"}">${expense ? "−" : "+"}${euro.format(amount)}</div>
+    <div class="journal-side">
+      <div class="journal-amount ${expense ? "expense" : "income"}">${expense ? "−" : "+"}${euro.format(amount)}</div>
+      ${state.canEdit ? `<div class="booking-actions">
+        <button type="button" class="booking-action cancel" data-booking-action="toggle-cancel" data-booking-id="${escapeHtml(item.id)}" title="${item.storniert ? "Stornierung aufheben" : "Buchung stornieren"}">${item.storniert ? "↩ Reaktivieren" : "⛔ Stornieren"}</button>
+        ${item.abschlussId ? "" : `<button type="button" class="booking-action delete" data-booking-action="delete" data-booking-id="${escapeHtml(item.id)}" title="Buchung endgültig löschen">🗑 Löschen</button>`}
+      </div>` : ""}
+    </div>
   </article>`;
 }
 
@@ -514,7 +548,7 @@ async function togglePaid(id) {
   if (button) button.disabled = true;
 
   try {
-    const existing = state.contributions.get(id);
+    const existing = contributionFor(id);
     const amount = amountFor(id, monthKey);
     const nowPaid = existing?.status !== "bezahlt";
     const safeId = encodeURIComponent(id);
@@ -601,6 +635,76 @@ async function saveMemberProfile(event) {
   await refreshData();
 }
 
+async function toggleBookingCancelled(id) {
+  if (!state.canEdit || !id) return;
+  const item = state.bookings.find(entry => entry.id === id);
+  if (!item) return showMessage("Buchung wurde nicht gefunden.", true);
+
+  const cancelled = item.storniert !== true;
+  const batch = writeBatch(db);
+  batch.set(doc(db, "kassenBuchungen", id), {
+    storniert: cancelled,
+    storniertVon: cancelled ? state.user.benutzername : null,
+    storniertAm: cancelled ? serverTimestamp() : null
+  }, { merge: true });
+
+  // Bei automatisch erzeugten Mitgliedsbeiträgen muss auch der Tabellenstatus
+  // wieder auf offen bzw. bezahlt gesetzt werden.
+  if (item.kategorie === "mitgliedsbeitrag" && item.monat && item.mitgliedId) {
+    const contributionId = `${item.monat}_${encodeURIComponent(item.mitgliedId)}`;
+    batch.set(doc(db, "kassenBeitraege", contributionId), {
+      mitgliedId: item.mitgliedId,
+      benutzername: item.benutzername || item.mitgliedId,
+      personName: item.personName || "",
+      monat: item.monat,
+      betrag: Number(item.betrag) || 0,
+      status: cancelled ? "offen" : "bezahlt",
+      geaendertVon: state.user.benutzername,
+      geaendertAm: serverTimestamp()
+    }, { merge: true });
+  }
+
+  await batch.commit();
+  showMessage(cancelled ? "Buchung wurde storniert." : "Stornierung wurde aufgehoben.");
+  await refreshData();
+}
+
+async function deleteBooking(id) {
+  if (!state.canEdit || !id) return;
+  const item = state.bookings.find(entry => entry.id === id);
+  if (!item) return showMessage("Buchung wurde nicht gefunden.", true);
+  if (item.abschlussId) return showMessage("Abgeschlossene Buchungen können nicht gelöscht, sondern nur storniert werden.", true);
+
+  const label = item.titel || item.beschreibung || "diese Buchung";
+  if (!window.confirm(`Soll „${label}“ wirklich endgültig gelöscht werden?`)) return;
+
+  const batch = writeBatch(db);
+  batch.delete(doc(db, "kassenBuchungen", id));
+
+  if (item.kategorie === "mitgliedsbeitrag" && item.monat && item.mitgliedId) {
+    const contributionId = `${item.monat}_${encodeURIComponent(item.mitgliedId)}`;
+    batch.set(doc(db, "kassenBeitraege", contributionId), {
+      status: "offen",
+      geaendertVon: state.user.benutzername,
+      geaendertAm: serverTimestamp()
+    }, { merge: true });
+  }
+
+  await batch.commit();
+  showMessage("Buchung wurde gelöscht.");
+  await refreshData();
+}
+
+function handleBookingAction(event) {
+  const button = event.target.closest("button[data-booking-action]");
+  if (!button) return;
+  const id = button.dataset.bookingId;
+  button.disabled = true;
+  const action = button.dataset.bookingAction;
+  const promise = action === "toggle-cancel" ? toggleBookingCancelled(id) : action === "delete" ? deleteBooking(id) : Promise.resolve();
+  promise.catch(error => showMessage(error.message || "Aktion fehlgeschlagen.", true)).finally(() => { button.disabled = false; });
+}
+
 async function refreshData() {
   const monthKey = $("monthPicker").value || currentMonthKey();
   await Promise.all([loadMembers(), loadProfiles(), loadContributions(monthKey), loadBookings()]);
@@ -619,6 +723,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderMembers();
   });
   $("journalMonthPicker").addEventListener("change", renderMonthlyBookings);
+  $("journalList").addEventListener("click", handleBookingAction);
+  $("monthlyBookingList").addEventListener("click", handleBookingAction);
   $("bookingType").addEventListener("change", updateCategoryOptions);
   $("downloadClosingPdf").addEventListener("click", downloadClosingPdf);
   $("bookingForm").addEventListener("submit", event => saveBooking(event).catch(error => showMessage(error.message, true)));

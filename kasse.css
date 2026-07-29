@@ -122,3 +122,18 @@
   .closing-info { grid-template-columns:1fr; }
   .closing-button { width:100%; }
 }
+
+
+/* Buchungen verwalten */
+.journal-side { display:grid; justify-items:end; gap:9px; }
+.booking-actions { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:6px; }
+.booking-action { border:1px solid rgba(255,255,255,.14); border-radius:8px; padding:6px 8px; color:#fff; background:#24242a; font:inherit; font-size:.72rem; font-weight:800; cursor:pointer; }
+.booking-action.cancel:hover { border-color:#ffbf55; color:#ffcf75; }
+.booking-action.delete { background:rgba(255,70,80,.1); border-color:rgba(255,93,103,.35); color:#ff858c; }
+.booking-action.delete:hover { background:rgba(255,70,80,.2); }
+.booking-action:disabled { opacity:.45; cursor:wait; }
+.journal-item:has(strong:nth-child(1)) {}
+@media (max-width:700px) {
+  .journal-side { grid-column:2; justify-items:start; }
+  .booking-actions { justify-content:flex-start; }
+}
