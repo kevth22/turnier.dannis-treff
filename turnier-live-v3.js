@@ -1218,20 +1218,25 @@ document.addEventListener("DOMContentLoaded", () => {
       klarname.textContent = [person.vorname, person.nachname].filter(Boolean).join(" ");
       name.append(nickname, klarname);
 
-      const bezahltLabel = document.createElement("label");
-      bezahltLabel.className = "admin-status-toggle";
-      const bezahltCheck = document.createElement("input");
-      bezahltCheck.type = "checkbox";
-      bezahltCheck.checked = person.bezahlt === true;
-      bezahltCheck.setAttribute("aria-label", `${person.nickname || "Person"} als bezahlt markieren`);
-      bezahltLabel.append(bezahltCheck, document.createTextNode(" Bezahlt"));
+      const barLabel = document.createElement("label");
+      barLabel.className = "admin-status-toggle";
+      const barCheck = document.createElement("input");
+      barCheck.type = "checkbox";
+      barCheck.checked = person.zahlungBar === true || person.zahlungsart === "bar";
+      barLabel.append(barCheck, document.createTextNode(" Bar"));
+
+      const paypalLabel = document.createElement("label");
+      paypalLabel.className = "admin-status-toggle";
+      const paypalCheck = document.createElement("input");
+      paypalCheck.type = "checkbox";
+      paypalCheck.checked = person.zahlungPaypal === true || person.zahlungsart === "paypal";
+      paypalLabel.append(paypalCheck, document.createTextNode(" PayPal"));
 
       const anwesendLabel = document.createElement("label");
       anwesendLabel.className = "admin-status-toggle";
       const anwesendCheck = document.createElement("input");
       anwesendCheck.type = "checkbox";
       anwesendCheck.checked = person.anwesend === true;
-      anwesendCheck.setAttribute("aria-label", `${person.nickname || "Person"} als anwesend markieren`);
       anwesendLabel.append(anwesendCheck, document.createTextNode(" Anwesend"));
 
       const loeschenButton = document.createElement("button");
@@ -1253,7 +1258,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       };
 
-      bezahltCheck.addEventListener("change", () => statusSpeichern("bezahlt", bezahltCheck.checked, bezahltCheck));
+      barCheck.addEventListener("change", async () => {
+        barCheck.disabled = paypalCheck.disabled = true;
+        try { await updateDoc(doc(db, "warteschlange", person.id), { zahlungBar: barCheck.checked, zahlungPaypal: false, zahlungsart: barCheck.checked ? "bar" : null, bezahlt: barCheck.checked }); paypalCheck.checked = false; } catch(e){ barCheck.checked=!barCheck.checked; alert("Status konnte nicht gespeichert werden."); } finally { barCheck.disabled=paypalCheck.disabled=false; }
+      });
+      paypalCheck.addEventListener("change", async () => {
+        barCheck.disabled = paypalCheck.disabled = true;
+        try { await updateDoc(doc(db, "warteschlange", person.id), { zahlungPaypal: paypalCheck.checked, zahlungBar: false, zahlungsart: paypalCheck.checked ? "paypal" : null, bezahlt: paypalCheck.checked }); barCheck.checked = false; } catch(e){ paypalCheck.checked=!paypalCheck.checked; alert("Status konnte nicht gespeichert werden."); } finally { barCheck.disabled=paypalCheck.disabled=false; }
+      });
       anwesendCheck.addEventListener("change", () => statusSpeichern("anwesend", anwesendCheck.checked, anwesendCheck));
 
       loeschenButton.addEventListener("click", async () => {
@@ -1270,7 +1282,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      zeile.append(name, bezahltLabel, anwesendLabel, loeschenButton);
+      zeile.append(name, barLabel, paypalLabel, anwesendLabel, loeschenButton);
       teilnehmerListe.appendChild(zeile);
     });
   }
@@ -1417,7 +1429,7 @@ document.addEventListener("DOMContentLoaded", () => {
     snapshot.forEach((dokument) => {
       const person = { id: dokument.id, ...dokument.data() };
       letzteTeilnehmer.push(person);
-      if (person.bezahlt === true) bezahlt += 1;
+      if (person.bezahlt === true || person.zahlungBar === true || person.zahlungPaypal === true) bezahlt += 1;
       if (person.anwesend === true) anwesend += 1;
     });
 

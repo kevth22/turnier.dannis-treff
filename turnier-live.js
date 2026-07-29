@@ -930,7 +930,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let punkte = [];
     let index = 0;
     const slidesAktualisieren = () => {
-      slides = [...document.querySelectorAll("#tvAnsicht .tv-slide")];
+      slides = [...document.querySelectorAll("#tvAnsicht .tv-slide")].filter(slide => slide.dataset.rotationActive !== "false" && getComputedStyle(slide).display !== "none");
       if (status) status.innerHTML = "";
       punkte = slides.map((slide, i) => {
         const punkt = document.createElement("i");

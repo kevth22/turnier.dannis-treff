@@ -1,5 +1,5 @@
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, setDoc, onSnapshot, serverTimestamp, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDtQ3pECcZETIoI4QTV5G-7_QcoRvVGHL4',
@@ -12,12 +12,13 @@ const firebaseConfig = {
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const user = (() => { try { return JSON.parse(localStorage.getItem('dart11enLogin') || 'null'); } catch { return null; } })();
+const user = (() => { try { return JSON.parse(sessionStorage.getItem('dart11enLogin') || localStorage.getItem('dart11enLogin') || 'null'); } catch { return null; } })();
 const isAdmin = String(user?.rolle || '').toLowerCase() === 'admin';
 const editor = document.getElementById('tvSlideEditor');
 const canvas = document.getElementById('tvSlideCanvas');
 const list = document.getElementById('tvSlideList');
 const message = document.getElementById('tvSlideMessage');
+const builtInBox = document.getElementById('tvBuiltInSlideSettings');
 let slides = [];
 let current = null;
 let selectedId = null;
@@ -26,7 +27,9 @@ let operation = null;
 const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
 const clamp = (v,min,max) => Math.max(min, Math.min(max,v));
 const safe = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const defaultSlide = () => ({ title:'Neue Folie', active:true, duration:10, background:'#08090d', order: slides.length, elements:[] });
+const defaultSlide = () => ({ title:'Neue Folie', active:true, duration:10, background:'#08090d', order: 100 + slides.length, elements:[] });
+const builtIns=[['slideAktuelleSpiele','Aktuelle Spiele',1],['slideNaechsteSpiele','Nächste Spiele',2],['slideTurnierbaum','Turnierbaum',3],['slideGewinnerbaum','Gewinnerbaum',4],['slideVerliererbaum','Verliererbaum',5],['slideFinale','Grand Final',6],['slideGruppen','Gruppenphase',7],['slideGruppenKo','K.-o.-Phasen',8]];
+let rotationSettings={};
 
 function normalize(slide){
   return { ...defaultSlide(), ...slide, elements:Array.isArray(slide.elements)?slide.elements:[] };
@@ -44,6 +47,7 @@ function selectSlide(id){
   current=structuredClone(found); selectedId=null;
   document.getElementById('tvSlideTitle').value=current.title||'';
   document.getElementById('tvSlideDuration').value=current.duration||10;
+  document.getElementById('tvSlideOrder').value=Number(current.order)||100;
   document.getElementById('tvSlideActive').checked=current.active!==false;
   document.getElementById('tvSlideBackground').value=current.background||'#08090d';
   renderList(); renderCanvas();
@@ -59,8 +63,8 @@ function renderCanvas(){
     return `<div class="${cls} tv-editor-text" data-eid="${el.id}" style="${common}color:${el.color||'#fff'};font-size:${el.fontSize||42}px;text-align:${el.align||'center'};font-weight:${el.bold===false?400:800};"><div>${safe(el.text||'Text')}</div><span class="resize-handle" aria-hidden="true"></span></div>`;
   }).join('');
   canvas.querySelectorAll('.tv-editor-element').forEach(el=>{
-    el.addEventListener('pointerdown',startPointer);
-    el.addEventListener('click',()=>{ selectedId=el.dataset.eid; renderCanvas(); renderProperties(); });
+    el.addEventListener('pointerdown',startPointer,{passive:false});
+    el.addEventListener('click',()=>{ selectedId=el.dataset.eid; el.classList.add('selected'); renderProperties(); });
   });
   renderProperties();
 }
@@ -81,26 +85,28 @@ function renderProperties(){
   box.querySelector('#propDelete')?.addEventListener('click',()=>{current.elements=current.elements.filter(e=>e.id!==selectedId);selectedId=null;renderCanvas();});
 }
 
+function pointOf(e){const t=e.touches?.[0]||e.changedTouches?.[0]||e;return {x:t.clientX,y:t.clientY};}
 function startPointer(e){
-  if(!current) return; e.preventDefault();
-  selectedId=e.currentTarget.dataset.eid;
+  if(!current) return;
+  if(e.cancelable)e.preventDefault();
+  const target=e.currentTarget;
+  selectedId=target.dataset.eid;
   const el=current.elements.find(x=>x.id===selectedId); if(!el) return;
-  const rect=canvas.getBoundingClientRect();
-  operation={ el, resize:e.target.classList.contains('resize-handle'), sx:e.clientX, sy:e.clientY, x:el.x,y:el.y,w:el.w,h:el.h, rect };
-  e.currentTarget.setPointerCapture(e.pointerId);
-  e.currentTarget.addEventListener('pointermove',movePointer);
-  e.currentTarget.addEventListener('pointerup',endPointer,{once:true});
-  renderCanvas();
+  canvas.querySelectorAll('.tv-editor-element').forEach(n=>n.classList.toggle('selected',n===target));
+  renderProperties();
+  const pt=pointOf(e), rect=canvas.getBoundingClientRect();
+  operation={el,resize:e.target.classList.contains('resize-handle'),sx:pt.x,sy:pt.y,x:el.x,y:el.y,w:el.w,h:el.h,rect,target};
+  canvas.classList.add('dragging');
+  if(e.pointerId!=null){try{target.setPointerCapture(e.pointerId)}catch{}}
 }
 function movePointer(e){
-  if(!operation) return;
-  const dx=(e.clientX-operation.sx)/operation.rect.width*100;
-  const dy=(e.clientY-operation.sy)/operation.rect.height*100;
-  if(operation.resize){ operation.el.w=clamp(operation.w+dx,5,100-operation.el.x); operation.el.h=clamp(operation.h+dy,5,100-operation.el.y); }
-  else { operation.el.x=clamp(operation.x+dx,0,100-operation.el.w); operation.el.y=clamp(operation.y+dy,0,100-operation.el.h); }
-  const dom=canvas.querySelector(`[data-eid="${operation.el.id}"]`); if(dom){dom.style.left=operation.el.x+'%';dom.style.top=operation.el.y+'%';dom.style.width=operation.el.w+'%';dom.style.height=operation.el.h+'%';}
+  if(!operation)return;if(e.cancelable)e.preventDefault();
+  const pt=pointOf(e);const dx=(pt.x-operation.sx)/operation.rect.width*100;const dy=(pt.y-operation.sy)/operation.rect.height*100;
+  if(operation.resize){operation.el.w=clamp(operation.w+dx,5,100-operation.el.x);operation.el.h=clamp(operation.h+dy,5,100-operation.el.y)}else{operation.el.x=clamp(operation.x+dx,0,100-operation.el.w);operation.el.y=clamp(operation.y+dy,0,100-operation.el.h)}
+  const dom=canvas.querySelector(`[data-eid="${operation.el.id}"]`);if(dom){dom.style.left=operation.el.x+'%';dom.style.top=operation.el.y+'%';dom.style.width=operation.el.w+'%';dom.style.height=operation.el.h+'%'}
 }
-function endPointer(e){ e.currentTarget.removeEventListener('pointermove',movePointer); operation=null; renderCanvas(); }
+function endPointer(e){if(!operation)return;if(e?.cancelable)e.preventDefault();operation=null;canvas.classList.remove('dragging');renderCanvas();}
+document.addEventListener('pointermove',movePointer,{passive:false});document.addEventListener('pointerup',endPointer,{passive:false});document.addEventListener('pointercancel',endPointer,{passive:false});
 
 async function imageToDataUrl(file){
   if(!file.type.startsWith('image/')) throw new Error('Bitte eine Bilddatei auswählen.');
@@ -116,6 +122,7 @@ async function saveCurrent(){
   current.duration=clamp(Number(document.getElementById('tvSlideDuration').value)||10,3,120);
   current.active=document.getElementById('tvSlideActive').checked;
   current.background=document.getElementById('tvSlideBackground').value;
+  current.order=Math.max(1,Number(document.getElementById('tvSlideOrder').value)||100);
   const payload={title:current.title,duration:current.duration,active:current.active,background:current.background,order:Number(current.order)||0,elements:current.elements,updatedAt:serverTimestamp(),updatedBy:user?.benutzername||user?.nickname||'admin'};
   try{
     setMessage('Folie wird gespeichert …');
@@ -135,9 +142,24 @@ if(editor && isAdmin){
   document.getElementById('tvSlideBackground')?.addEventListener('input',e=>{if(current){current.background=e.target.value;renderCanvas();}});
 }
 
+
+function defaultRotation(){return Object.fromEntries(builtIns.map(([id,,order])=>[id,{order,duration:10,active:true}]));}
+function renderBuiltInSettings(){
+ if(!builtInBox||!isAdmin)return;const cfg={...defaultRotation(),...rotationSettings};
+ builtInBox.innerHTML=builtIns.map(([id,label,order])=>{const v=cfg[id]||{order,duration:10,active:true};return `<div class="tv-built-in-row" data-slide-id="${id}"><strong>${safe(label)}</strong><label>Reihenfolge<input class="builtin-order" type="number" min="1" max="999" value="${Number(v.order)||order}"></label><label>Dauer (Sek.)<input class="builtin-duration" type="number" min="3" max="120" value="${Number(v.duration)||10}"></label><label class="settings-row"><span>Aktiv</span><input class="builtin-active" type="checkbox" ${v.active===false?'':'checked'}></label></div>`}).join('');
+ builtInBox.querySelectorAll('.tv-built-in-row').forEach(row=>row.querySelectorAll('input').forEach(input=>input.addEventListener('change',async()=>{const id=row.dataset.slideId;const value={order:Math.max(1,Number(row.querySelector('.builtin-order').value)||1),duration:clamp(Number(row.querySelector('.builtin-duration').value)||10,3,120),active:row.querySelector('.builtin-active').checked};rotationSettings={...rotationSettings,[id]:value};await setDoc(doc(db,'tvSettings','rotation'),{slides:rotationSettings,updatedAt:serverTimestamp()},{merge:true});applyRotationSettings();setMessage('TV-Reihenfolge gespeichert.');})));
+}
+function applyRotationSettings(){
+ const tv=document.getElementById('tvAnsicht');if(!tv)return;const cfg={...defaultRotation(),...rotationSettings};
+ builtIns.forEach(([id,,fallback])=>{const node=document.getElementById(id);if(!node)return;const v=cfg[id]||{};node.dataset.order=String(Number(v.order)||fallback);node.dataset.duration=String(clamp(Number(v.duration)||10,3,120));node.dataset.rotationActive=v.active===false?'false':'true';node.style.display=v.active===false?'none':'';});
+ [...tv.querySelectorAll('.tv-slide')].sort((a,b)=>(Number(a.dataset.order)||500)-(Number(b.dataset.order)||500)).forEach(n=>tv.appendChild(n));window.dispatchEvent(new CustomEvent('dart11en-tv-slides-updated'));
+}
+onSnapshot(doc(db,'tvSettings','rotation'),snap=>{rotationSettings=snap.exists()?(snap.data().slides||{}):{};renderBuiltInSettings();applyRotationSettings();},err=>console.error('TV-Reihenfolge konnte nicht geladen werden',err));
+
 onSnapshot(query(collection(db,'tvSlides'),orderBy('order','asc')),(snapshot)=>{
   slides=snapshot.docs.map(d=>normalize({id:d.id,...d.data()}));
-  if(editor&&isAdmin){ if(current?.id){const fresh=slides.find(s=>s.id===current.id);if(fresh)current=structuredClone(fresh);} else if(!current&&slides[0])current=structuredClone(slides[0]); renderList();if(current){document.getElementById('tvSlideTitle').value=current.title||'';document.getElementById('tvSlideDuration').value=current.duration||10;document.getElementById('tvSlideActive').checked=current.active!==false;document.getElementById('tvSlideBackground').value=current.background||'#08090d';renderCanvas();} }
+  if(editor&&isAdmin){ if(current?.id){const fresh=slides.find(s=>s.id===current.id);if(fresh)current=structuredClone(fresh);} else if(!current&&slides[0])current=structuredClone(slides[0]); renderList();if(current){document.getElementById('tvSlideTitle').value=current.title||'';document.getElementById('tvSlideDuration').value=current.duration||10;
+  document.getElementById('tvSlideOrder').value=Number(current.order)||100;document.getElementById('tvSlideActive').checked=current.active!==false;document.getElementById('tvSlideBackground').value=current.background||'#08090d';renderCanvas();} }
   renderTvSlides();
 },err=>{console.error('TV-Slides konnten nicht geladen werden',err);setMessage('TV-Slides konnten nicht geladen werden.',true);});
 
@@ -145,9 +167,9 @@ function renderTvSlides(){
   const tv=document.getElementById('tvAnsicht'); if(!tv) return;
   tv.querySelectorAll('.tv-custom-slide').forEach(n=>n.remove());
   slides.filter(s=>s.active!==false).forEach(s=>{
-    const node=document.createElement('div');node.className='tv-slide tv-custom-slide';node.dataset.duration=String(clamp(Number(s.duration)||10,3,120));node.style.background=s.background||'#08090d';
+    const node=document.createElement('div');node.className='tv-slide tv-custom-slide';node.dataset.duration=String(clamp(Number(s.duration)||10,3,120));node.dataset.order=String(Number(s.order)||100);node.style.background=s.background||'#08090d';
     node.innerHTML=`<div class="tv-custom-stage">${s.elements.map(el=>el.type==='image'?`<img class="tv-custom-element" src="${el.src}" alt="" style="left:${el.x}%;top:${el.y}%;width:${el.w}%;height:${el.h}%;z-index:${el.z||1};">`:`<div class="tv-custom-element tv-custom-text" style="left:${el.x}%;top:${el.y}%;width:${el.w}%;height:${el.h}%;z-index:${el.z||1};color:${el.color||'#fff'};font-size:${el.fontSize||42}px;text-align:${el.align||'center'};font-weight:${el.bold===false?400:800};">${safe(el.text)}</div>`).join('')}</div>`;
     tv.appendChild(node);
   });
-  window.dispatchEvent(new CustomEvent('dart11en-tv-slides-updated'));
+  applyRotationSettings();
 }

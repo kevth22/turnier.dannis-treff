@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v21-turnier-status-dashboard";
+const VERSION = "dart11en-v23-tv-editor-payment-lists";
 
 const CORE_FILES = [
   "./",

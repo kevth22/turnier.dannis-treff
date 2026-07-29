@@ -8,7 +8,8 @@ import {
   onSnapshot,  
   deleteDoc,  
   doc,  
-  updateDoc  
+  updateDoc,
+  getDocs  
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";  
   
 const firebaseConfig = {  
@@ -76,26 +77,15 @@ if (
   return;
 }  
   
- const existiert = await new Promise((resolve) => {  
-  onSnapshot(warteschlangeRef, (snapshot) => {  
-    let gefunden = false;  
-  
-    snapshot.forEach((dokument) => {  
-      const spieler = dokument.data();  
-  
-      const gleicherNickname = spieler.nickname &&
-        spieler.nickname.toLowerCase() === nickname.toLowerCase();
-      const gleichesKonto = aktuellerLogin?.benutzername &&
-        spieler.mitgliedId === aktuellerLogin.benutzername;
-
-      if (gleicherNickname || gleichesKonto) {
-        gefunden = true;
-      }
-    });  
-  
-    resolve(gefunden);  
-  });  
-});  
+ const snapshotExistenz = await getDocs(warteschlangeRef);
+let existiert = false;
+snapshotExistenz.forEach((dokument) => {
+  const spieler = dokument.data();
+  const gleicherNickname = String(spieler.nickname || "").toLowerCase() === nickname.toLowerCase();
+  const kontoId = String(spieler.kontoBenutzername || spieler.mitgliedId || "").toLowerCase();
+  const gleichesKonto = aktuellerLogin?.benutzername && kontoId === String(aktuellerLogin.benutzername).toLowerCase();
+  if (gleicherNickname || gleichesKonto) existiert = true;
+});
   
 if (existiert) {  
   alert("Dieser Spitzname steht bereits in der Warteschlange.");  
@@ -154,9 +144,9 @@ bezahlteListe.innerHTML = "";
     });  
   });  
   
-  spieler.sort((a, b) => a.zeit - b.zeit);  
+  spieler.sort((a, b) => { const av=(a.zeit?.toMillis?.() ?? Number(a.zeit) ?? 0) || 0; const bv=(b.zeit?.toMillis?.() ?? Number(b.zeit) ?? 0) || 0; return av-bv; });  
 spieler.forEach(person => {
-  person.bezahlt = person.bezahlt === true || person.zahlungBar === true || person.zahlungPaypal === true;
+  person.bezahlt = person.bezahlt === true || person.zahlungBar === true || person.zahlungPaypal === true || person.zahlungsart === "bar" || person.zahlungsart === "paypal";
 });
 const bezahlteSpieler = spieler.filter((person) => person.bezahlt === true);
 const wartendeSpieler = spieler.filter((person) => person.bezahlt !== true);  
@@ -319,6 +309,7 @@ function kontoDatenUebernehmen() {
     }
   });
   document.dispatchEvent(new Event("kontoDatenUebernommen"));
+  window.checkForm?.();
 }
 
 document.addEventListener("DOMContentLoaded", kontoDatenUebernehmen);

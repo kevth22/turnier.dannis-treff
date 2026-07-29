@@ -409,6 +409,9 @@
     </a>
 
     <div id="tvSlideEditor" class="tv-slide-editor" hidden>
+      <h3>🔁 Reihenfolge der TV-Folien</h3>
+      <p class="section-text">Lege für die vorhandenen TV-Folien Reihenfolge, Anzeigedauer und Sichtbarkeit fest.</p>
+      <div id="tvBuiltInSlideSettings" class="tv-built-in-settings"></div>
       <h3>🖼️ Eigene TV-Folien</h3>
       <p class="section-text">Erstelle Folien aus Texten und eigenen Bildern. Elemente lassen sich direkt auf der Vorschau verschieben und unten rechts in der Größe verändern.</p>
       <div class="tv-slide-editor-layout">
@@ -420,6 +423,7 @@
           <div class="tv-slide-meta">
             <label>Titel<input id="tvSlideTitle" type="text" maxlength="80" placeholder="z. B. Getränkeangebot"></label>
             <label>Dauer in Sekunden<input id="tvSlideDuration" type="number" min="3" max="120" value="10"></label>
+            <label>Reihenfolge<input id="tvSlideOrder" type="number" min="1" max="999" value="100"></label>
             <label>Hintergrund<input id="tvSlideBackground" type="color" value="#08090d"></label>
             <label class="settings-row"><span><strong>In TV-Rotation aktiv</strong></span><input id="tvSlideActive" type="checkbox" checked></label>
           </div>
@@ -446,7 +450,6 @@
       <p>🎯 Aktuelle Spiele</p>
       <p>⏭️ Nächste Spiele</p>
       <p>🌳 Turnierbaum</p>
-      <p>📢 Werbung</p>
       <p>🏆 Siegeranimation nach Ergebnis</p>
 
     </div>
@@ -586,15 +589,6 @@
     <div id="tvGruppenKo" class="tv-ko-wrap"></div>
   </div>
 
-  <div class="tv-slide" id="slideWerbung">
-    <h2>📢 Dannis Treff</h2>
-    <div class="werbung-box">
-      <p>🍻 Danke an alle Teilnehmer</p>
-      <p>🎯 Nächstes Dart11en-Turnier: 01.08.2026</p>
-      <p>📍 Emil-Zimmermann-Allee 10, Gelsenkirchen</p>
-    </div>
-  </div>
-
 </section>
 
 <div id="drawPopup" class="draw-popup" aria-live="polite">
@@ -630,13 +624,13 @@
 </nav>
 
 <script type="module" src="turnier-v3-manager.js?v=507"></script>
-<script type="module" src="turnier-live-v3.js?v=509"></script>
+<script type="module" src="turnier-live-v3.js?v=524"></script>
 <script type="module" src="gruppen-turnier-v3.js?v=509"></script>
 <script src="turnier-tv-fit.js?v=400" defer></script>
 <script type="module" src="turnier-v4-live.js?v=400"></script>
 <script src="turnier-admin-menu.js?v=110" defer></script>
 <script type="module" src="turnier-theme.js?v=507"></script>
-<script type="module" src="tv-slide-editor.js?v=22"></script>
+<script type="module" src="tv-slide-editor.js?v=24"></script>
 <script type="module" src="push-foreground.js?v=10.0.1"></script>
 <script src="pwa.js" defer></script>
 

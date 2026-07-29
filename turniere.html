@@ -314,7 +314,7 @@
   <a href="kader.html">👥<br>Kader</a>
 </nav>
 
-<script type="module" src="script.js?v=21"></script>
+<script type="module" src="script.js?v=24"></script>
 
 <script>
 const checkboxDatenschutz = document.getElementById("datenschutzCheck");
@@ -325,7 +325,7 @@ const nicknameInput = document.getElementById("nickname");
 const vornameInput = document.getElementById("vorname");
 const nachnameInput = document.getElementById("nachname");
 
-function checkForm() {
+window.checkForm = function checkForm() {
   const nicknameOk = nicknameInput.value.trim().length >= 2;
   const vornameOk = vornameInput.value.trim().length >= 2;
   const nachnameOk = nachnameInput.value.trim().length >= 2;
