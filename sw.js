@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v30-anwesenheit-turniercenter";
+const VERSION = "dart11en-v31-spieler-hinzufuegen-fix";
 
 const CORE_FILES = [
   "./",

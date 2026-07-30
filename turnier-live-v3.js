@@ -1295,11 +1295,26 @@ document.addEventListener("DOMContentLoaded", () => {
     event.preventDefault();
     if (!istAdmin) return;
 
-    const nickname = document.getElementById("neuerSpielerNickname").value.trim();
-    const vorname = document.getElementById("neuerSpielerVorname").value.trim();
-    const nachname = document.getElementById("neuerSpielerNachname").value.trim();
-    const bezahlt = document.getElementById("neuerSpielerBezahlt").checked;
-    const anwesend = document.getElementById("neuerSpielerAnwesend").checked;
+    const nicknameFeld = document.getElementById("neuerSpielerNickname");
+    const vornameFeld = document.getElementById("neuerSpielerVorname");
+    const nachnameFeld = document.getElementById("neuerSpielerNachname");
+    const barFeld = document.getElementById("neuerSpielerBar");
+    const paypalFeld = document.getElementById("neuerSpielerPaypal");
+    const anwesendFeld = document.getElementById("neuerSpielerAnwesend");
+
+    if (!nicknameFeld || !vornameFeld || !nachnameFeld || !barFeld || !paypalFeld || !anwesendFeld) {
+      console.error("Formularfelder zum Hinzufügen eines Spielers fehlen.");
+      spielerHinzufuegenMeldung.textContent = "Das Formular ist nicht vollständig geladen. Bitte die Seite neu laden.";
+      return;
+    }
+
+    const nickname = nicknameFeld.value.trim();
+    const vorname = vornameFeld.value.trim();
+    const nachname = nachnameFeld.value.trim();
+    const zahlungBar = barFeld.checked;
+    const zahlungPaypal = paypalFeld.checked;
+    const bezahlt = zahlungBar || zahlungPaypal;
+    const anwesend = anwesendFeld.checked;
 
     if (nickname.length < 2) {
       spielerHinzufuegenMeldung.textContent = "Bitte einen Spitznamen mit mindestens zwei Zeichen eingeben.";
@@ -1317,7 +1332,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       await addDoc(collection(db, "warteschlange"), {
-        nickname, vorname, nachname, bezahlt, anwesend,
+        nickname,
+        vorname,
+        nachname,
+        bezahlt,
+        zahlungBar,
+        zahlungPaypal,
+        zahlungsart: zahlungBar ? "bar" : (zahlungPaypal ? "paypal" : null),
+        anwesend,
         manuellHinzugefuegt: true,
         zeit: Date.now()
       });
