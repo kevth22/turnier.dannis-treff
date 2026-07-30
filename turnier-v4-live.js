@@ -20,6 +20,7 @@ function anwenden(wert){
   if(tv){tv.innerHTML=`<i></i> ${cfg.tv}`;const box=tv.closest(".tv-live-kopf");box?.classList.remove("status-vorbereitung","status-anmeldung","status-live");box?.classList.add(`status-${key}`)}
   const vorstart=document.querySelector("#tvVorstart p");if(vorstart)vorstart.textContent=cfg.tv;
   localStorage.setItem("dart11enV4LiveStatus",key);
+  window.dispatchEvent(new CustomEvent("dart11en:live-status", { detail: { status: key } }));
 }
 
 function gruppenModusFuerSpielerAktivieren(snap){

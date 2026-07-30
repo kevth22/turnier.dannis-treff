@@ -8,7 +8,12 @@ import {
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
+  query,
+  where,
+  runTransaction,
+  writeBatch,
   updateDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -200,6 +205,15 @@ function renderUsers() {
 
           <button
             type="button"
+            class="prepare-username-button secondary-button"
+            data-username="${escapeHtml(username)}"
+            ${isSelf ? "disabled" : ""}
+          >
+            Benutzername ändern
+          </button>
+
+          <button
+            type="button"
             class="prepare-reset-button"
             data-username="${escapeHtml(username)}"
           >
@@ -241,6 +255,18 @@ function bindUserActions() {
       const username = event.currentTarget.dataset.username;
       const currentlyActive = event.currentTarget.dataset.active === "true";
       await changeActiveStatus(username, !currentlyActive, event.currentTarget);
+    });
+  });
+
+  document.querySelectorAll(".prepare-username-button").forEach(button => {
+    button.addEventListener("click", event => {
+      const username = event.currentTarget.dataset.username;
+      $("oldUsername").value = username;
+      $("newUsername").value = username;
+      hideBox("usernameMessage");
+      $("usernameChangeSection").scrollIntoView({ behavior: "smooth", block: "start" });
+      $("newUsername").focus();
+      $("newUsername").select();
     });
   });
 
@@ -307,6 +333,112 @@ async function changeActiveStatus(username, newStatus, button) {
   }
 }
 
+async function changeUsername() {
+  const oldUsername = normalizeUsername($("oldUsername").value);
+  const newUsername = normalizeUsername($("newUsername").value);
+  hideBox("usernameMessage");
+
+  if (!oldUsername || !newUsername) {
+    showBox("usernameMessage", "Bitte alten und neuen Benutzernamen eingeben.");
+    return;
+  }
+
+  if (newUsername.length < 3 || newUsername.length > 30) {
+    showBox("usernameMessage", "Der neue Benutzername muss zwischen 3 und 30 Zeichen lang sein.");
+    return;
+  }
+
+  if (newUsername === oldUsername) {
+    showBox("usernameMessage", "Der neue Benutzername ist identisch mit dem bisherigen.");
+    return;
+  }
+
+  if (oldUsername === currentAdmin.benutzername) {
+    showBox("usernameMessage", "Dein eigenes Admin-Konto kann hier nicht umbenannt werden.");
+    return;
+  }
+
+  const button = $("changeUsernameButton");
+  button.disabled = true;
+  button.textContent = "Benutzername wird geändert …";
+
+  try {
+    const oldRef = doc(db, "mitglieder", oldUsername);
+    const newRef = doc(db, "mitglieder", newUsername);
+
+    await runTransaction(db, async transaction => {
+      const [oldSnapshot, newSnapshot] = await Promise.all([
+        transaction.get(oldRef),
+        transaction.get(newRef)
+      ]);
+
+      if (!oldSnapshot.exists()) throw new Error("USER_NOT_FOUND");
+      if (newSnapshot.exists()) throw new Error("USERNAME_EXISTS");
+
+      const oldData = oldSnapshot.data();
+      transaction.set(newRef, {
+        ...oldData,
+        benutzername: newUsername,
+        // Diese feste ID hält Mitgliedsbeiträge trotz Umbenennung zusammen.
+        mitgliedId: oldData.mitgliedId || oldUsername,
+        benutzernameVorher: oldUsername,
+        benutzernameGeaendertAm: serverTimestamp(),
+        benutzernameGeaendertVon: currentAdmin.benutzername
+      });
+      transaction.delete(oldRef);
+    });
+
+    // Bestehende Zusagen verwenden den Benutzernamen auch in der Dokument-ID.
+    const responses = await getDocs(query(collection(db, "zusagen"), where("benutzername", "==", oldUsername)));
+    for (const responseDoc of responses.docs) {
+      const data = responseDoc.data();
+      const newId = data.spieltagId ? `${data.spieltagId}_${newUsername}` : responseDoc.id.replace(oldUsername, newUsername);
+      const batch = writeBatch(db);
+      batch.set(doc(db, "zusagen", newId), {
+        ...data,
+        benutzername: newUsername,
+        benutzernameGeaendertAm: serverTimestamp()
+      });
+      batch.delete(responseDoc.ref);
+      await batch.commit();
+    }
+
+    // Push-Abos und weitere Datensätze behalten ihre ID, bekommen aber den neuen Namen.
+    for (const collectionName of ["pushAbos", "warteschlange", "kassenProfile", "kassenBeitraege"]) {
+      try {
+        const matches = await getDocs(query(collection(db, collectionName), where("benutzername", "==", oldUsername)));
+        if (!matches.empty) {
+          const batch = writeBatch(db);
+          matches.docs.forEach(match => batch.update(match.ref, {
+            benutzername: newUsername,
+            benutzernameGeaendertAm: serverTimestamp()
+          }));
+          await batch.commit();
+        }
+      } catch (migrationError) {
+        console.warn(`Verknüpfte Daten in ${collectionName} konnten nicht vollständig angepasst werden.`, migrationError);
+      }
+    }
+
+    $("oldUsername").value = newUsername;
+    $("newUsername").value = "";
+    showBox("usernameMessage", `Der Benutzername wurde von „${oldUsername}“ zu „${newUsername}“ geändert. Der Nutzer muss sich künftig mit dem neuen Benutzernamen anmelden.`, true);
+    await loadUsers();
+  } catch (error) {
+    console.error(error);
+    if (error.message === "USERNAME_EXISTS") {
+      showBox("usernameMessage", "Dieser Benutzername ist bereits vergeben.");
+    } else if (error.message === "USER_NOT_FOUND") {
+      showBox("usernameMessage", "Das ausgewählte Konto wurde nicht gefunden.");
+    } else {
+      showBox("usernameMessage", "Der Benutzername konnte nicht geändert werden. Prüfe die Firestore-Regeln.");
+    }
+  } finally {
+    button.disabled = false;
+    button.textContent = "Benutzername ändern";
+  }
+}
+
 async function resetPassword() {
   const username = normalizeUsername($("adminUsername").value);
   const password = $("temporaryPassword").value;
@@ -360,6 +492,7 @@ async function resetPassword() {
   }
 }
 
+$("changeUsernameButton").addEventListener("click", changeUsername);
 $("resetButton").addEventListener("click", resetPassword);
 $("refreshUsersButton").addEventListener("click", loadUsers);
 $("userSearch").addEventListener("input", renderUsers);

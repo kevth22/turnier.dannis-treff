@@ -12,7 +12,7 @@
 <header class="app-header">
   <img src="dart11enlogo.png" class="logo" alt="Dart11en Logo">
   <h1>Kontoverwaltung</h1>
-  <p>Benutzer, Rollen und Passwörter verwalten</p>
+  <p>Benutzernamen, Rollen und Passwörter verwalten</p>
 </header>
 
 <main class="app-container konto-admin-container">
@@ -54,6 +54,22 @@
       <div id="usersList" class="users-list">
         <p class="konto-hinweis">Benutzer werden geladen …</p>
       </div>
+    </section>
+
+    <section id="usernameChangeSection" class="info-card konto-card">
+      <h2>✏️ Benutzername ändern</h2>
+
+      <label for="oldUsername">Bisheriger Benutzername</label>
+      <input id="oldUsername" type="text" maxlength="30" readonly>
+
+      <label for="newUsername">Neuer Benutzername</label>
+      <input id="newUsername" type="text" maxlength="30" autocomplete="off" placeholder="z. B. red-dart">
+
+      <button id="changeUsernameButton" type="button">Benutzername ändern</button>
+      <p class="konto-hinweis">
+        Der neue Benutzername wird zugleich zum neuen Login-Namen. Das Passwort bleibt unverändert.
+      </p>
+      <p id="usernameMessage" class="konto-meldung" hidden></p>
     </section>
 
     <section id="passwordResetSection" class="info-card konto-card">

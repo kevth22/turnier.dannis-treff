@@ -82,6 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let letzteTeilnehmer = [];
   let anwesendeAnzahl = 0;
+  let bezahlteAnzahl = 0;
   let turnierGroesse = Number(localStorage.getItem("dart11enTurnierGroesse")) || 16;
   let turnierDaten = JSON.parse(localStorage.getItem("dart11enDoppelKo") || "null");
   let bestOf = Number(localStorage.getItem("dart11enBestOf")) || 3;
@@ -1062,20 +1063,32 @@ document.addEventListener("DOMContentLoaded", () => {
   if (istAdmin && !istTvModus) einstellungenOnlineSpeichern();
 
   function turnierZahlenAktualisieren() {
-    const freilose = Math.max(turnierGroesse - anwesendeAnzahl, 0);
+    // In der Vorbereitung richten sich die angezeigten Freilose nach den
+    // bezahlten Personen. Sobald der Status auf Anmeldung oder Live steht,
+    // zählen dafür nur noch die tatsächlich anwesenden Personen.
+    const liveStatus = localStorage.getItem("dart11enV4LiveStatus") || "vorbereitung";
+    const dashboardTeilnehmerzahl = liveStatus === "vorbereitung"
+      ? bezahlteAnzahl
+      : anwesendeAnzahl;
+    const dashboardFreilose = Math.max(turnierGroesse - dashboardTeilnehmerzahl, 0);
+    const auslosungsFreilose = Math.max(turnierGroesse - anwesendeAnzahl, 0);
 
     if (auslosungTeilnehmer) auslosungTeilnehmer.textContent = anwesendeAnzahl;
     if (auslosungFeldgroesse) auslosungFeldgroesse.textContent = turnierGroesse;
-    if (auslosungFreilose) auslosungFreilose.textContent = freilose;
-    if (freiloseAnzeige) freiloseAnzeige.textContent = freilose;
+    if (auslosungFreilose) auslosungFreilose.textContent = auslosungsFreilose;
+    if (freiloseAnzeige) freiloseAnzeige.textContent = dashboardFreilose;
 
     if (turnierGroesseHinweis) {
       turnierGroesseHinweis.textContent = anwesendeAnzahl > turnierGroesse
         ? `${anwesendeAnzahl - turnierGroesse} anwesende Person(en) überschreiten die gewählte Turniergröße.`
-        : `${anwesendeAnzahl} anwesend · ${freilose} Freilos${freilose === 1 ? "" : "e"}`;
+        : `${anwesendeAnzahl} anwesend · ${auslosungsFreilose} Freilos${auslosungsFreilose === 1 ? "" : "e"}`;
       turnierGroesseHinweis.classList.toggle("warnung", anwesendeAnzahl > turnierGroesse);
     }
   }
+
+  window.addEventListener("dart11en:live-status", () => {
+    turnierZahlenAktualisieren();
+  });
 
   turnierGroesseAuswahl?.addEventListener("change", () => {
     if (!istAdmin) return;
@@ -1335,6 +1348,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (gesamtAnzeige) gesamtAnzeige.textContent = snapshot.size;
     if (bezahltAnzeige) bezahltAnzeige.textContent = bezahlt;
     if (anwesendAnzeige) anwesendAnzeige.textContent = anwesend;
+    bezahlteAnzahl = bezahlt;
     anwesendeAnzahl = anwesend;
     turnierZahlenAktualisieren();
     teilnehmerRendern();
