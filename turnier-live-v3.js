@@ -338,15 +338,7 @@ document.addEventListener("DOMContentLoaded", () => {
       beendet: ergebnisGruppeErstellen("Beendete Spiele", "Ergebnisse können weiterhin korrigiert werden")
     };
     spieleListe.append(gruppen.laufend.bereich, gruppen.anstehend.bereich, gruppen.beendet.bereich);
-    const alle = [...turnierDaten.w.flat(), ...turnierDaten.l.flat(), ...turnierDaten.finale]
-      .map((match, reihenfolge) => ({ match, reihenfolge }))
-      .sort((a, b) => {
-        if (a.match.board && b.match.board) return a.match.board - b.match.board;
-        if (a.match.board) return -1;
-        if (b.match.board) return 1;
-        return a.reihenfolge - b.reihenfolge;
-      })
-      .map(eintrag => eintrag.match);
+    const alle = sortiereNachTurnierfolge(alleTurnierMatches());
     let anstehendGesamt = 0;
     let anstehendAngezeigt = 0;
     alle.filter(m => m.a && m.b && m.a !== "Freilos" && m.b !== "Freilos").forEach(match => {
@@ -600,8 +592,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
   spielerSuche?.addEventListener("input", spielerSucheAktualisieren);
 
+  function turnierReihenfolge() {
+    if (!turnierDaten) return [];
+
+    const reihenfolge = [];
+    const w = turnierDaten.w || [];
+    const l = turnierDaten.l || [];
+
+    // Vereinbarte Doppel-K.-o.-Reihenfolge:
+    // W1 -> L1 -> W2 -> L2 -> W3 -> L3 -> L4 -> W4 -> L5 -> L6 ...
+    if (w[0]) reihenfolge.push(...w[0]);
+    if (l[0]) reihenfolge.push(...l[0]);
+
+    for (let wIndex = 1; wIndex < w.length; wIndex += 1) {
+      reihenfolge.push(...w[wIndex]);
+
+      if (wIndex === 1) {
+        if (l[1]) reihenfolge.push(...l[1]);
+        continue;
+      }
+
+      const ersteVerliererRunde = (2 * wIndex) - 1;
+      const zweiteVerliererRunde = 2 * wIndex;
+      if (l[ersteVerliererRunde]) reihenfolge.push(...l[ersteVerliererRunde]);
+      if (l[zweiteVerliererRunde]) reihenfolge.push(...l[zweiteVerliererRunde]);
+    }
+
+    // Falls bei einer anderen Feldgröße noch eine Verliererrunde übrig bleibt,
+    // wird sie vor dem Finale ergänzt.
+    const enthalten = new Set(reihenfolge);
+    l.flat().forEach(match => { if (!enthalten.has(match)) reihenfolge.push(match); });
+    reihenfolge.push(...(turnierDaten.finale || []));
+    return reihenfolge;
+  }
+
+  function matchReihenfolgeIndex(match) {
+    const index = turnierReihenfolge().indexOf(match);
+    return index >= 0 ? index : Number.MAX_SAFE_INTEGER;
+  }
+
+  function sortiereNachTurnierfolge(matches) {
+    return [...matches].sort((a, b) => {
+      if (a.board && b.board) return Number(a.board) - Number(b.board);
+      if (a.board) return -1;
+      if (b.board) return 1;
+      return matchReihenfolgeIndex(a) - matchReihenfolgeIndex(b);
+    });
+  }
+
   function alleTurnierMatches() {
-    return turnierDaten ? [...turnierDaten.w.flat(), ...turnierDaten.l.flat(), ...turnierDaten.finale] : [];
+    return turnierReihenfolge();
   }
 
   function istSpielbereit(match) {
@@ -610,55 +650,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function boardsVerteilen() {
     const matches = alleTurnierMatches();
-    const jetzt = Date.now();
+    const bereit = matches.filter(istSpielbereit);
+    matches.filter(match => !istSpielbereit(match)).forEach(match => { match.board = null; });
 
-    // Nur wirklich spielbereite Partien dürfen ein Board behalten oder erhalten.
-    // Sobald eine Partie erstmals bereit ist, wird dieser Zeitpunkt im
-    // Turnierdatensatz gespeichert. Dadurch bleibt die Reihenfolge auch nach
-    // Neuladen und auf anderen Geräten erhalten.
-    const bereit = [];
-    matches.forEach((match, index) => {
-      if (!istSpielbereit(match)) {
-        match.board = null;
-        delete match.bereitSeit;
-        delete match.bereitReihenfolge;
-        return;
-      }
-
-      if (!Number.isFinite(Number(match.bereitSeit))) match.bereitSeit = jetzt;
-      if (!Number.isFinite(Number(match.bereitReihenfolge))) match.bereitReihenfolge = index;
-      bereit.push(match);
-    });
-
-    // Bereits laufende und gültig zugewiesene Spiele bleiben unangetastet.
     const belegt = new Set();
     bereit.forEach(match => {
-      const board = Number(match.board);
-      if (board >= 1 && board <= boardAnzahl && !belegt.has(board)) {
-        match.board = board;
-        belegt.add(board);
-      } else {
-        match.board = null;
-      }
+      if (match.board >= 1 && match.board <= boardAnzahl && !belegt.has(match.board)) belegt.add(match.board);
+      else match.board = null;
     });
 
     const frei = [];
-    for (let board = 1; board <= boardAnzahl; board += 1) {
-      if (!belegt.has(board)) frei.push(board);
-    }
-
-    // Nur noch nicht gestartete Partien werden fair nach Wartezeit verteilt.
-    // Der Baum (Gewinner/Verlierer) spielt dabei keine Rolle mehr.
-    bereit
-      .filter(match => !match.board)
-      .sort((a, b) =>
-        Number(a.bereitSeit) - Number(b.bereitSeit)
-        || Number(a.bereitReihenfolge) - Number(b.bereitReihenfolge)
-        || String(a.id || "").localeCompare(String(b.id || ""), "de")
-      )
-      .forEach(match => {
-        match.board = frei.shift() || null;
-      });
+    for (let board = 1; board <= boardAnzahl; board += 1) if (!belegt.has(board)) frei.push(board);
+    sortiereNachTurnierfolge(bereit.filter(match => !match.board))
+      .forEach(match => { match.board = frei.shift() || null; });
   }
 
   function dashboardTurnierInhalteSichtbar(sichtbar) {
@@ -760,12 +764,7 @@ document.addEventListener("DOMContentLoaded", () => {
     dashboardTurnierInhalteSichtbar(true);
     let naechsteAngezeigt = 0;
     let aktuellAngezeigt = 0;
-    alleTurnierMatches().filter(istSpielbereit).sort((a, b) => {
-      if (a.board && b.board) return a.board - b.board;
-      if (a.board) return -1;
-      if (b.board) return 1;
-      return 0;
-    }).forEach(match => {
+    sortiereNachTurnierfolge(alleTurnierMatches().filter(istSpielbereit)).forEach(match => {
       if (!match.board && naechsteAngezeigt >= 6) return;
       const zeile = document.createElement("article"); zeile.className = "tv-match-row";
       const meta = document.createElement("div"); meta.className = "tv-match-meta";
@@ -784,12 +783,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!aktuellAngezeigt) aktuell.innerHTML = '<div class="tv-leer">Zurzeit läuft kein Spiel.</div>';
     if (!naechsteAngezeigt) naechste.innerHTML = '<div class="tv-leer">Keine weiteren spielbereiten Partien.</div>';
     dashboardAktuelleSpieleRendern(alleTurnierMatches().filter(istSpielbereit), bestOf);
-    dashboardNaechsteSpieleRendern(alleTurnierMatches().filter(istSpielbereit).sort((a, b) => {
-      if (a.board && b.board) return a.board - b.board;
-      if (a.board) return -1;
-      if (b.board) return 1;
-      return String(a.id || "").localeCompare(String(b.id || ""), "de");
-    }), bestOf);
+    dashboardNaechsteSpieleRendern(
+      sortiereNachTurnierfolge(alleTurnierMatches().filter(istSpielbereit)),
+      bestOf
+    );
   }
 
   function tvTurnierbaumRendern() {

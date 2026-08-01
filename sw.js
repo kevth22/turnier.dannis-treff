@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v32-faire-boardverteilung-live-sicher";
+const VERSION = "dart11en-v33-einheitliche-turnierreihenfolge";
 
 const CORE_FILES = [
   "./",
