@@ -610,18 +610,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function boardsVerteilen() {
     const matches = alleTurnierMatches();
-    const bereit = matches.filter(istSpielbereit);
-    matches.filter(match => !istSpielbereit(match)).forEach(match => { match.board = null; });
+    const jetzt = Date.now();
 
+    // Nur wirklich spielbereite Partien dürfen ein Board behalten oder erhalten.
+    // Sobald eine Partie erstmals bereit ist, wird dieser Zeitpunkt im
+    // Turnierdatensatz gespeichert. Dadurch bleibt die Reihenfolge auch nach
+    // Neuladen und auf anderen Geräten erhalten.
+    const bereit = [];
+    matches.forEach((match, index) => {
+      if (!istSpielbereit(match)) {
+        match.board = null;
+        delete match.bereitSeit;
+        delete match.bereitReihenfolge;
+        return;
+      }
+
+      if (!Number.isFinite(Number(match.bereitSeit))) match.bereitSeit = jetzt;
+      if (!Number.isFinite(Number(match.bereitReihenfolge))) match.bereitReihenfolge = index;
+      bereit.push(match);
+    });
+
+    // Bereits laufende und gültig zugewiesene Spiele bleiben unangetastet.
     const belegt = new Set();
     bereit.forEach(match => {
-      if (match.board >= 1 && match.board <= boardAnzahl && !belegt.has(match.board)) belegt.add(match.board);
-      else match.board = null;
+      const board = Number(match.board);
+      if (board >= 1 && board <= boardAnzahl && !belegt.has(board)) {
+        match.board = board;
+        belegt.add(board);
+      } else {
+        match.board = null;
+      }
     });
 
     const frei = [];
-    for (let board = 1; board <= boardAnzahl; board += 1) if (!belegt.has(board)) frei.push(board);
-    bereit.filter(match => !match.board).forEach(match => { match.board = frei.shift() || null; });
+    for (let board = 1; board <= boardAnzahl; board += 1) {
+      if (!belegt.has(board)) frei.push(board);
+    }
+
+    // Nur noch nicht gestartete Partien werden fair nach Wartezeit verteilt.
+    // Der Baum (Gewinner/Verlierer) spielt dabei keine Rolle mehr.
+    bereit
+      .filter(match => !match.board)
+      .sort((a, b) =>
+        Number(a.bereitSeit) - Number(b.bereitSeit)
+        || Number(a.bereitReihenfolge) - Number(b.bereitReihenfolge)
+        || String(a.id || "").localeCompare(String(b.id || ""), "de")
+      )
+      .forEach(match => {
+        match.board = frei.shift() || null;
+      });
   }
 
   function dashboardTurnierInhalteSichtbar(sichtbar) {

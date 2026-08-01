@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v31-spieler-hinzufuegen-fix";
+const VERSION = "dart11en-v32-faire-boardverteilung-live-sicher";
 
 const CORE_FILES = [
   "./",
