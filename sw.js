@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v33-einheitliche-turnierreihenfolge";
+const VERSION = "dart11en-v35-gegner-ort-getrennt";
 
 const CORE_FILES = [
   "./",

@@ -1376,6 +1376,44 @@ footer {
     font-size: 15px;
   }
 }
+/* Spieltag eintragen: Treffen und Anwurf klar beschriften */
+.spieltag-zeiten {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.spieltag-zeit-feld {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-weight: 700;
+}
+
+.spieltag-zeit-feld > span {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+#adminSpieltagBox .spieltag-zeit-feld input {
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 0;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+@media (max-width: 380px) {
+  .spieltag-zeiten {
+    gap: 8px;
+  }
+  .spieltag-zeit-feld > span {
+    font-size: 13px;
+  }
+}
+
 .abstimmung-buttons {
   display: grid;
   gap: 12px;
@@ -2267,28 +2305,28 @@ body.spieltag-page {
   background:
     linear-gradient(
       135deg,
-      rgba(80,0,20,0.10),
+      rgba(0,45,90,0.14),
       rgba(25,25,25,0.96)
     );
 
-  border:1px solid rgba(196,0,48,0.35);
+  border:1px solid rgba(0,94,255,0.42);
 
   box-shadow:
-    0 0 8px rgba(196,0,48,0.12);
+    0 0 10px rgba(0,94,255,0.16);
 }
 
 .auswaerts-center{
   background:
     linear-gradient(
       135deg,
-      rgba(0,45,90,0.10),
+      rgba(80,0,20,0.14),
       rgba(25,25,25,0.96)
     );
 
-  border:1px solid rgba(0,94,255,0.28);
+  border:1px solid rgba(196,0,48,0.42);
 
   box-shadow:
-    0 0 8px rgba(0,94,255,0.10);
+    0 0 10px rgba(196,0,48,0.16);
 }
 .spieltag-slide-out-left {
   animation: slideOutLeft 0.18s ease forwards;
@@ -2354,3 +2392,90 @@ body.spieltag-page {
 .konto-anmeldung-hinweis { opacity:.85; margin-top:-4px; }
 .konto-uebernommen { background: rgba(255,255,255,.08); cursor:not-allowed; }
 .anwesenheit-button { margin-left:10px; width:auto; padding:7px 10px; font-size:13px; }
+
+/* =========================
+   KALENDER MOBILE 7-SPALTEN FIX
+   - Sonntag bleibt vollständig sichtbar
+   - alle 7 Tage gleich breit
+   - Liga + Heim/Auswärts bleiben lesbar
+========================= */
+@media (max-width: 600px) {
+  /* Nur die Kalenderkarte nutzt auf dem Handy fast die volle Breite. */
+  #kalenderGrid,
+  .kalender-kopf {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* 1fr hat sonst eine automatische Mindestbreite durch den Event-Text.
+     minmax(0, 1fr) verhindert, dass z.B. "Ruhrpott" die Spalte verbreitert
+     und den Sonntag aus dem Bildschirm drückt. */
+  .kalender-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 3px !important;
+  }
+
+  /* Die Kalenderkarte bekommt mobil weniger Innenabstand, damit jede
+     der sieben Spalten genug Platz für Liga und Heim/Auswärts hat. */
+  .info-card:has(#kalenderGrid) {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .kalender-kopf div {
+    min-width: 0;
+    font-size: 14px;
+  }
+
+  .kalender-tag {
+    min-width: 0;
+    min-height: 88px;
+    padding: 5px 3px;
+    border-radius: 11px;
+    overflow: hidden;
+    font-size: 12px;
+  }
+
+  .kalender-tag > strong {
+    display: block;
+    padding-left: 1px;
+  }
+
+  .kalender-event {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin-top: 5px;
+    padding: 6px 2px;
+    border-radius: 8px;
+    font-size: 9px;
+    line-height: 1.15;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .kalender-event strong,
+  .kalender-event small {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    font-size: inherit;
+    line-height: inherit;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .kalender-event small {
+    margin-top: 2px;
+  }
+}
+
+/* Fallback für Browser ohne :has(): Kalenderkarte über die vorhandene
+   Struktur ebenfalls kompakter halten, ohne andere Seiten zu verändern. */
+@media (max-width: 420px) {
+  #kalenderBereich .info-card:last-of-type {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}

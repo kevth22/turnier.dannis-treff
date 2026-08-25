@@ -193,7 +193,7 @@ function spieltagListeAnzeigen() {
 
         ${spieltag.typ === "heim"
           ? "🏠 Heimspiel"
-          : `🚗 Auswärtsspiel<br>📍 ${spieltag.ort}`
+          : `🚗 Auswärtsspiel<br>🎯 ${spieltag.gegner || spieltag.ort || "Gegner offen"}`
         }
 
         <br>
@@ -228,14 +228,17 @@ window.spieltagSpeichern = async function () {
   const anwurf =
     document.getElementById("spieltagAnwurf").value;
 
+  const gegner =
+    document.getElementById("spieltagGegner").value.trim();
+
   const ort =
     document.getElementById("spieltagOrt").value.trim();
 
   const typ =
     document.getElementById("spieltagTyp").value;
 
-  if (!liga || !datum || !anwurf || !ort) {
-    alert("Bitte Liga, Datum, Anwurf und Ort ausfüllen.");
+  if (!liga || !datum || !anwurf || !gegner) {
+    alert("Bitte Liga, Datum, Anwurf und Gegner ausfüllen.");
     return;
   }
 
@@ -244,6 +247,7 @@ window.spieltagSpeichern = async function () {
   datum,
   treffen,
   anwurf,
+  gegner,
   ort,
   typ,
   erstelltAm: serverTimestamp()
@@ -266,6 +270,7 @@ try {
         datum,
         treffen,
         anwurf,
+        gegner,
         ort,
         typ
       })
@@ -290,6 +295,7 @@ document.getElementById("spieltagLiga").value = "";
 document.getElementById("spieltagDatum").value = "";
 document.getElementById("spieltagTreffen").value = "";
 document.getElementById("spieltagAnwurf").value = "";
+document.getElementById("spieltagGegner").value = "";
 document.getElementById("spieltagOrt").value = "";
 
 alert(
@@ -424,7 +430,8 @@ window.zeigeSpieltag = function (spieltagId) {
     <p>📅 Datum: ${spieltag.datum}</p>
     <p>⏰ Treffen: ${spieltag.treffen || "Noch offen"}</p>
     <p>🎯 Anwurf: ${spieltag.anwurf}</p>
-    <p>📍 Ort: ${spieltag.ort}</p>
+    <p>🎯 Gegner: ${spieltag.gegner || spieltag.ort || "-"}</p>
+    <p>📍 Ort: ${spieltag.ort || "Nicht eingetragen"}</p>
     <p>🏠 Typ: ${spieltag.typ === "heim" ? "Heimspiel" : "Auswärtsspiel"}</p>
 
     ${aktuellerUser && (

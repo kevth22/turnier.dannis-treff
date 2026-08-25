@@ -101,6 +101,32 @@ onSnapshot(zusagenRef, (snapshot) => {
   rueckmeldungenAnzeigenCenter();
 
 });
+
+function formatSpieltagDatum(datum) {
+  if (!datum) return "-";
+
+  let tag, monat, jahr;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(datum)) {
+    [jahr, monat, tag] = datum.split("-");
+  } else if (/^\d{2}\.\d{2}\.\d{4}$/.test(datum)) {
+    [tag, monat, jahr] = datum.split(".");
+  } else {
+    const fallback = new Date(datum);
+    if (Number.isNaN(fallback.getTime())) return datum;
+    return fallback.toLocaleDateString("de-DE", {
+      weekday: "long",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    });
+  }
+
+  const date = new Date(Number(jahr), Number(monat) - 1, Number(tag));
+  const wochentag = date.toLocaleDateString("de-DE", { weekday: "long" });
+  return `${wochentag}, ${tag}.${monat}.${jahr}`;
+}
+
 function spieltagAnzeigen() {
   const box = document.getElementById("spieltagAnzeige");
   const counter = document.getElementById("spieltagCounter");
@@ -122,10 +148,11 @@ function spieltagAnzeigen() {
   z.spieltagId === spieltag.id &&
   z.benutzername === aktuellerUser.benutzername
 );
+  const gegner = spieltag.gegner || spieltag.ort || "Gegner offen";
   const gegnerText =
     spieltag.typ === "heim"
-      ? `Dart11en : ${spieltag.ort}`
-      : `${spieltag.ort} : Dart11en`;
+      ? `Dart11en : ${gegner}`
+      : `${gegner} : Dart11en`;
 
   const spieltagKlasse =
     spieltag.typ === "heim"
@@ -143,11 +170,11 @@ function spieltagAnzeigen() {
     </div>
 
     <div class="spieltag-details">
-      <p>📅 ${spieltag.datum}</p>
+      <p>📅 ${formatSpieltagDatum(spieltag.datum)}</p>
       <p>🕒 Treffen: ${spieltag.treffen || "-"}</p>
       <p id="spieltagCountdown"></p>
       <p>🎯 Anwurf: ${spieltag.anwurf}</p>
-      <p>📍 ${spieltag.ort}</p>
+      ${spieltag.ort ? `<p>📍 ${spieltag.ort}</p>
 
       <a
         class="maps-button"
@@ -155,7 +182,7 @@ function spieltagAnzeigen() {
         href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spieltag.ort)}"
       >
         🗺 Navigation starten
-      </a>
+      </a>` : `<p>📍 Ort nicht eingetragen</p>`}
     </div>
 
   </div>
