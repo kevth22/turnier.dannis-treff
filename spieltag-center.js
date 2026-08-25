@@ -496,16 +496,42 @@ window.toggleTeilnehmerListe = function () {
     return;
   }
 
+  // Für Kapitäne übersichtlich nach Abstimmungsart gruppieren.
+  // Innerhalb einer Gruppe bleibt die ursprüngliche Reihenfolge erhalten.
+  const gruppen = spieltag.typ === "heim"
+    ? [
+        { status: "Dabei", icon: "👍" },
+        { status: "Nein", icon: "👎" }
+      ]
+    : [
+        { status: "Fahrer", icon: "🚗" },
+        { status: "Dabei", icon: "👍" },
+        { status: "Komme direkt", icon: "📍" },
+        { status: "Nein", icon: "👎" }
+      ];
+
+  const gruppenHtml = gruppen.map(gruppe => {
+    const spieler = rueckmeldungen.filter(z => z.status === gruppe.status);
+
+    if (spieler.length === 0) return "";
+
+    return `
+      <div class="abstimmung-gruppe">
+        <div class="abstimmung-gruppe-titel">
+          <span>${gruppe.icon} ${gruppe.status}</span>
+          <strong>${spieler.length}</strong>
+        </div>
+        ${spieler.map(person => `
+          <div class="spieler-name">${person.name}</div>
+        `).join("")}
+      </div>
+    `;
+  }).join("");
+
   box.innerHTML = `
     <div class="namen-popup">
-
-      ${rueckmeldungen.map(spieler => `
-        <div class="spieler-name">
-          ${spieler.name}
-          (${spieler.status})
-        </div>
-      `).join("")}
-
+      <h4>Abstimmungen</h4>
+      ${gruppenHtml}
     </div>
   `;
 };

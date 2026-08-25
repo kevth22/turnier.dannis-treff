@@ -44,6 +44,7 @@ let spieltage = [];
 let zusagen = [];
 let aktuellesDatum = new Date();
 let ausgewaehltesDatum = null;
+let bearbeiteterSpieltagId = null;
 
 const erlaubteRollen = ["admin", "captain", "kassenwart", "mitglied"];
 
@@ -200,11 +201,16 @@ function spieltagListeAnzeigen() {
         ✅ Zusagen: ${zusagenGesamt}
       </div>
 
-      <div class="spieltag-actions">
-        <button onclick="zeigeSpieltag('${spieltag.id}')">
-          Details
-        </button>
-      </div>
+      ${aktuellerUser && (aktuellerUser.rolle === "admin" || aktuellerUser.rolle === "captain") ? `
+        <div class="spieltag-actions">
+          <button class="spieltag-edit-button" onclick="spieltagBearbeiten('${spieltag.id}')">
+            ✏️ Bearbeiten
+          </button>
+          <button class="spieltag-delete-button" onclick="spieltagLoeschen('${spieltag.id}')">
+            🗑️ Löschen
+          </button>
+        </div>
+      ` : ""}
     `;
 
     liste.appendChild(card);
@@ -242,67 +248,123 @@ window.spieltagSpeichern = async function () {
     return;
   }
 
-  const spieltagDokument = await addDoc(spieltageRef, {
-  liga,
-  datum,
-  treffen,
-  anwurf,
-  gegner,
-  ort,
-  typ,
-  erstelltAm: serverTimestamp()
-});
+  const daten = {
+    liga,
+    datum,
+    treffen,
+    anwurf,
+    gegner,
+    ort,
+    typ
+  };
 
-let pushErfolgreich = false;
+  if (bearbeiteterSpieltagId) {
+    await updateDoc(doc(db, "spieltage", bearbeiteterSpieltagId), {
+      ...daten,
+      aktualisiertAm: serverTimestamp()
+    });
 
-try {
-  const pushAntwort = await fetch(
-    "https://dart11en-push.kevteha.workers.dev/spieltag-push",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        spieltagId: spieltagDokument.id,
-        aktion: "erstellt",
-        liga,
-        datum,
-        treffen,
-        anwurf,
-        gegner,
-        ort,
-        typ
-      })
-    }
-  );
-
-  const pushErgebnis = await pushAntwort.json().catch(() => null);
-
-  if (!pushAntwort.ok) {
-    throw new Error(
-      pushErgebnis?.error ||
-      `Worker-Fehler ${pushAntwort.status}`
-    );
+    bearbeiteterSpieltagId = null;
+    formularZuruecksetzen();
+    alert("Spieltag aktualisiert.");
+    return;
   }
 
-  pushErfolgreich = true;
-  console.log("Spieltag-Push:", pushErgebnis);
-} catch (error) {
-  console.error("Spieltag-Push fehlgeschlagen:", error);
-}
-document.getElementById("spieltagLiga").value = "";
-document.getElementById("spieltagDatum").value = "";
-document.getElementById("spieltagTreffen").value = "";
-document.getElementById("spieltagAnwurf").value = "";
-document.getElementById("spieltagGegner").value = "";
-document.getElementById("spieltagOrt").value = "";
+  const spieltagDokument = await addDoc(spieltageRef, {
+    ...daten,
+    erstelltAm: serverTimestamp()
+  });
 
-alert(
-  pushErfolgreich
-    ? "Spieltag gespeichert und Benachrichtigung versendet."
-    : "Spieltag gespeichert. Die Benachrichtigung konnte nicht versendet werden."
-);
+  let pushErfolgreich = false;
+
+  try {
+    const pushAntwort = await fetch(
+      "https://dart11en-push.kevteha.workers.dev/spieltag-push",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          spieltagId: spieltagDokument.id,
+          aktion: "erstellt",
+          ...daten
+        })
+      }
+    );
+
+    const pushErgebnis = await pushAntwort.json().catch(() => null);
+
+    if (!pushAntwort.ok) {
+      throw new Error(
+        pushErgebnis?.error ||
+        `Worker-Fehler ${pushAntwort.status}`
+      );
+    }
+
+    pushErfolgreich = true;
+    console.log("Spieltag-Push:", pushErgebnis);
+  } catch (error) {
+    console.error("Spieltag-Push fehlgeschlagen:", error);
+  }
+
+  formularZuruecksetzen();
+
+  alert(
+    pushErfolgreich
+      ? "Spieltag gespeichert und Benachrichtigung versendet."
+      : "Spieltag gespeichert. Die Benachrichtigung konnte nicht versendet werden."
+  );
+};
+
+function formularZuruecksetzen() {
+  document.getElementById("spieltagLiga").value = "";
+  document.getElementById("spieltagDatum").value = "";
+  document.getElementById("spieltagTreffen").value = "";
+  document.getElementById("spieltagAnwurf").value = "";
+  document.getElementById("spieltagGegner").value = "";
+  document.getElementById("spieltagOrt").value = "";
+  document.getElementById("spieltagTyp").value = "heim";
+
+  const speichernButton = document.getElementById("spieltagSpeichernButton");
+  const abbrechenButton = document.getElementById("spieltagBearbeitenAbbrechen");
+  if (speichernButton) speichernButton.textContent = "Spieltag speichern";
+  if (abbrechenButton) abbrechenButton.style.display = "none";
+}
+
+window.spieltagBearbeiten = function (spieltagId) {
+  const darfBearbeiten = aktuellerUser &&
+    (aktuellerUser.rolle === "admin" || aktuellerUser.rolle === "captain");
+
+  if (!darfBearbeiten) return;
+
+  const spieltag = spieltage.find(s => s.id === spieltagId);
+  if (!spieltag) return;
+
+  bearbeiteterSpieltagId = spieltag.id;
+
+  document.getElementById("spieltagLiga").value = spieltag.liga || "";
+  document.getElementById("spieltagDatum").value = spieltag.datum || "";
+  document.getElementById("spieltagTreffen").value = spieltag.treffen || "";
+  document.getElementById("spieltagAnwurf").value = spieltag.anwurf || "";
+  document.getElementById("spieltagGegner").value = spieltag.gegner || spieltag.ort || "";
+  document.getElementById("spieltagOrt").value = spieltag.gegner ? (spieltag.ort || "") : "";
+  document.getElementById("spieltagTyp").value = spieltag.typ || "heim";
+
+  const speichernButton = document.getElementById("spieltagSpeichernButton");
+  const abbrechenButton = document.getElementById("spieltagBearbeitenAbbrechen");
+  if (speichernButton) speichernButton.textContent = "Änderungen speichern";
+  if (abbrechenButton) abbrechenButton.style.display = "block";
+
+  document.getElementById("adminSpieltagBox")?.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+};
+
+window.spieltagBearbeitenAbbrechen = function () {
+  bearbeiteterSpieltagId = null;
+  formularZuruecksetzen();
 };
 /* =========================
    KALENDER ZEICHNEN
@@ -384,10 +446,12 @@ function kalenderZeichnen() {
         <small>${spieltag.typ === "heim" ? "🏠 Heim" : "🚗 Auswärts"}</small>
       `;
 
-      event.onclick = function (e) {
-        e.stopPropagation();
-        zeigeSpieltag(spieltag.id);
-      };
+      if (aktuellerUser && (aktuellerUser.rolle === "admin" || aktuellerUser.rolle === "captain")) {
+        event.onclick = function (e) {
+          e.stopPropagation();
+          spieltagBearbeiten(spieltag.id);
+        };
+      }
 
       feld.appendChild(event);
     });
@@ -412,38 +476,6 @@ window.monatVor = function () {
   kalenderZeichnen();
 };
 
-/* =========================
-   SPIELTAG DETAILS
-========================= */
-
-window.zeigeSpieltag = function (spieltagId) {
-  const spieltag = spieltage.find(s => s.id === spieltagId);
-  if (!spieltag) return;
-
-  window.aktiverSpieltagId = spieltag.id;
-
-  const details = document.getElementById("spieltagDetails");
-  details.style.display = "block";
-
-  details.innerHTML = `
-    <h2>${spieltag.liga}</h2>
-    <p>📅 Datum: ${spieltag.datum}</p>
-    <p>⏰ Treffen: ${spieltag.treffen || "Noch offen"}</p>
-    <p>🎯 Anwurf: ${spieltag.anwurf}</p>
-    <p>🎯 Gegner: ${spieltag.gegner || spieltag.ort || "-"}</p>
-    <p>📍 Ort: ${spieltag.ort || "Nicht eingetragen"}</p>
-    <p>🏠 Typ: ${spieltag.typ === "heim" ? "Heimspiel" : "Auswärtsspiel"}</p>
-
-    ${aktuellerUser && (
-      aktuellerUser.rolle === "admin" ||
-      aktuellerUser.rolle === "captain"
-    ) ? `
-      <button class="main-button" style="background:#555;" onclick="spieltagLoeschen('${spieltag.id}')">
-        ❌ Spieltag löschen
-      </button>
-    ` : ""}
-  `;
-};
 /* =========================
    RÜCKMELDUNGEN
 ========================= */
@@ -565,13 +597,20 @@ window.adminDelete = async function (docId) {
 ========================= */
 
 window.spieltagLoeschen = async function (spieltagId) {
+  const darfBearbeiten = aktuellerUser &&
+    (aktuellerUser.rolle === "admin" || aktuellerUser.rolle === "captain");
+
+  if (!darfBearbeiten) return;
   if (!confirm("Diesen Spieltag wirklich löschen?")) return;
 
   await deleteDoc(doc(db, "spieltage", spieltagId));
 
-  alert("Spieltag gelöscht");
+  if (bearbeiteterSpieltagId === spieltagId) {
+    bearbeiteterSpieltagId = null;
+    formularZuruecksetzen();
+  }
 
-  document.getElementById("spieltagDetails").style.display = "none";
+  alert("Spieltag gelöscht");
 };
 
 /* =========================

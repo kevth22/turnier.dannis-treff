@@ -1902,6 +1902,32 @@ body.spieltag-page {
   font-weight: bold;
 }
 
+
+.abstimmung-gruppe {
+  margin-top: 16px;
+}
+
+.abstimmung-gruppe:first-of-type {
+  margin-top: 8px;
+}
+
+.abstimmung-gruppe-titel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  font-weight: 800;
+}
+
+.abstimmung-gruppe-titel strong {
+  min-width: 30px;
+  text-align: center;
+}
+
 #spieltagRueckmeldungen {
   position: relative;
   z-index: 10;
@@ -2048,6 +2074,32 @@ body.spieltag-page {
 .spieltag-center-card {
   overflow: visible !important;
   margin-bottom: 140px;
+}
+
+
+.abstimmung-gruppe {
+  margin-top: 16px;
+}
+
+.abstimmung-gruppe:first-of-type {
+  margin-top: 8px;
+}
+
+.abstimmung-gruppe-titel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  font-weight: 800;
+}
+
+.abstimmung-gruppe-titel strong {
+  min-width: 30px;
+  text-align: center;
 }
 
 #spieltagRueckmeldungen {
@@ -2477,5 +2529,45 @@ body.spieltag-page {
   #kalenderBereich .info-card:last-of-type {
     padding-left: 10px;
     padding-right: 10px;
+  }
+}
+
+
+/* SPIELTAG DIREKT BEARBEITEN / LÖSCHEN */
+.spieltag-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.spieltag-actions button {
+  width: 100%;
+  margin-top: 0;
+  min-width: 0;
+  border: 0;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.spieltag-edit-button {
+  background: #4a4a4a;
+}
+
+.spieltag-delete-button {
+  background: #d71920;
+}
+
+.spieltag-cancel-button {
+  margin-top: 10px;
+  background: #555 !important;
+}
+
+@media (max-width: 420px) {
+  .spieltag-actions button {
+    font-size: 14px;
+    padding-left: 8px;
+    padding-right: 8px;
   }
 }

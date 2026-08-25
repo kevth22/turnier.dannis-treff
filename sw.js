@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v35-gegner-ort-getrennt";
+const VERSION = "dart11en-v38-abstimmungen-mit-spielernamen";
 
 const CORE_FILES = [
   "./",

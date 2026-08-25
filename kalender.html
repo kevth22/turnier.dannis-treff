@@ -93,7 +93,8 @@
         <option value="auswaerts">Auswärtsspiel</option>
       </select>
 
-      <button class="main-button" onclick="spieltagSpeichern()">Spieltag speichern</button>
+      <button id="spieltagSpeichernButton" class="main-button" onclick="spieltagSpeichern()">Spieltag speichern</button>
+      <button id="spieltagBearbeitenAbbrechen" class="main-button spieltag-cancel-button" style="display:none;" onclick="spieltagBearbeitenAbbrechen()">Bearbeiten abbrechen</button>
     </div>
 
     <div class="info-card">
@@ -120,7 +121,6 @@
       <div id="spieltagListe"></div>
     </div>
 
-    <div id="spieltagDetails" class="info-card" style="display:none;"></div>
 
   </section>
 
