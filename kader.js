@@ -20,7 +20,6 @@ const $ = id => document.getElementById(id);
 const MEMBER_ROLES = ["mitglied", "captain", "admin", "kassenwart"];
 const BESTLEISTUNGEN_EDIT_ROLES = ["admin", "captain"];
 const DEFAULT_IMAGE = "dart11enlogo.png";
-const SYNC_3K_URL = "https://dart11en-push.kevteha.workers.dev/3k-sync";
 let members = [];
 let selectedMember = null;
 let login = getLogin();
@@ -240,28 +239,327 @@ async function saveBestleistungen() {
   finally{ button.disabled=false; }
 }
 
-async function sync3k() {
-  const canEdit=BESTLEISTUNGEN_EDIT_ROLES.includes(String(login?.rolle||"").toLowerCase());
-  if(!canEdit) return;
-  const button=$("sync3kButton"), msg=$("sync3kMeldung");
-  button.disabled=true; button.textContent="⏳ 3K wird geladen …"; msg.hidden=true;
-  try{
-    const response=await fetch(SYNC_3K_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({events:[7019,8683]})});
-    const data=await response.json().catch(()=>({}));
-    if(!response.ok||!data.ok) throw new Error(data.error||`HTTP_${response.status}`);
-    await loadMembers(false);
-    const refreshed=members.find(x=>x.id===selectedMember?.id);
-    if(refreshed){ selectedMember=refreshed; renderBestleistungen(selectedMember); renderSpielstatistik(selectedMember); fillBestleistungenForm(selectedMember); }
-    const unmatched=Array.isArray(data.nichtZugeordnet)?data.nichtZugeordnet.length:0;
-    const statsUpdated = Number(data?.spielstatistik?.aktualisiert || 0);
-    msg.textContent=`3K aktualisiert: ${data.aktualisiert||0} Bestleistungsprofile, ${statsUpdated} Spielstatistiken${unmatched?`, ${unmatched} Namen nicht zugeordnet`:""}.`;
-    msg.className="profil-message success"; msg.hidden=false;
-  }catch(error){
-    console.error(error);
-    msg.textContent="3K-Synchronisierung noch nicht möglich. Bitte den mitgelieferten Cloudflare-Worker aktualisieren/deployen.";
-    msg.className="profil-message error"; msg.hidden=false;
-  }finally{ button.disabled=false; button.textContent="🔄 3K synchronisieren"; }
+
+let import3kPreviewData = null;
+
+function normalizeImportName(value) {
+  return String(value || "")
+    .toLocaleLowerCase("de")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/[^a-z0-9äöüß]+/gi, " ")
+    .replace(/\s+/g, " ").trim();
 }
+
+function extractNicknameFrom3k(value) {
+  return String(value || "").match(/\(([^)]+)\)/)?.[1]?.trim() || "";
+}
+
+function matchImportedPlayer(playerName) {
+  const cleanSource = normalizeImportName(playerName);
+  const nickSource = normalizeImportName(extractNicknameFrom3k(playerName));
+  if (!cleanSource && !nickSource) return null;
+
+  // 1. Vorname + Nachname exakt. Das ist absichtlich der Hauptschlüssel.
+  const fullMatches = members.filter(member => normalizeImportName(displayName(member)) === cleanSource);
+  if (fullMatches.length === 1) return fullMatches[0];
+
+  // Falls 3K "Vorname Nachname (Spitzname)" liefert, ist cleanSource bereits der volle Name.
+  // 2. Gespeicherte Aliasse, falls später nötig.
+  const aliasMatches = members.filter(member => {
+    const aliases = Array.isArray(member.threeKAliases) ? member.threeKAliases : [];
+    return aliases.some(alias => normalizeImportName(alias) === cleanSource || normalizeImportName(alias) === nickSource);
+  });
+  if (aliasMatches.length === 1) return aliasMatches[0];
+
+  // 3. Spitzname nur als Fallback.
+  const nickMatches = members.filter(member => {
+    const target = normalizeImportName(nickname(member));
+    return target && (target === cleanSource || target === nickSource);
+  });
+  return nickMatches.length === 1 ? nickMatches[0] : null;
+}
+
+function splitImportLines(text) {
+  return String(text || "")
+    .replace(/\r/g, "")
+    .split("\n")
+    .map(line => line.replace(/\u00a0/g, " ").trim())
+    .filter(Boolean);
+}
+
+function parseBestleistungenImport(text) {
+  const lines = splitImportLines(text);
+  const result = [];
+  let category = null;
+
+  for (const line of lines) {
+    const upper = line.toUpperCase();
+    if (upper.includes("HIGHSCORE")) { category = "highscore"; continue; }
+    if (upper.includes("HIGHFINISH")) { category = "highfinish"; continue; }
+    if (upper.includes("SHORTGAME") || upper.includes("SHORT GAME") || upper.includes("SHORTLEG")) { category = "shortgame"; continue; }
+    if (/^(NAME|ANZAHL|WERT|NACH BESTLEISTUNGSART|NACH SPIELER|BESTLEISTUNGS)/i.test(line)) continue;
+    if (!category) continue;
+
+    // Kopierte 3K-Zeilen kommen meist als: Name <Tab/Spaces> Anzahl <Tab/Spaces> Wert
+    const match = line.match(/^(.+?)\s+(\d+)\s+(\d+)$/);
+    if (!match) continue;
+    const player = match[1].trim();
+    const count = Number(match[2]);
+    const value = Number(match[3]);
+    if (!player || !Number.isInteger(count) || count < 1 || !Number.isFinite(value)) continue;
+    if (category === "highscore" && (value < 150 || value > 180)) continue;
+    if (category === "highfinish" && (value < 100 || value > 180)) continue;
+    if (category === "shortgame" && (value < 1 || value > 60)) continue;
+    result.push({ player, category, count, value });
+  }
+  // iOS/Safari kann Tabellenzellen beim Kopieren auch einzeln pro Zeile liefern.
+  if (!result.length) {
+    let fallbackCategory = null;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i], upper = line.toUpperCase();
+      if (upper.includes("HIGHSCORE")) { fallbackCategory="highscore"; continue; }
+      if (upper.includes("HIGHFINISH")) { fallbackCategory="highfinish"; continue; }
+      if (upper.includes("SHORTGAME") || upper.includes("SHORT GAME") || upper.includes("SHORTLEG")) { fallbackCategory="shortgame"; continue; }
+      if (!fallbackCategory || /^(NAME|ANZAHL|WERT)/i.test(line) || /^\d+$/.test(line)) continue;
+      const count = Number(lines[i+1]), value = Number(lines[i+2]);
+      if (!Number.isInteger(count) || count < 1 || !Number.isFinite(value)) continue;
+      const plausible = fallbackCategory === "highscore" ? value >= 150 && value <= 180 : fallbackCategory === "highfinish" ? value >= 100 && value <= 180 : value >= 1 && value <= 60;
+      if (plausible) { result.push({player:line, category:fallbackCategory, count, value}); i += 2; }
+    }
+  }
+  return result;
+}
+
+function normalizeHeader(value) {
+  return normalizeImportName(value).replace(/\s/g, "");
+}
+
+function findHeaderIndex(headers, patterns) {
+  return headers.findIndex(header => patterns.some(pattern => pattern.test(header)));
+}
+
+function parseSpielstatistikImport(text) {
+  const rawLines = String(text || "").replace(/\r/g, "").split("\n").map(x => x.trim()).filter(Boolean);
+  const records = [];
+  let headerInfo = null;
+
+  // Bevorzugt Tabulatoren aus einer kopierten HTML-Tabelle nutzen.
+  for (const raw of rawLines) {
+    const cells = raw.split(/\t+/).map(cell => cell.trim()).filter(cell => cell !== "");
+    if (cells.length >= 4) {
+      const normalized = cells.map(normalizeHeader);
+      const winGame = findHeaderIndex(normalized, [/spielegewonnen/, /gewonnenespiele/, /^gewonnen$/, /^siege$/]);
+      const lostGame = findHeaderIndex(normalized, [/spieleverloren/, /verlorenespiele/, /^verloren$/, /^niederlagen$/]);
+      const winLeg = findHeaderIndex(normalized, [/legsgewonnen/, /gewonnenelegs/]);
+      const lostLeg = findHeaderIndex(normalized, [/legsverloren/, /verlorenelegs/]);
+      if ([winGame, lostGame, winLeg, lostLeg].every(i => i >= 0)) {
+        headerInfo = { winGame, lostGame, winLeg, lostLeg, name: 0 };
+        continue;
+      }
+      if (headerInfo && cells.length > Math.max(headerInfo.winGame, headerInfo.lostGame, headerInfo.winLeg, headerInfo.lostLeg)) {
+        const rec = {
+          player: cells[headerInfo.name],
+          wonGames: Number(cells[headerInfo.winGame]),
+          lostGames: Number(cells[headerInfo.lostGame]),
+          wonLegs: Number(cells[headerInfo.winLeg]),
+          lostLegs: Number(cells[headerInfo.lostLeg])
+        };
+        if (rec.player && [rec.wonGames, rec.lostGames, rec.wonLegs, rec.lostLegs].every(Number.isFinite)) records.push(rec);
+        continue;
+      }
+    }
+
+    // Fallback: Name gefolgt von vier Zahlen. Reihenfolge: Spiele gewonnen/verloren, Legs gewonnen/verloren.
+    const match = raw.replace(/\u00a0/g, " ").match(/^(.+?)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/);
+    if (match && !/^(name|spieler)/i.test(match[1])) {
+      records.push({
+        player: match[1].trim(), wonGames: Number(match[2]), lostGames: Number(match[3]),
+        wonLegs: Number(match[4]), lostLegs: Number(match[5]), fallbackOrder: true
+      });
+    }
+  }
+  // Fallback für Copy/Paste, bei dem jede Tabellenzelle eine eigene Zeile erhält:
+  // Spielername, Spiele gewonnen, Spiele verloren, Legs gewonnen, Legs verloren.
+  if (!records.length) {
+    const lines = splitImportLines(text);
+    for (let i=0; i<lines.length-4; i++) {
+      if (/^\d+$/.test(lines[i]) || /^(name|spieler|spiele|legs|gewonnen|verloren)/i.test(lines[i])) continue;
+      const nums = lines.slice(i+1,i+5).map(Number);
+      if (nums.every(n => Number.isInteger(n) && n >= 0)) {
+        records.push({player:lines[i], wonGames:nums[0], lostGames:nums[1], wonLegs:nums[2], lostLegs:nums[3], fallbackOrder:true});
+        i += 4;
+      }
+    }
+  }
+  return records;
+}
+
+function aggregateImportPreview(type, records) {
+  const grouped = new Map();
+  const unmatched = new Map();
+
+  for (const record of records) {
+    const member = matchImportedPlayer(record.player);
+    if (!member) {
+      unmatched.set(record.player, record);
+      continue;
+    }
+    if (!grouped.has(member.id)) grouped.set(member.id, { member, sourceNames: new Set(), records: [] });
+    const entry = grouped.get(member.id);
+    entry.sourceNames.add(record.player);
+    entry.records.push(record);
+  }
+
+  const matched = [...grouped.values()].map(entry => {
+    if (type === "bestleistungen") {
+      const stats = { count180: 0, highscores: [], highfinishes: [], shortgames: [] };
+      const maps = { highscore: new Map(), highfinish: new Map(), shortgame: new Map() };
+      for (const record of entry.records) {
+        if (record.category === "highscore" && record.value === 180) stats.count180 += record.count;
+        const map = maps[record.category];
+        if (map) map.set(record.value, (map.get(record.value) || 0) + record.count);
+      }
+      stats.highscores = [...maps.highscore].map(([value,count]) => ({value,count})).sort((a,b)=>b.value-a.value);
+      stats.highfinishes = [...maps.highfinish].map(([value,count]) => ({value,count})).sort((a,b)=>b.value-a.value);
+      stats.shortgames = [...maps.shortgame].map(([value,count]) => ({value,count})).sort((a,b)=>a.value-b.value);
+      return { ...entry, data: stats };
+    }
+    const data = entry.records.reduce((sum, record) => ({
+      wonGames: sum.wonGames + (Number(record.wonGames) || 0),
+      lostGames: sum.lostGames + (Number(record.lostGames) || 0),
+      wonLegs: sum.wonLegs + (Number(record.wonLegs) || 0),
+      lostLegs: sum.lostLegs + (Number(record.lostLegs) || 0)
+    }), { wonGames:0, lostGames:0, wonLegs:0, lostLegs:0 });
+    return { ...entry, data };
+  });
+  return { matched, unmatched: [...unmatched.keys()] };
+}
+
+function mergeBestSources(sources) {
+  const total = { count180:0, highscores:[], highfinishes:[], shortgames:[], quelle:"3k-import" };
+  const maps = { highscores:new Map(), highfinishes:new Map(), shortgames:new Map() };
+  for (const source of Object.values(sources || {})) {
+    total.count180 += Number(source?.count180 || 0);
+    for (const key of ["highscores","highfinishes","shortgames"]) {
+      for (const item of normalizeList(source?.[key] || [])) maps[key].set(item.value, (maps[key].get(item.value)||0) + item.count);
+    }
+  }
+  total.highscores=[...maps.highscores].map(([value,count])=>({value,count})).sort((a,b)=>b.value-a.value);
+  total.highfinishes=[...maps.highfinishes].map(([value,count])=>({value,count})).sort((a,b)=>b.value-a.value);
+  total.shortgames=[...maps.shortgames].map(([value,count])=>({value,count})).sort((a,b)=>a.value-b.value);
+  return total;
+}
+
+function mergeStatsSources(sources) {
+  return Object.values(sources || {}).reduce((sum, source) => ({
+    spieleGewonnen: sum.spieleGewonnen + (Number(source?.wonGames ?? source?.spieleGewonnen ?? 0) || 0),
+    spieleVerloren: sum.spieleVerloren + (Number(source?.lostGames ?? source?.spieleVerloren ?? 0) || 0),
+    legsGewonnen: sum.legsGewonnen + (Number(source?.wonLegs ?? source?.legsGewonnen ?? 0) || 0),
+    legsVerloren: sum.legsVerloren + (Number(source?.lostLegs ?? source?.legsVerloren ?? 0) || 0),
+    quelle: "3k-import"
+  }), { spieleGewonnen:0, spieleVerloren:0, legsGewonnen:0, legsVerloren:0, quelle:"3k-import" });
+}
+
+function renderImportPreview(preview, type) {
+  const box = $("import3kPreview");
+  const rows = [];
+  for (const entry of preview.matched) {
+    const summary = type === "bestleistungen"
+      ? `180: ${entry.data.count180} · HS: ${listTotal(entry.data.highscores)} · HF: ${listTotal(entry.data.highfinishes)} · SG: ${listTotal(entry.data.shortgames)}`
+      : `${entry.data.wonGames}:${entry.data.lostGames} Spiele · ${entry.data.wonLegs}:${entry.data.lostLegs} Legs`;
+    rows.push(`<div class="import-preview-row"><div><strong>${escapeHtml(nickname(entry.member))}</strong><small>${escapeHtml(displayName(entry.member))}</small></div><span>${escapeHtml(summary)}</span></div>`);
+  }
+  for (const name of preview.unmatched) rows.push(`<div class="import-preview-row unmatched"><div><strong>Nicht zugeordnet</strong><small>${escapeHtml(name)}</small></div><span>Bitte Name im Konto prüfen</span></div>`);
+
+  box.innerHTML = `
+    <div class="import-preview-summary">
+      <span class="import-preview-pill good">${preview.matched.length} zugeordnet</span>
+      <span class="import-preview-pill bad">${preview.unmatched.length} nicht zugeordnet</span>
+    </div>
+    ${rows.join("")}
+  `;
+  box.hidden = false;
+}
+
+function preview3kImport() {
+  const type = $("import3kArt").value;
+  const text = $("import3kText").value;
+  const msg = $("import3kMeldung");
+  msg.hidden = true;
+  const records = type === "bestleistungen" ? parseBestleistungenImport(text) : parseSpielstatistikImport(text);
+  if (!records.length) {
+    import3kPreviewData = null;
+    $("save3kImportButton").disabled = true;
+    $("import3kPreview").hidden = true;
+    msg.textContent = "Ich konnte aus dem eingefügten Text noch keine passenden 3K-Zeilen erkennen. Bitte die komplette Tabelle inklusive Namen und Zahlen kopieren.";
+    msg.className = "profil-message error"; msg.hidden = false;
+    return;
+  }
+  const preview = aggregateImportPreview(type, records);
+  import3kPreviewData = { type, league: $("import3kLiga").value, preview };
+  renderImportPreview(preview, type);
+  $("save3kImportButton").disabled = preview.matched.length === 0;
+  msg.textContent = `${records.length} Tabellenzeilen erkannt. Bitte Vorschau prüfen und erst dann speichern.`;
+  msg.className = "profil-message success"; msg.hidden = false;
+}
+
+async function save3kImport() {
+  const state = import3kPreviewData;
+  if (!state || !state.preview.matched.length) return;
+  const button = $("save3kImportButton"), msg = $("import3kMeldung");
+  button.disabled = true;
+  try {
+    for (const entry of state.preview.matched) {
+      const member = members.find(item => item.id === entry.member.id) || entry.member;
+      const currentImport = member.dreiKImport && typeof member.dreiKImport === "object" ? structuredClone(member.dreiKImport) : {};
+      if (state.type === "bestleistungen") {
+        currentImport.bestleistungen = currentImport.bestleistungen || {};
+        currentImport.bestleistungen[state.league] = { ...entry.data, importiertAm: new Date().toISOString() };
+        const bestleistungen3k = mergeBestSources(currentImport.bestleistungen);
+        await updateDoc(doc(db,"mitglieder",member.id), {
+          dreiKImport: currentImport,
+          bestleistungen3k,
+          bestleistungenGeaendertAm: serverTimestamp(),
+          bestleistungenGeaendertVon: String(login?.benutzername || "3k-import")
+        });
+        member.dreiKImport = currentImport; member.bestleistungen3k = bestleistungen3k;
+      } else {
+        currentImport.spielstatistik = currentImport.spielstatistik || {};
+        currentImport.spielstatistik[state.league] = { ...entry.data, importiertAm: new Date().toISOString() };
+        const spielstatistik3k = mergeStatsSources(currentImport.spielstatistik);
+        await updateDoc(doc(db,"mitglieder",member.id), {
+          dreiKImport: currentImport,
+          spielstatistik3k,
+          spielstatistikGeaendertAm: serverTimestamp(),
+          spielstatistikGeaendertVon: String(login?.benutzername || "3k-import")
+        });
+        member.dreiKImport = currentImport; member.spielstatistik3k = spielstatistik3k;
+      }
+    }
+    const refreshed = members.find(x => x.id === selectedMember?.id);
+    if (refreshed) { selectedMember = refreshed; renderBestleistungen(refreshed); renderSpielstatistik(refreshed); fillBestleistungenForm(refreshed); }
+    msg.textContent = `${state.preview.matched.length} Spieler wurden aus ${state.league === "ruhrpott" ? "Ruhrpott" : "Herne"} aktualisiert.${state.preview.unmatched.length ? ` ${state.preview.unmatched.length} Namen konnten nicht zugeordnet werden.` : ""}`;
+    msg.className = "profil-message success"; msg.hidden = false;
+    $("import3kText").value = "";
+    import3kPreviewData = null;
+    $("save3kImportButton").disabled = true;
+  } catch (error) {
+    console.error(error);
+    msg.textContent = "Der 3K-Import konnte nicht vollständig gespeichert werden.";
+    msg.className = "profil-message error"; msg.hidden = false;
+  } finally { button.disabled = !import3kPreviewData; }
+}
+
+function open3kImport() {
+  $("import3kPanel").hidden = false;
+  $("import3kMeldung").hidden = true;
+  $("import3kPreview").hidden = true;
+  $("save3kImportButton").disabled = true;
+  import3kPreviewData = null;
+  $("import3kPanel").scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+function close3kImport() { $("import3kPanel").hidden = true; import3kPreviewData = null; }
 
 function showMessage(text, success=false){ const box=$("profilMeldung"); box.textContent=text; box.className=`profil-message ${success?"success":"error"}`; box.hidden=false; }
 function clearMessage(){ $("profilMeldung").hidden=true; }
@@ -289,7 +587,7 @@ function openProfile(memberId){
   const isOwn=Boolean(login?.benutzername)&&String(login.benutzername).toLowerCase()===String(selectedMember.benutzername||selectedMember.id).toLowerCase();
   $("eigenesProfilTools").hidden=!isOwn; if(isOwn) $("nicknameInput").value=nickname(selectedMember);
   const canEdit=BESTLEISTUNGEN_EDIT_ROLES.includes(String(login?.rolle||"").toLowerCase());
-  $("bestleistungenAdmin").hidden=!canEdit; $("sync3kButton").hidden=!canEdit; $("bestleistungenMeldung").hidden=true; $("sync3kMeldung").hidden=true; if(canEdit) fillBestleistungenForm(selectedMember);
+  $("bestleistungenAdmin").hidden=!canEdit; $("open3kImportButton").hidden=!canEdit; $("bestleistungenMeldung").hidden=true; $("sync3kMeldung").hidden=true; $("import3kPanel").hidden=true; if(canEdit) fillBestleistungenForm(selectedMember);
   $("kaderListeBereich").hidden=true; $("profilBereich").hidden=false; window.scrollTo({top:0,behavior:"smooth"});
 }
 function backToRoster(){ selectedMember=null; $("profilBereich").hidden=true; $("kaderListeBereich").hidden=false; window.scrollTo({top:0,behavior:"smooth"}); }
@@ -314,5 +612,11 @@ $("fotoInput").addEventListener("change",event=>savePhoto(event.target.files?.[0
 $("nicknameButton").addEventListener("click",saveNickname);
 $("passwortButton").addEventListener("click",changePassword);
 $("bestleistungenSpeichern").addEventListener("click",saveBestleistungen);
-$("sync3kButton").addEventListener("click",sync3k);
+$("open3kImportButton").addEventListener("click",open3kImport);
+$("close3kImportButton").addEventListener("click",close3kImport);
+$("preview3kImportButton").addEventListener("click",preview3kImport);
+$("save3kImportButton").addEventListener("click",save3kImport);
+$("import3kText").addEventListener("input",()=>{ import3kPreviewData=null; $("save3kImportButton").disabled=true; });
+$("import3kLiga").addEventListener("change",()=>{ import3kPreviewData=null; $("save3kImportButton").disabled=true; });
+$("import3kArt").addEventListener("change",()=>{ import3kPreviewData=null; $("save3kImportButton").disabled=true; $("import3kPreview").hidden=true; });
 loadMembers();

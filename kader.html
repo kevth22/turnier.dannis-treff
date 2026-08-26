@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dart11en | Kader</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="kader.css?v=4">
+  <link rel="stylesheet" href="kader.css?v=6">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#c40030">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -52,14 +52,50 @@
         <div class="section-title-row">
           <div>
             <h3 class="best-section-title">🏆 Liga-Bestleistungen</h3>
-            <p class="best-source-hint">Zusammengeführt aus beiden 3K-Ligen.</p>
+            <p class="best-source-hint">Importiert und zusammengeführt aus beiden 3K-Ligen.</p>
           </div>
-          <button id="sync3kButton" class="sync-3k-button" type="button" hidden>🔄 3K synchronisieren</button>
+          <button id="open3kImportButton" class="sync-3k-button" type="button" hidden>📥 3K importieren</button>
         </div>
 
         <div id="bestleistungenGrid" class="bestleistungen-grid"></div>
         <p id="keineBestleistungen" class="empty-hint" hidden>Noch keine Bestleistungen hinterlegt.</p>
         <p id="sync3kMeldung" class="profil-message" hidden></p>
+
+        <div id="import3kPanel" class="import-3k-panel" hidden>
+          <div class="import-3k-head">
+            <div>
+              <strong>📥 3K-Daten importieren</strong>
+              <small>Kopiere die sichtbare Tabelle auf der 3K-Seite und füge sie hier ein.</small>
+            </div>
+            <button id="close3kImportButton" type="button" aria-label="Import schließen">✕</button>
+          </div>
+
+          <div class="import-3k-options">
+            <label>Liga
+              <select id="import3kLiga">
+                <option value="ruhrpott">Ruhrpott</option>
+                <option value="herne">Herne</option>
+              </select>
+            </label>
+            <label>Datenart
+              <select id="import3kArt">
+                <option value="bestleistungen">Bestleistungen</option>
+                <option value="spielstatistik">Spielstatistik</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="import-3k-help" id="import3kHelp">
+            Öffne in 3K die entsprechende Tabelle, markiere/kopiere den Tabelleninhalt und füge ihn vollständig ein. Spielernamen werden über Vorname + Nachname zugeordnet.
+          </div>
+          <textarea id="import3kText" rows="10" placeholder="3K-Tabelle hier einfügen …"></textarea>
+          <div class="import-3k-actions">
+            <button id="preview3kImportButton" class="profil-action" type="button">Vorschau prüfen</button>
+            <button id="save3kImportButton" class="profil-action best-save" type="button" disabled>Import speichern</button>
+          </div>
+          <div id="import3kPreview" class="import-3k-preview" hidden></div>
+          <p id="import3kMeldung" class="profil-message" hidden></p>
+        </div>
 
         <div class="player-stats-block">
           <div class="player-stats-title">
@@ -134,7 +170,7 @@
   <a href="turniere.html">🎯<br>Turniere</a>
 </nav>
 
-<script type="module" src="kader.js?v=5"></script>
+<script type="module" src="kader.js?v=7"></script>
 <script type="module" src="push-foreground.js?v=10.0.1"></script>
 <script src="pwa.js?v=7" defer></script>
 </body>
