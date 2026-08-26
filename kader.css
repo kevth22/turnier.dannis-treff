@@ -4,3 +4,61 @@
 
 /* 3K Bestleistungen */
 .best-source-hint{margin:2px 0 0;color:#969696;font-size:.78rem}.section-title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.sync-3k-button{border:1px solid rgba(255,255,255,.12);background:#202020;color:#fff;border-radius:11px;padding:10px 12px;font-weight:800;cursor:pointer}.sync-3k-button:disabled{opacity:.55}.best-card-clickable{appearance:none;color:#fff;width:100%;cursor:pointer;position:relative}.best-icon{display:block;font-size:1.15rem;margin-bottom:5px}.best-tap{display:block;margin-top:7px;font-size:.64rem;color:#d9697e;font-weight:800;text-transform:uppercase;letter-spacing:.05em}.best-detail{grid-column:1/-1;background:#151515;border:1px solid rgba(255,255,255,.1);border-radius:15px;padding:12px;margin-top:-3px}.best-detail-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}.best-detail-head button{border:0;background:transparent;color:#aaa;font-size:1rem;cursor:pointer}.best-detail-list{display:grid;gap:6px}.best-detail-row{display:flex;justify-content:space-between;align-items:center;background:#1e1e1e;border-radius:9px;padding:9px 11px}.best-detail-row strong{color:#d9697e}.best-detail-single{text-align:center;padding:12px}.best-detail-single strong{display:block;font-size:2rem}.best-detail-single span,.best-detail-empty{color:#aaa;font-size:.82rem}.best-manual-note{font-size:.75rem;color:#aaa;background:#1b1b1b;border-radius:10px;padding:9px 10px;margin-bottom:10px}.best-edit-grid textarea{width:100%;box-sizing:border-box;margin-top:6px;background:#0d0d0d;color:#fff;border:1px solid #383838;border-radius:11px;padding:11px;font:inherit;outline:none;resize:vertical}.best-edit-grid textarea:focus{border-color:#c40030}.best-edit-grid-detailed{grid-template-columns:1fr}.best-edit-grid-detailed label:first-child{max-width:180px}@media(min-width:650px){.best-edit-grid-detailed{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.section-title-row{display:block}.sync-3k-button{width:100%;margin-top:10px}}
+
+/* Profil-Bestleistungen V4 – kompakte Spieleransicht */
+.bestleistungen-grid{display:block}
+.best-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+.best-card.best-card-clickable{min-height:126px;padding:14px 14px 13px;text-align:left;border-radius:17px;background:linear-gradient(145deg,#1c1c1c,#161616);border:1px solid rgba(255,255,255,.09);box-shadow:none;transition:border-color .18s ease,background .18s ease,transform .12s ease}
+.best-card.best-card-clickable:active{transform:scale(.985)}
+.best-card.best-card-clickable.active{border-color:rgba(217,105,126,.72);background:#202020}
+.best-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.best-icon{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;margin:0;border-radius:9px;background:rgba(255,255,255,.06);font-size:1rem}
+.best-chevron{font-size:1.35rem;line-height:1;color:#777;transform:translateY(-1px)}
+.best-card.active .best-chevron{color:#d9697e;transform:rotate(90deg)}
+.best-value{display:block;font-size:1.7rem;font-weight:900;line-height:1;color:#fff;letter-spacing:-.02em}
+.best-label{display:block;margin-top:7px;color:#f2f2f2;font-size:.82rem;font-weight:800}
+.best-meta{display:block;margin-top:3px;color:#858585;font-size:.68rem;font-weight:600}
+.best-tap{display:none}
+.best-detail-panel{margin-top:10px;background:#171717;border:1px solid rgba(255,255,255,.09);border-radius:17px;padding:13px 14px 14px;animation:profileIn .16s ease}
+.best-detail-panel[hidden]{display:none}
+.best-detail-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.07)}
+.best-detail-head>div{display:flex;align-items:center;gap:8px}.best-detail-icon{font-size:1rem}
+.best-detail-head strong{font-size:.93rem}.best-detail-head button{width:30px;height:30px;border:0;border-radius:9px;background:#222;color:#999;font-size:.8rem;cursor:pointer}
+.best-detail-list{display:grid;gap:7px}.best-detail-row{display:flex;justify-content:space-between;align-items:center;background:#1f1f1f;border-radius:10px;padding:9px 11px;font-size:.84rem}.best-detail-row strong{color:#d9697e;font-size:.78rem}.best-detail-row span{font-weight:800;color:#eee}
+.best-detail-single{text-align:left;padding:3px 0}.best-detail-single strong{display:inline;font-size:1.15rem;margin-right:6px}.best-detail-single span,.best-detail-empty{color:#929292;font-size:.8rem}
+.section-title-row{align-items:center}.section-title-row h3{margin-bottom:4px}.best-source-hint{font-size:.76rem;line-height:1.35}
+.sync-3k-button{flex:0 0 auto;border-radius:999px;padding:8px 11px;font-size:.72rem;background:#1e1e1e;color:#ddd}
+@media(max-width:520px){.section-title-row{display:flex;align-items:flex-start}.sync-3k-button{width:auto;margin-top:0;max-width:150px;white-space:normal;line-height:1.15}.best-source-hint{max-width:210px}}
+@media(min-width:650px){.best-summary-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* Kader v24 – Schließen-Button der Bestleistungsdetails sauber oben rechts */
+.best-detail-panel{
+  position:relative;
+  padding-top:16px;
+}
+.best-detail-head{
+  padding-right:34px;
+}
+.best-detail-head button#closeBestDetail{
+  position:absolute;
+  top:8px;
+  right:8px;
+  width:28px;
+  height:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  margin:0;
+  border:0;
+  border-radius:8px;
+  background:rgba(255,255,255,.05);
+  color:#8d8d8d;
+  font-size:.72rem;
+  line-height:1;
+  z-index:2;
+}
+.best-detail-head button#closeBestDetail:active{
+  background:rgba(255,255,255,.1);
+  color:#fff;
+}

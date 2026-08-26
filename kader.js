@@ -79,29 +79,96 @@ function renderDetailList(label, list, suffix="") {
 
 function renderBestleistungen(member) {
   const best = getBestleistungen(member);
-  const hasAny = best.count180 > 0 || best.highscores.length || best.highfinishes.length || best.shortgames.length;
+  const bestHighscore = best.highscores.length ? best.highscores[0].value : null;
+  const bestHighfinish = best.highfinishes.length ? best.highfinishes[0].value : null;
+  const bestShortgame = best.shortgames.length ? best.shortgames[0].value : null;
+
   const cards = [
-    { key:"180", icon:"🎯", label:"180", value: best.count180, detail: `<div class="best-detail-single"><strong>${best.count180}</strong><span>geworfene 180er</span></div>` },
-    { key:"highscore", icon:"🔥", label:"Highscore", value: listTotal(best.highscores), detail: renderDetailList("Highscore", best.highscores) },
-    { key:"highfinish", icon:"✅", label:"Highfinish", value: listTotal(best.highfinishes), detail: renderDetailList("Highfinish", best.highfinishes) },
-    { key:"shortgame", icon:"⚡", label:"Short Game", value: listTotal(best.shortgames), detail: renderDetailList("Short Game", best.shortgames, " Darts") }
+    {
+      key:"180",
+      icon:"🎯",
+      label:"180",
+      value: String(best.count180 || 0),
+      meta: best.count180 === 1 ? "geworfen" : "geworfen",
+      detail: `<div class="best-detail-single"><strong>${best.count180 || 0}</strong><span>geworfene 180er</span></div>`
+    },
+    {
+      key:"highscore",
+      icon:"🔥",
+      label:"Highscore",
+      value: bestHighscore ?? "–",
+      meta: best.highscores.length ? `${listTotal(best.highscores)} Einträge` : "noch keiner",
+      detail: renderDetailList("Highscore", best.highscores)
+    },
+    {
+      key:"highfinish",
+      icon:"✅",
+      label:"Highfinish",
+      value: bestHighfinish ?? "–",
+      meta: best.highfinishes.length ? `${listTotal(best.highfinishes)} Einträge` : "noch keins",
+      detail: renderDetailList("Highfinish", best.highfinishes)
+    },
+    {
+      key:"shortgame",
+      icon:"⚡",
+      label:"Short Game",
+      value: bestShortgame ?? "–",
+      meta: bestShortgame ? "Darts" : "noch keins",
+      detail: renderDetailList("Short Game", best.shortgames, " Darts")
+    }
   ];
-  $("bestleistungenGrid").innerHTML = cards.map(card => `
-    <button class="best-card best-card-clickable" type="button" data-best-key="${card.key}">
-      <span class="best-icon">${card.icon}</span><span class="best-value">${escapeHtml(card.value)}</span><span class="best-label">${escapeHtml(card.label)}</span>
-      <span class="best-tap">Details</span>
-    </button>
-    <div class="best-detail" data-best-detail="${card.key}" hidden><div class="best-detail-head"><strong>${card.icon} ${escapeHtml(card.label)}</strong><button type="button" data-close-best="${card.key}">✕</button></div>${card.detail}</div>
-  `).join("");
-  $("bestleistungenGrid").hidden = !hasAny;
-  $("keineBestleistungen").hidden = hasAny;
+
+  $("bestleistungenGrid").innerHTML = `
+    <div class="best-summary-grid">
+      ${cards.map(card => `
+        <button class="best-card best-card-clickable" type="button" data-best-key="${card.key}" aria-expanded="false">
+          <span class="best-card-top"><span class="best-icon">${card.icon}</span><span class="best-chevron">›</span></span>
+          <span class="best-value">${escapeHtml(card.value)}</span>
+          <span class="best-label">${escapeHtml(card.label)}</span>
+          <span class="best-meta">${escapeHtml(card.meta)}</span>
+        </button>
+      `).join("")}
+    </div>
+    <div id="bestDetailPanel" class="best-detail-panel" hidden></div>
+  `;
+
+  $("bestleistungenGrid").hidden = false;
+  $("keineBestleistungen").hidden = true;
+
+  const detailPanel = $("bestDetailPanel");
   document.querySelectorAll("[data-best-key]").forEach(btn => btn.addEventListener("click", () => {
-    const detail = document.querySelector(`[data-best-detail="${btn.dataset.bestKey}"]`);
-    if (detail) detail.hidden = !detail.hidden;
-  }));
-  document.querySelectorAll("[data-close-best]").forEach(btn => btn.addEventListener("click", () => {
-    const detail = document.querySelector(`[data-best-detail="${btn.dataset.closeBest}"]`);
-    if (detail) detail.hidden = true;
+    const card = cards.find(item => item.key === btn.dataset.bestKey);
+    if (!card) return;
+    const alreadyOpen = detailPanel.dataset.openKey === card.key && !detailPanel.hidden;
+
+    document.querySelectorAll("[data-best-key]").forEach(item => {
+      item.classList.remove("active");
+      item.setAttribute("aria-expanded", "false");
+    });
+
+    if (alreadyOpen) {
+      detailPanel.hidden = true;
+      detailPanel.dataset.openKey = "";
+      return;
+    }
+
+    btn.classList.add("active");
+    btn.setAttribute("aria-expanded", "true");
+    detailPanel.dataset.openKey = card.key;
+    detailPanel.innerHTML = `
+      <div class="best-detail-head">
+        <div><span class="best-detail-icon">${card.icon}</span><strong>${escapeHtml(card.label)}</strong></div>
+        <button type="button" id="closeBestDetail" aria-label="Details schließen">✕</button>
+      </div>
+      ${card.detail}
+    `;
+    detailPanel.hidden = false;
+    $("closeBestDetail")?.addEventListener("click", () => {
+      detailPanel.hidden = true;
+      detailPanel.dataset.openKey = "";
+      btn.classList.remove("active");
+      btn.setAttribute("aria-expanded", "false");
+    });
   }));
 }
 
