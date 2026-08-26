@@ -8,6 +8,7 @@ function renderAccountControls() {
 
   const captainCard = document.getElementById("captainCard");
   const kasseCard = document.getElementById("kasseCard");
+  const cameraCard = document.getElementById("cameraCard");
   const verwaltungSection = document.getElementById("verwaltungSection");
 
   if (!user) {
@@ -18,6 +19,7 @@ function renderAccountControls() {
     `;
     if (captainCard) captainCard.hidden = true;
     if (kasseCard) kasseCard.hidden = true;
+    if (cameraCard) cameraCard.hidden = true;
     if (verwaltungSection) verwaltungSection.hidden = true;
     return;
   }
@@ -28,6 +30,7 @@ function renderAccountControls() {
 
   if (captainCard) captainCard.hidden = !canCaptain;
   if (kasseCard) kasseCard.hidden = !canViewKasse;
+  if (cameraCard) cameraCard.hidden = !canCaptain;
   if (verwaltungSection) verwaltungSection.hidden = !(canCaptain || canViewKasse);
 
   const roleLabels = {

@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v44-3k-reset";
+const VERSION = 'dart11en-app-v38-camera-control';
 
 const CORE_FILES = [
   "./",

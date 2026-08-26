@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kamera-Steuerung | Dart11en</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="kamera-steuerung.css?v=1">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#e00022">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+</head>
+<body class="camera-page">
+<header class="app-header camera-header">
+  <a href="index.html" class="camera-back">‹</a>
+  <div><h1>🎥 Kamera-Steuerung</h1><p>Board links & rechts</p></div>
+</header>
+
+<main class="app-container camera-shell">
+  <section id="cameraAccessDenied" class="info-card" hidden>
+    <h2>🔒 Kein Zugriff</h2>
+    <p>Die Kamerasteuerung ist nur für Admin und Captain freigeschaltet.</p>
+  </section>
+
+  <div id="cameraApp" hidden>
+    <section class="camera-status-card">
+      <div>
+        <small>STREAMING-PC</small>
+        <strong id="bridgeStatus">Nicht verbunden</strong>
+      </div>
+      <button id="bridgeSettingsButton" class="camera-icon-button" type="button">⚙️</button>
+    </section>
+
+    <section class="camera-board-switch" aria-label="Kamera auswählen">
+      <button class="active" data-board="left" type="button">⬅️ Board links</button>
+      <button data-board="right" type="button">Board rechts ➡️</button>
+    </section>
+
+    <section class="camera-controller-card">
+      <div class="camera-current">
+        <span id="currentBoardLabel">Board links</span>
+        <strong id="currentTarget">Gesamtansicht</strong>
+      </div>
+
+      <div id="dartboardControl" class="camera-dartboard" role="application" aria-label="Dartboard antippen"></div>
+
+      <div class="camera-quick-actions">
+        <button type="button" data-preset="full">🎬 Gesamt</button>
+        <button type="button" data-preset="bull">🎯 Bull</button>
+        <button type="button" data-preset="T20">🔥 T20</button>
+        <button type="button" data-preset="D20">⭕ D20</button>
+      </div>
+
+      <p class="camera-hint">Tippe direkt auf ein Feld. Die App erkennt Single, Triple, Double und Bull.</p>
+      <div id="cameraMessage" class="camera-message" aria-live="polite"></div>
+    </section>
+
+    <section class="camera-test-card">
+      <h2>Feinsteuerung</h2>
+      <div class="camera-nudge-grid">
+        <span></span><button data-nudge="up" type="button">▲</button><span></span>
+        <button data-nudge="left" type="button">◀</button><button data-nudge="reset" type="button">●</button><button data-nudge="right" type="button">▶</button>
+        <span></span><button data-nudge="down" type="button">▼</button><span></span>
+      </div>
+      <div class="camera-zoom-row">
+        <button data-zoom="out" type="button">− Zoom</button>
+        <button data-zoom="in" type="button">+ Zoom</button>
+      </div>
+      <small>Für die erste Kalibrierung kannst du den Ausschnitt damit nachjustieren.</small>
+    </section>
+  </div>
+</main>
+
+<div id="bridgeModal" class="camera-modal" hidden>
+  <div class="camera-modal-card">
+    <div class="camera-modal-head"><div><small>VERBINDUNG</small><h2>Streaming-PC</h2></div><button id="bridgeModalClose" type="button">×</button></div>
+    <label>Bridge-Adresse<input id="bridgeUrl" type="url" placeholder="https://deine-bridge.trycloudflare.com"></label>
+    <label>Steuer-PIN<input id="bridgePin" type="password" inputmode="numeric" placeholder="z. B. 4711"></label>
+    <button id="bridgeSave" class="main-button" type="button">Speichern & testen</button>
+    <p class="camera-modal-note">Die Streamlabs-Zugangsdaten bleiben auf dem Streaming-PC. In der App wird nur die Bridge-Adresse gespeichert.</p>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html">🏠<br>Home</a>
+  <a href="spieltag-center.html">🚌<br>Spieltag</a>
+  <a href="kalender.html">📅<br>Kalender</a>
+  <a href="liga.html">🏆<br>Liga</a>
+  <a href="kader.html">👥<br>Kader</a>
+</nav>
+<script type="module" src="kamera-steuerung.js?v=1"></script>
+<script src="pwa.js?v=4" defer></script>
+</body>
+</html>
