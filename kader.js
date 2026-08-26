@@ -340,58 +340,70 @@ function findHeaderIndex(headers, patterns) {
 }
 
 function parseSpielstatistikImport(text) {
-  const rawLines = String(text || "").replace(/\r/g, "").split("\n").map(x => x.trim()).filter(Boolean);
+  const lines = splitImportLines(text);
   const records = [];
-  let headerInfo = null;
 
-  // Bevorzugt Tabulatoren aus einer kopierten HTML-Tabelle nutzen.
-  for (const raw of rawLines) {
-    const cells = raw.split(/\t+/).map(cell => cell.trim()).filter(cell => cell !== "");
-    if (cells.length >= 4) {
-      const normalized = cells.map(normalizeHeader);
-      const winGame = findHeaderIndex(normalized, [/spielegewonnen/, /gewonnenespiele/, /^gewonnen$/, /^siege$/]);
-      const lostGame = findHeaderIndex(normalized, [/spieleverloren/, /verlorenespiele/, /^verloren$/, /^niederlagen$/]);
-      const winLeg = findHeaderIndex(normalized, [/legsgewonnen/, /gewonnenelegs/]);
-      const lostLeg = findHeaderIndex(normalized, [/legsverloren/, /verlorenelegs/]);
-      if ([winGame, lostGame, winLeg, lostLeg].every(i => i >= 0)) {
-        headerInfo = { winGame, lostGame, winLeg, lostLeg, name: 0 };
-        continue;
-      }
-      if (headerInfo && cells.length > Math.max(headerInfo.winGame, headerInfo.lostGame, headerInfo.winLeg, headerInfo.lostLeg)) {
-        const rec = {
-          player: cells[headerInfo.name],
-          wonGames: Number(cells[headerInfo.winGame]),
-          lostGames: Number(cells[headerInfo.lostGame]),
-          wonLegs: Number(cells[headerInfo.winLeg]),
-          lostLegs: Number(cells[headerInfo.lostLeg])
-        };
-        if (rec.player && [rec.wonGames, rec.lostGames, rec.wonLegs, rec.lostLegs].every(Number.isFinite)) records.push(rec);
-        continue;
-      }
+  // 3K kopiert die Spielerstatistik auf iPhone/Safari mehrzeilig:
+  // Spieler + Mannschaft, danach jeweils
+  // Spiele Einzel, Legs Einzel, Spiele Doppel, Legs Doppel,
+  // Spiele Gesamt, Legs Gesamt. Dazwischen stehen die Differenzen (+/-).
+  // Für Dart11en interessieren ausschließlich die beiden Gesamt-Paare.
+  const playerStarts = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (/^Pl\.?\s*\t?/i.test(line) || /^Spieler\b/i.test(line)) continue;
+
+    // Rang ist bei 3K manchmal vorhanden ("7. Kevin ..."), manchmal fehlt er.
+    // Mannschaft kann mit Tabs/mehreren Leerzeichen angehängt sein.
+    const match = line.match(/^(?:\d+\.\s*)?(.+?\([^()]+\))\s+(?:Dart11en\b|[^\t]+?)(?:\s{2,}|\t|$)/i)
+      || line.match(/^(?:\d+\.\s*)?(.+?\([^()]+\))\s+Dart11en\b/i);
+    if (match) playerStarts.push({ index: i, player: match[1].trim() });
+  }
+
+  for (let p = 0; p < playerStarts.length; p++) {
+    const current = playerStarts[p];
+    const end = p + 1 < playerStarts.length ? playerStarts[p + 1].index : lines.length;
+    const block = lines.slice(current.index, end).join("\n");
+
+    // Alle W-L-Paare im Spielerblock einsammeln. Differenzzeilen wie +8/-4
+    // werden bewusst ignoriert.
+    const pairs = [];
+    const pairRegex = /(\d+)\s*-\s*(\d+)/g;
+    let pairMatch;
+    while ((pairMatch = pairRegex.exec(block)) !== null) {
+      pairs.push([Number(pairMatch[1]), Number(pairMatch[2])]);
     }
 
-    // Fallback: Name gefolgt von vier Zahlen. Reihenfolge: Spiele gewonnen/verloren, Legs gewonnen/verloren.
-    const match = raw.replace(/\u00a0/g, " ").match(/^(.+?)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/);
-    if (match && !/^(name|spieler)/i.test(match[1])) {
+    // Normaler 3K-Aufbau = 6 Paare. Wir nehmen Paar 5 und 6 (= Gesamt).
+    // Falls sich später zusätzliche Spalten davor einschieben, bleiben die
+    // letzten beiden Paare weiterhin Gesamt-Spiele und Gesamt-Legs.
+    if (pairs.length >= 6) {
+      const games = pairs[pairs.length - 2];
+      const legs = pairs[pairs.length - 1];
       records.push({
-        player: match[1].trim(), wonGames: Number(match[2]), lostGames: Number(match[3]),
-        wonLegs: Number(match[4]), lostLegs: Number(match[5]), fallbackOrder: true
+        player: current.player,
+        wonGames: games[0],
+        lostGames: games[1],
+        wonLegs: legs[0],
+        lostLegs: legs[1]
       });
     }
   }
-  // Fallback für Copy/Paste, bei dem jede Tabellenzelle eine eigene Zeile erhält:
-  // Spielername, Spiele gewonnen, Spiele verloren, Legs gewonnen, Legs verloren.
+
+  // Zweiter Fallback für Desktop-Kopien, bei denen eine komplette Zeile mit
+  // allen sechs W-L-Paaren erhalten bleibt.
   if (!records.length) {
-    const lines = splitImportLines(text);
-    for (let i=0; i<lines.length-4; i++) {
-      if (/^\d+$/.test(lines[i]) || /^(name|spieler|spiele|legs|gewonnen|verloren)/i.test(lines[i])) continue;
-      const nums = lines.slice(i+1,i+5).map(Number);
-      if (nums.every(n => Number.isInteger(n) && n >= 0)) {
-        records.push({player:lines[i], wonGames:nums[0], lostGames:nums[1], wonLegs:nums[2], lostLegs:nums[3], fallbackOrder:true});
-        i += 4;
+    for (const raw of String(text || "").replace(/\r/g, "").split("\n")) {
+      const nameMatch = raw.match(/^(?:\d+\.\s*)?(.+?\([^()]+\))\s+Dart11en\b/i);
+      if (!nameMatch) continue;
+      const pairs = [...raw.matchAll(/(\d+)\s*-\s*(\d+)/g)].map(m => [Number(m[1]), Number(m[2])]);
+      if (pairs.length >= 6) {
+        const games = pairs[pairs.length - 2], legs = pairs[pairs.length - 1];
+        records.push({ player:nameMatch[1].trim(), wonGames:games[0], lostGames:games[1], wonLegs:legs[0], lostLegs:legs[1] });
       }
     }
   }
+
   return records;
 }
 

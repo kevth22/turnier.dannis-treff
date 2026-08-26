@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v40-turnier-settings";
+const VERSION = "dart11en-v41-3k-import-parser";
 
 const CORE_FILES = [
   "./",
