@@ -38,6 +38,7 @@ function bindUi(state){
   document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>sendFocus(state,b.dataset.preset)));
   document.querySelectorAll('[data-nudge]').forEach(b=>b.addEventListener('click',()=>sendCommand(state,'nudge',{direction:b.dataset.nudge})));
   document.querySelectorAll('[data-zoom]').forEach(b=>b.addEventListener('click',()=>sendCommand(state,'zoom',{direction:b.dataset.zoom})));
+  document.getElementById('captureHomeButton')?.addEventListener('click',()=>sendCommand(state,'capture-home'));
   const modal=document.getElementById('bridgeModal');
   document.getElementById('bridgeSettingsButton').addEventListener('click',()=>{document.getElementById('bridgeUrl').value=state.bridgeUrl;document.getElementById('bridgePin').value=state.pin;modal.hidden=false;});
   document.getElementById('bridgeModalClose').addEventListener('click',()=>modal.hidden=true);

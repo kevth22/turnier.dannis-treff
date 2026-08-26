@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kamera-Steuerung | Dart11en</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="kamera-steuerung.css?v=1">
+  <link rel="stylesheet" href="kamera-steuerung.css?v=2">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#e00022">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -67,7 +67,8 @@
         <button data-zoom="out" type="button">− Zoom</button>
         <button data-zoom="in" type="button">+ Zoom</button>
       </div>
-      <small>Für die erste Kalibrierung kannst du den Ausschnitt damit nachjustieren.</small>
+      <button id="captureHomeButton" class="camera-calibration-button" type="button">📌 Aktuelle Ansicht als „Gesamt“ speichern</button>
+      <small>Für die erste Kalibrierung kannst du den Ausschnitt damit nachjustieren. Danach die aktuelle Ansicht als Gesamtansicht speichern.</small>
     </section>
   </div>
 </main>
@@ -89,7 +90,7 @@
   <a href="liga.html">🏆<br>Liga</a>
   <a href="kader.html">👥<br>Kader</a>
 </nav>
-<script type="module" src="kamera-steuerung.js?v=1"></script>
+<script type="module" src="kamera-steuerung.js?v=2"></script>
 <script src="pwa.js?v=4" defer></script>
 </body>
 </html>
