@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dart11en | Kader</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="kader.css?v=3">
+  <link rel="stylesheet" href="kader.css?v=4">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#c40030">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -60,6 +60,16 @@
         <div id="bestleistungenGrid" class="bestleistungen-grid"></div>
         <p id="keineBestleistungen" class="empty-hint" hidden>Noch keine Bestleistungen hinterlegt.</p>
         <p id="sync3kMeldung" class="profil-message" hidden></p>
+
+        <div class="player-stats-block">
+          <div class="player-stats-title">
+            <div>
+              <h3>📊 Liga-Spielstatistik</h3>
+              <p>Gewonnene und verlorene Spiele sowie Legs aus Ruhrpott + Herne.</p>
+            </div>
+          </div>
+          <div id="spielstatistikGrid" class="player-stats-grid"></div>
+        </div>
 
         <div id="bestleistungenAdmin" class="best-admin" hidden>
           <div class="best-admin-head">
@@ -124,7 +134,7 @@
   <a href="turniere.html">🎯<br>Turniere</a>
 </nav>
 
-<script type="module" src="kader.js?v=4"></script>
+<script type="module" src="kader.js?v=5"></script>
 <script type="module" src="push-foreground.js?v=10.0.1"></script>
 <script src="pwa.js?v=7" defer></script>
 </body>

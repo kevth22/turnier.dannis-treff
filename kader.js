@@ -77,6 +77,32 @@ function renderDetailList(label, list, suffix="") {
   return `<div class="best-detail-list">${list.map(item => `<div class="best-detail-row"><strong>${escapeHtml(item.count)}×</strong><span>${escapeHtml(item.value)}${suffix}</span></div>`).join("")}</div>`;
 }
 
+function getSpielstatistik(member) {
+  const raw = member.spielstatistik3k || member.statistik3k || {};
+  const wonGames = Number(raw.spieleGewonnen ?? raw.wonGames ?? 0) || 0;
+  const lostGames = Number(raw.spieleVerloren ?? raw.lostGames ?? 0) || 0;
+  const wonLegs = Number(raw.legsGewonnen ?? raw.wonLegs ?? 0) || 0;
+  const lostLegs = Number(raw.legsVerloren ?? raw.lostLegs ?? 0) || 0;
+  return { wonGames, lostGames, wonLegs, lostLegs };
+}
+
+function renderSpielstatistik(member) {
+  const stats = getSpielstatistik(member);
+  const items = [
+    { icon: "🏆", value: stats.wonGames, label: "Spiele gewonnen" },
+    { icon: "✕", value: stats.lostGames, label: "Spiele verloren" },
+    { icon: "✅", value: stats.wonLegs, label: "Legs gewonnen" },
+    { icon: "➖", value: stats.lostLegs, label: "Legs verloren" }
+  ];
+  $("spielstatistikGrid").innerHTML = items.map(item => `
+    <div class="player-stat-card">
+      <span class="player-stat-icon">${item.icon}</span>
+      <strong>${escapeHtml(item.value)}</strong>
+      <span>${escapeHtml(item.label)}</span>
+    </div>
+  `).join("");
+}
+
 function renderBestleistungen(member) {
   const best = getBestleistungen(member);
   const bestHighscore = best.highscores.length ? best.highscores[0].value : null;
@@ -225,9 +251,10 @@ async function sync3k() {
     if(!response.ok||!data.ok) throw new Error(data.error||`HTTP_${response.status}`);
     await loadMembers(false);
     const refreshed=members.find(x=>x.id===selectedMember?.id);
-    if(refreshed){ selectedMember=refreshed; renderBestleistungen(selectedMember); fillBestleistungenForm(selectedMember); }
+    if(refreshed){ selectedMember=refreshed; renderBestleistungen(selectedMember); renderSpielstatistik(selectedMember); fillBestleistungenForm(selectedMember); }
     const unmatched=Array.isArray(data.nichtZugeordnet)?data.nichtZugeordnet.length:0;
-    msg.textContent=`3K aktualisiert: ${data.aktualisiert||0} Spieler${unmatched?`, ${unmatched} Namen nicht zugeordnet`:""}.`;
+    const statsUpdated = Number(data?.spielstatistik?.aktualisiert || 0);
+    msg.textContent=`3K aktualisiert: ${data.aktualisiert||0} Bestleistungsprofile, ${statsUpdated} Spielstatistiken${unmatched?`, ${unmatched} Namen nicht zugeordnet`:""}.`;
     msg.className="profil-message success"; msg.hidden=false;
   }catch(error){
     console.error(error);
@@ -258,6 +285,7 @@ function openProfile(memberId){
   $("profilBild").src=profileImage(selectedMember); $("profilBild").onerror=()=>{$("profilBild").src=DEFAULT_IMAGE;};
   $("profilNickname").textContent=nickname(selectedMember); $("profilName").textContent=displayName(selectedMember); $("profilRolle").textContent=roleLabel(String(selectedMember.rolle).toLowerCase());
   renderBestleistungen(selectedMember);
+  renderSpielstatistik(selectedMember);
   const isOwn=Boolean(login?.benutzername)&&String(login.benutzername).toLowerCase()===String(selectedMember.benutzername||selectedMember.id).toLowerCase();
   $("eigenesProfilTools").hidden=!isOwn; if(isOwn) $("nicknameInput").value=nickname(selectedMember);
   const canEdit=BESTLEISTUNGEN_EDIT_ROLES.includes(String(login?.rolle||"").toLowerCase());

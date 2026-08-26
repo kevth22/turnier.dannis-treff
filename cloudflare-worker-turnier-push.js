@@ -22,7 +22,7 @@ export default {
     try {
       // Statusseite des Workers
       if (request.method === "GET" && url.pathname === "/") {
-        return corsResponse({ ok: true, status: "online", service: "dart11en-turnier-push", version: "10.1-3k-sync" });
+        return corsResponse({ ok: true, status: "online", service: "dart11en-turnier-push", version: "10.2-3k-stats" });
       }
 
       // Manueller Test-Push, z. B. /test-push?nickname=Red%20Dart
@@ -50,7 +50,7 @@ export default {
       if (request.method === "POST" && url.pathname === "/3k-sync") {
         validateSecrets(env);
         const accessToken = await getGoogleAccessToken(env);
-        const result = await sync3kPerformances(env, accessToken);
+        const result = await sync3kAll(env, accessToken);
         return corsResponse({ ok: true, ...result });
       }
 
@@ -59,6 +59,14 @@ export default {
         const eventId = Number(url.searchParams.get("event") || 7019);
         if (![7019, 8683].includes(eventId)) return corsResponse({ ok: false, error: "EVENT_NICHT_ERLAUBT" }, 400);
         const debug = await fetch3kPerformancePayload(eventId, true);
+        return corsResponse({ ok: true, eventId, ...debug });
+      }
+
+      // Diagnose der 3K Spielerstatistik. Event 1255 enthält bereits Ruhrpott-Daten.
+      if (request.method === "GET" && url.pathname === "/3k-stats-debug") {
+        const eventId = Number(url.searchParams.get("event") || 1255);
+        if (![1255, 8683].includes(eventId)) return corsResponse({ ok: false, error: "EVENT_NICHT_ERLAUBT" }, 400);
+        const debug = await fetch3kStatisticsPayload(eventId, true);
         return corsResponse({ ok: true, eventId, ...debug });
       }
 
@@ -75,7 +83,7 @@ export default {
       try {
         validateSecrets(env);
         const accessToken = await getGoogleAccessToken(env);
-        await sync3kPerformances(env, accessToken);
+        await sync3kAll(env, accessToken);
       } catch (error) {
         console.error("3K Cron-Sync fehlgeschlagen:", error);
       }
@@ -304,7 +312,7 @@ async function syncTournamentPushes(env, accessToken) {
   return {
     syncId,
     status: "synchronisiert",
-    version: "10.1-3k-sync",
+    version: "10.2-3k-stats",
     runId,
     turnierTyp: active.type,
     partienGeprueft: actionable.length,
@@ -606,7 +614,38 @@ function toFirestoreValue(value) {
 
 // ---------------- 3K BESTLEISTUNGEN ----------------
 const THREE_K_EVENTS = [7019, 8683];
+const THREE_K_STATS_EVENTS = [1255, 8683];
 const THREE_K_BASE = "https://backend6.3k-darts.com/2k-backend6/api/v1/frontend";
+
+async function sync3kAll(env, accessToken) {
+  let performances = { aktualisiert: 0, events: [], nichtZugeordnet: [], status: "keine-bestleistungen" };
+  let spielstatistik = { aktualisiert: 0, events: [], nichtZugeordnet: [], status: "keine-statistik" };
+
+  // Eine Liga darf noch leer sein. Deshalb werden Bestleistungen und Statistik
+  // unabhängig voneinander synchronisiert und ein leerer Bereich blockiert den anderen nicht.
+  try {
+    performances = await sync3kPerformances(env, accessToken);
+  } catch (error) {
+    if (!String(error?.message || error).startsWith("3K_KEINE_BESTLEISTUNGEN")) throw error;
+    performances.fehler = String(error?.message || error);
+  }
+
+  try {
+    spielstatistik = await sync3kStatistics(env, accessToken);
+  } catch (error) {
+    if (!String(error?.message || error).startsWith("3K_KEINE_SPIELSTATISTIK")) throw error;
+    spielstatistik.fehler = String(error?.message || error);
+  }
+
+  return {
+    status: "synchronisiert",
+    aktualisiert: performances.aktualisiert || 0,
+    events: performances.events || [],
+    nichtZugeordnet: [...new Set([...(performances.nichtZugeordnet || []), ...(spielstatistik.nichtZugeordnet || [])])].sort((a,b)=>a.localeCompare(b,"de")),
+    bestleistungen: performances,
+    spielstatistik
+  };
+}
 
 async function sync3kPerformances(env, accessToken) {
   const eventResults = [];
@@ -837,26 +876,30 @@ function match3kPlayerToMember(playerName, members) {
   const source = normalize3kName(playerName);
   if (!source) return null;
   const parenthetical = String(playerName || "").match(/\(([^)]+)\)/)?.[1] || "";
-  const candidates = [source, normalize3kName(parenthetical)].filter(Boolean);
-  let best = null;
-  let bestScore = 0;
-  for (const member of members) {
-    const memberNames = [
-      member.nickname,
-      member.benutzername,
-      [member.vorname, member.nachname].filter(Boolean).join(" "),
-      `${[member.vorname, member.nachname].filter(Boolean).join(" ")} ${member.nickname || ""}`
-    ].map(normalize3kName).filter(Boolean);
-    let score = 0;
-    for (const candidate of candidates) {
-      for (const name of memberNames) {
-        if (candidate === name) score = Math.max(score, 100);
-        else if (candidate.includes(name) || name.includes(candidate)) score = Math.max(score, 80);
-      }
-    }
-    if (score > bestScore) { bestScore = score; best = member; }
-  }
-  return bestScore >= 80 ? best : null;
+  const nickFrom3k = normalize3kName(parenthetical);
+
+  // 1. Hauptzuordnung: Vorname + Nachname. Der sichtbare Spitzname darf sich ändern,
+  // ohne dass dadurch die 3K-Verbindung verloren geht.
+  const exactFullNameMatches = members.filter(member => {
+    const fullName = normalize3kName([member.vorname, member.nachname].filter(Boolean).join(" "));
+    return fullName && (source === fullName || source.startsWith(`${fullName} `) || source.includes(` ${fullName} `));
+  });
+  if (exactFullNameMatches.length === 1) return exactFullNameMatches[0];
+
+  // 2. Fallback: von 3K mitgelieferter Spitzname oder exakter Dart11en-Spitzname.
+  const nicknameMatches = members.filter(member => {
+    const nick = normalize3kName(member.nickname);
+    const user = normalize3kName(member.benutzername);
+    return (nickFrom3k && (nickFrom3k === nick || nickFrom3k === user)) || source === nick || source === user;
+  });
+  if (nicknameMatches.length === 1) return nicknameMatches[0];
+
+  // 3. Optional gespeicherte Aliase für Sonderfälle.
+  const aliasMatches = members.filter(member => {
+    const aliases = Array.isArray(member.threeKAliases) ? member.threeKAliases : [];
+    return aliases.some(alias => normalize3kName(alias) === source);
+  });
+  return aliasMatches.length === 1 ? aliasMatches[0] : null;
 }
 
 function normalize3kName(value) {
@@ -886,6 +929,181 @@ async function patchMember3kStats(env, accessToken, memberId, stats) {
     body: JSON.stringify({ fields })
   });
   if (!response.ok) throw new Error(`MITGLIED_3K_SPEICHERN_${response.status}:${await response.text()}`);
+}
+
+
+// ---------------- 3K SPIELERSTATISTIK ----------------
+async function sync3kStatistics(env, accessToken) {
+  const eventResults = [];
+  const allRecords = [];
+
+  for (const eventId of THREE_K_STATS_EVENTS) {
+    try {
+      const result = await fetch3kStatisticsPayload(eventId, false);
+      eventResults.push({ eventId, endpoint: result.endpoint, records: result.records.length });
+      allRecords.push(...result.records.map(record => ({ ...record, eventId })));
+    } catch (error) {
+      // Herne darf aktuell noch leer sein. Ein leerer Event wird protokolliert,
+      // verhindert aber nicht, dass Ruhrpott 1255 synchronisiert wird.
+      eventResults.push({ eventId, endpoint: null, records: 0, error: String(error?.message || error) });
+    }
+  }
+
+  if (!allRecords.length) {
+    throw new Error("3K_KEINE_SPIELSTATISTIK_GEFUNDEN: Bitte /3k-stats-debug?event=1255 prüfen.");
+  }
+
+  const members = await listMembersFor3k(env, accessToken);
+  const byMember = new Map();
+  const unmatched = new Set();
+
+  for (const record of allRecords) {
+    const member = match3kPlayerToMember(record.player, members);
+    if (!member) {
+      if (record.player) unmatched.add(record.player);
+      continue;
+    }
+    const current = byMember.get(member.id) || { spieleGewonnen: 0, spieleVerloren: 0, legsGewonnen: 0, legsVerloren: 0 };
+    current.spieleGewonnen += Number(record.spieleGewonnen) || 0;
+    current.spieleVerloren += Number(record.spieleVerloren) || 0;
+    current.legsGewonnen += Number(record.legsGewonnen) || 0;
+    current.legsVerloren += Number(record.legsVerloren) || 0;
+    byMember.set(member.id, current);
+  }
+
+  let updated = 0;
+  for (const [memberId, stats] of byMember.entries()) {
+    await patchMember3kStatistics(env, accessToken, memberId, {
+      ...stats,
+      quelle: "3k",
+      events: THREE_K_STATS_EVENTS,
+      synchronisiertAm: new Date().toISOString()
+    });
+    updated += 1;
+  }
+
+  return {
+    status: "synchronisiert",
+    events: eventResults,
+    aktualisiert: updated,
+    nichtZugeordnet: [...unmatched].sort((a,b)=>a.localeCompare(b,"de"))
+  };
+}
+
+async function fetch3kStatisticsPayload(eventId, debugOnly = false) {
+  // 3K hat die öffentliche Ansicht /statistics/player/results. Je nach Backend-Version
+  // kann die API-Reihenfolge leicht variieren; wir testen nur lesende JSON-Endpunkte.
+  const candidates = [
+    `${THREE_K_BASE}/event/${eventId}/statistics/player/results`,
+    `${THREE_K_BASE}/event/${eventId}/statistics/player`,
+    `${THREE_K_BASE}/event/${eventId}/statistics`,
+    `${THREE_K_BASE}/statistics/player/results/${eventId}`,
+    `${THREE_K_BASE}/statistics/player/${eventId}`,
+    `${THREE_K_BASE}/event/${eventId}`
+  ];
+  const attempts = [];
+
+  for (const endpoint of candidates) {
+    try {
+      const response = await fetch(endpoint, {
+        headers: { Accept: "application/json, text/plain, */*", "User-Agent": "Dart11en-3K-Sync/1.0" }
+      });
+      const text = await response.text();
+      const attempt = { endpoint, status: response.status, contentType: response.headers.get("content-type") || "", bytes: text.length };
+      attempts.push(attempt);
+      if (!response.ok || !text) continue;
+      let json;
+      try { json = JSON.parse(text); } catch { continue; }
+      const records = extract3kStatisticsRecords(json);
+      if (records.length) {
+        if (debugOnly) attempt.sample = records.slice(0, 8);
+        return { endpoint, records, attempts };
+      }
+      if (debugOnly) attempt.topLevelKeys = json && typeof json === "object" ? Object.keys(json).slice(0, 50) : [];
+    } catch (error) {
+      attempts.push({ endpoint, status: 0, error: String(error?.message || error) });
+    }
+  }
+
+  if (debugOnly) return { endpoint: null, records: [], attempts };
+  throw new Error(`3K_STATS_ENDPOINT_NICHT_ERKANNT_EVENT_${eventId}`);
+}
+
+function extract3kStatisticsRecords(root) {
+  const found = [];
+  const seen = new Set();
+
+  function pickNumber(node, keys) {
+    for (const key of keys) {
+      if (!(key in (node || {}))) continue;
+      const raw = node[key];
+      const value = typeof raw === "string" ? Number(raw.replace(",", ".")) : Number(raw);
+      if (Number.isFinite(value) && value >= 0) return value;
+    }
+    return NaN;
+  }
+
+  function walk(node, depth = 0) {
+    if (depth > 15 || node == null) return;
+    if (Array.isArray(node)) { node.forEach(item => walk(item, depth + 1)); return; }
+    if (typeof node !== "object") return;
+
+    const player = extract3kPlayer(node);
+    if (player) {
+      const spieleGewonnen = pickNumber(node, ["gamesWon","wonGames","matchesWon","wonMatches","wins","victories","spieleGewonnen","games_won","matchWins"]);
+      const spieleVerloren = pickNumber(node, ["gamesLost","lostGames","matchesLost","lostMatches","losses","defeats","spieleVerloren","games_lost","matchLosses"]);
+      const legsGewonnen = pickNumber(node, ["legsWon","wonLegs","legWins","legsGewonnen","legs_won"]);
+      const legsVerloren = pickNumber(node, ["legsLost","lostLegs","legLosses","legsVerloren","legs_lost"]);
+
+      if ([spieleGewonnen, spieleVerloren, legsGewonnen, legsVerloren].some(Number.isFinite)) {
+        const record = {
+          player: String(player).trim(),
+          spieleGewonnen: Number.isFinite(spieleGewonnen) ? spieleGewonnen : 0,
+          spieleVerloren: Number.isFinite(spieleVerloren) ? spieleVerloren : 0,
+          legsGewonnen: Number.isFinite(legsGewonnen) ? legsGewonnen : 0,
+          legsVerloren: Number.isFinite(legsVerloren) ? legsVerloren : 0
+        };
+        const key = `${normalize3kName(record.player)}|${record.spieleGewonnen}|${record.spieleVerloren}|${record.legsGewonnen}|${record.legsVerloren}`;
+        if (!seen.has(key)) { seen.add(key); found.push(record); }
+      }
+    }
+
+    Object.values(node).forEach(value => { if (value && typeof value === "object") walk(value, depth + 1); });
+  }
+
+  walk(root);
+
+  // Falls dieselbe Zeile in der API mehrfach verschachtelt vorkommt, pro Spieler nur
+  // den Datensatz mit der höchsten Gesamtmenge behalten – nicht doppelt addieren.
+  const byPlayer = new Map();
+  for (const record of found) {
+    const key = normalize3kName(record.player);
+    const total = record.spieleGewonnen + record.spieleVerloren + record.legsGewonnen + record.legsVerloren;
+    const old = byPlayer.get(key);
+    const oldTotal = old ? old.spieleGewonnen + old.spieleVerloren + old.legsGewonnen + old.legsVerloren : -1;
+    if (!old || total > oldTotal) byPlayer.set(key, record);
+  }
+  return [...byPlayer.values()];
+}
+
+async function patchMember3kStatistics(env, accessToken, memberId, stats) {
+  const base = `${FIRESTORE_BASE(env.FIREBASE_PROJECT_ID)}/mitglieder/${encodeURIComponent(memberId)}`;
+  const url = new URL(base);
+  url.searchParams.append("updateMask.fieldPaths", "spielstatistik3k");
+  url.searchParams.append("updateMask.fieldPaths", "spielstatistikGeaendertAm");
+  url.searchParams.append("updateMask.fieldPaths", "spielstatistikGeaendertVon");
+  const fields = objectToFirestoreFields({
+    spielstatistik3k: stats,
+    spielstatistikGeaendertAm: new Date().toISOString(),
+    spielstatistikGeaendertVon: "3k-sync"
+  });
+  fields.spielstatistikGeaendertAm = { timestampValue: new Date().toISOString() };
+  const response = await fetch(url, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ fields })
+  });
+  if (!response.ok) throw new Error(`MITGLIED_3K_STATISTIK_SPEICHERN_${response.status}:${await response.text()}`);
 }
 
 async function getGoogleAccessToken(env) {
