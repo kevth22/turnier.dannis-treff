@@ -991,19 +991,66 @@ async function sync3kStatistics(env, accessToken) {
 }
 
 async function fetch3kStatisticsPayload(eventId, debugOnly = false) {
-  // 3K hat die öffentliche Ansicht /statistics/player/results. Je nach Backend-Version
-  // kann die API-Reihenfolge leicht variieren; wir testen nur lesende JSON-Endpunkte.
+  // Zuerst Event-Metadaten laden. 3K hängt Statistik-Endpunkte häufig an eine Phase.
+  const attempts = [];
+  const baseEventEndpoint = `${THREE_K_BASE}/event/${eventId}`;
+  let eventJson = null;
+  let phaseIds = [];
+  let phasePreview = [];
+
+  try {
+    const response = await fetch(baseEventEndpoint, {
+      headers: { Accept: "application/json, text/plain, */*", "User-Agent": "Dart11en-3K-Sync/1.0" }
+    });
+    const text = await response.text();
+    const attempt = {
+      endpoint: baseEventEndpoint,
+      status: response.status,
+      contentType: response.headers.get("content-type") || "",
+      bytes: text.length
+    };
+    attempts.push(attempt);
+
+    if (response.ok && text) {
+      try {
+        eventJson = JSON.parse(text);
+        attempt.topLevelKeys = eventJson && typeof eventJson === "object" ? Object.keys(eventJson).slice(0, 50) : [];
+        phaseIds = extract3kPhaseIds(eventJson);
+        phasePreview = summarize3kPhases(eventJson?.phases);
+        if (debugOnly) {
+          attempt.phaseIds = phaseIds;
+          attempt.phases = phasePreview;
+        }
+      } catch {
+        // Keine JSON-Antwort; die weiteren Kandidaten werden trotzdem geprüft.
+      }
+    }
+  } catch (error) {
+    attempts.push({ endpoint: baseEventEndpoint, status: 0, error: String(error?.message || error) });
+  }
+
   const candidates = [
     `${THREE_K_BASE}/event/${eventId}/statistics/player/results`,
     `${THREE_K_BASE}/event/${eventId}/statistics/player`,
     `${THREE_K_BASE}/event/${eventId}/statistics`,
     `${THREE_K_BASE}/statistics/player/results/${eventId}`,
-    `${THREE_K_BASE}/statistics/player/${eventId}`,
-    `${THREE_K_BASE}/event/${eventId}`
+    `${THREE_K_BASE}/statistics/player/${eventId}`
   ];
-  const attempts = [];
 
-  for (const endpoint of candidates) {
+  // Sobald eine Phase bekannt ist, automatisch die naheliegenden öffentlichen
+  // Varianten testen. Damit zeigt der Debug-Aufruf direkt, welcher Pfad 3K nutzt.
+  for (const phaseId of phaseIds) {
+    candidates.push(
+      `${THREE_K_BASE}/event/${eventId}/phase/${phaseId}/statistics/player/results`,
+      `${THREE_K_BASE}/event/${eventId}/phase/${phaseId}/statistics/player`,
+      `${THREE_K_BASE}/event/${eventId}/phase/${phaseId}/statistics`,
+      `${THREE_K_BASE}/event/${eventId}/statistics/player/results?phase=${phaseId}`,
+      `${THREE_K_BASE}/event/${eventId}/statistics/player/results?phaseId=${phaseId}`,
+      `${THREE_K_BASE}/statistics/player/results/${eventId}/${phaseId}`
+    );
+  }
+
+  for (const endpoint of [...new Set(candidates)]) {
     try {
       const response = await fetch(endpoint, {
         headers: { Accept: "application/json, text/plain, */*", "User-Agent": "Dart11en-3K-Sync/1.0" }
@@ -1012,21 +1059,109 @@ async function fetch3kStatisticsPayload(eventId, debugOnly = false) {
       const attempt = { endpoint, status: response.status, contentType: response.headers.get("content-type") || "", bytes: text.length };
       attempts.push(attempt);
       if (!response.ok || !text) continue;
+
       let json;
       try { json = JSON.parse(text); } catch { continue; }
+
       const records = extract3kStatisticsRecords(json);
       if (records.length) {
         if (debugOnly) attempt.sample = records.slice(0, 8);
-        return { endpoint, records, attempts };
+        return { endpoint, records, phaseIds, phases: phasePreview, attempts };
       }
-      if (debugOnly) attempt.topLevelKeys = json && typeof json === "object" ? Object.keys(json).slice(0, 50) : [];
+
+      if (debugOnly) {
+        attempt.topLevelKeys = json && typeof json === "object" ? Object.keys(json).slice(0, 50) : [];
+        attempt.preview = compact3kDebugPreview(json);
+      }
     } catch (error) {
       attempts.push({ endpoint, status: 0, error: String(error?.message || error) });
     }
   }
 
-  if (debugOnly) return { endpoint: null, records: [], attempts };
+  if (debugOnly) {
+    return {
+      endpoint: null,
+      records: [],
+      phaseIds,
+      phases: phasePreview,
+      attempts
+    };
+  }
   throw new Error(`3K_STATS_ENDPOINT_NICHT_ERKANNT_EVENT_${eventId}`);
+}
+
+function extract3kPhaseIds(root) {
+  const ids = new Set();
+  const keys = ["id", "phaseId", "phaseID", "phase_id"];
+
+  function walk(node, insidePhase = false, depth = 0) {
+    if (depth > 10 || node == null) return;
+    if (Array.isArray(node)) {
+      node.forEach(item => walk(item, insidePhase, depth + 1));
+      return;
+    }
+    if (typeof node !== "object") return;
+
+    if (insidePhase) {
+      for (const key of keys) {
+        const value = Number(node[key]);
+        if (Number.isInteger(value) && value > 0) ids.add(value);
+      }
+    }
+
+    for (const [key, value] of Object.entries(node)) {
+      if (!value || typeof value !== "object") continue;
+      const nextInsidePhase = insidePhase || /phase/i.test(key);
+      walk(value, nextInsidePhase, depth + 1);
+    }
+  }
+
+  // Bevorzugt nur den echten phases-Bereich prüfen, damit keine Event-/Mandant-ID
+  // versehentlich als Phase behandelt wird.
+  if (root?.phases) walk(root.phases, true, 0);
+  return [...ids].sort((a, b) => a - b);
+}
+
+function summarize3kPhases(phases) {
+  const result = [];
+
+  function walk(node, depth = 0) {
+    if (depth > 6 || node == null || result.length >= 20) return;
+    if (Array.isArray(node)) {
+      node.forEach(item => walk(item, depth + 1));
+      return;
+    }
+    if (typeof node !== "object") return;
+
+    const id = Number(node.id ?? node.phaseId ?? node.phaseID ?? node.phase_id);
+    if (Number.isInteger(id) && id > 0) {
+      result.push({
+        id,
+        name: firstText(node, ["name", "title", "bezeichnung", "label"]) || null,
+        keys: Object.keys(node).slice(0, 20)
+      });
+    }
+
+    for (const value of Object.values(node)) {
+      if (value && typeof value === "object") walk(value, depth + 1);
+    }
+  }
+
+  walk(phases);
+  return result;
+}
+
+function compact3kDebugPreview(json) {
+  if (Array.isArray(json)) return { type: "array", length: json.length, firstKeys: json[0] && typeof json[0] === "object" ? Object.keys(json[0]).slice(0, 25) : [] };
+  if (!json || typeof json !== "object") return { type: typeof json };
+
+  const preview = {};
+  for (const [key, value] of Object.entries(json).slice(0, 20)) {
+    if (Array.isArray(value)) preview[key] = { type: "array", length: value.length, firstKeys: value[0] && typeof value[0] === "object" ? Object.keys(value[0]).slice(0, 20) : [] };
+    else if (value && typeof value === "object") preview[key] = { type: "object", keys: Object.keys(value).slice(0, 20) };
+    else preview[key] = value;
+  }
+  return preview;
 }
 
 function extract3kStatisticsRecords(root) {
