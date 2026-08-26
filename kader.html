@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dart11en | Kader</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="kader.css?v=6">
+  <link rel="stylesheet" href="kader.css?v=35">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#c40030">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -54,7 +54,10 @@
             <h3 class="best-section-title">🏆 Liga-Bestleistungen</h3>
             <p class="best-source-hint">Importiert und zusammengeführt aus beiden 3K-Ligen.</p>
           </div>
-          <button id="open3kImportButton" class="sync-3k-button" type="button" hidden>📥 3K importieren</button>
+          <div class="three-k-admin-actions" hidden id="threeKAdminActions">
+            <button id="open3kImportButton" class="sync-3k-button" type="button">📥 3K importieren</button>
+            <button id="reset3kButton" class="reset-3k-button" type="button">↺ 3K-Daten zurücksetzen</button>
+          </div>
         </div>
 
         <div id="bestleistungenGrid" class="bestleistungen-grid"></div>
@@ -170,7 +173,7 @@
   <a href="turniere.html">🎯<br>Turniere</a>
 </nav>
 
-<script type="module" src="kader.js?v=9"></script>
+<script type="module" src="kader.js?v=36"></script>
 <script type="module" src="push-foreground.js?v=10.0.1"></script>
 <script src="pwa.js?v=7" defer></script>
 </body>

@@ -6,7 +6,9 @@ import {
   query,
   updateDoc,
   where,
-  serverTimestamp
+  serverTimestamp,
+  arrayUnion,
+  deleteField
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   db,
@@ -450,7 +452,7 @@ function aggregateImportPreview(type, records) {
     }), { wonGames:0, lostGames:0, wonLegs:0, lostLegs:0 });
     return { ...entry, data };
   });
-  return { matched, unmatched: [...unmatched.keys()] };
+  return { matched, unmatched: [...unmatched.entries()].map(([name, record]) => ({ name, record })) };
 }
 
 function mergeBestSources(sources) {
@@ -487,7 +489,18 @@ function renderImportPreview(preview, type) {
       : `${entry.data.wonGames}:${entry.data.lostGames} Spiele · ${entry.data.wonLegs}:${entry.data.lostLegs} Legs`;
     rows.push(`<div class="import-preview-row"><div><strong>${escapeHtml(nickname(entry.member))}</strong><small>${escapeHtml(displayName(entry.member))}</small></div><span>${escapeHtml(summary)}</span></div>`);
   }
-  for (const name of preview.unmatched) rows.push(`<div class="import-preview-row unmatched"><div><strong>Nicht zugeordnet</strong><small>${escapeHtml(name)}</small></div><span>Bitte Name im Konto prüfen</span></div>`);
+  for (const item of preview.unmatched) {
+    const options = members.map(member => `<option value="${escapeHtml(member.id)}">${escapeHtml(nickname(member))} – ${escapeHtml(displayName(member) || "ohne Namen")}</option>`).join("");
+    rows.push(`<div class="import-preview-row unmatched import-alias-row" data-import-name="${escapeHtml(item.name)}">
+      <div class="import-unmatched-info"><strong>Nicht zugeordnet</strong><small>${escapeHtml(item.name)}</small></div>
+      <div class="import-alias-controls">
+        <select class="import-alias-select" aria-label="Dart11en-Spieler für ${escapeHtml(item.name)} auswählen">
+          <option value="">Spieler auswählen …</option>${options}
+        </select>
+        <button class="import-alias-button" type="button">Zuordnen & merken</button>
+      </div>
+    </div>`);
+  }
 
   box.innerHTML = `
     <div class="import-preview-summary">
@@ -497,27 +510,100 @@ function renderImportPreview(preview, type) {
     ${rows.join("")}
   `;
   box.hidden = false;
+  box.querySelectorAll(".import-alias-button").forEach(button => {
+    button.addEventListener("click", async () => {
+      const row = button.closest(".import-alias-row");
+      const sourceName = row?.dataset.importName || "";
+      const memberId = row?.querySelector(".import-alias-select")?.value || "";
+      if (!sourceName || !memberId) {
+        const msg = $("import3kMeldung");
+        msg.textContent = "Bitte zuerst den richtigen Dart11en-Spieler auswählen.";
+        msg.className = "profil-message error"; msg.hidden = false;
+        return;
+      }
+      await save3kAlias(sourceName, memberId, button);
+    });
+  });
+}
+
+async function save3kAlias(sourceName, memberId, button) {
+  const member = members.find(item => item.id === memberId);
+  const state = import3kPreviewData;
+  const msg = $("import3kMeldung");
+  if (!member || !state) return;
+  button.disabled = true;
+  try {
+    await updateDoc(doc(db, "mitglieder", member.id), {
+      threeKAliases: arrayUnion(sourceName),
+      threeKAliasesGeaendertAm: serverTimestamp(),
+      threeKAliasesGeaendertVon: String(login?.benutzername || "3k-import")
+    });
+    if (!Array.isArray(member.threeKAliases)) member.threeKAliases = [];
+    if (!member.threeKAliases.some(alias => normalizeImportName(alias) === normalizeImportName(sourceName))) member.threeKAliases.push(sourceName);
+
+    // Vorschau mit derselben bereits erkannten 3K-Tabelle neu aufbauen.
+    const preview = aggregateImportPreview(state.type, state.records);
+    import3kPreviewData = { ...state, preview };
+    renderImportPreview(preview, state.type);
+    $("save3kImportButton").disabled = preview.matched.length === 0;
+    msg.textContent = `${sourceName} wurde dauerhaft ${nickname(member)} zugeordnet.`;
+    msg.className = "profil-message success"; msg.hidden = false;
+  } catch (error) {
+    console.error(error);
+    msg.textContent = "Die 3K-Zuordnung konnte nicht gespeichert werden.";
+    msg.className = "profil-message error"; msg.hidden = false;
+    button.disabled = false;
+  }
 }
 
 function preview3kImport() {
-  const type = $("import3kArt").value;
+  let type = $("import3kArt").value;
   const text = $("import3kText").value;
   const msg = $("import3kMeldung");
   msg.hidden = true;
-  const records = type === "bestleistungen" ? parseBestleistungenImport(text) : parseSpielstatistikImport(text);
+
+  let records = type === "bestleistungen"
+    ? parseBestleistungenImport(text)
+    : parseSpielstatistikImport(text);
+
+  // Automatische Erkennung: 3K-Spielstatistiken enthalten pro Spieler sechs
+  // Ergebnispaare und typischerweise den Mannschaftsnamen Dart11en. Wenn im
+  // Dropdown versehentlich Bestleistungen gewählt ist, erkennen wir das Format
+  // trotzdem und wechseln selbstständig auf Spielstatistik.
+  if (!records.length && type === "bestleistungen") {
+    const statsRecords = parseSpielstatistikImport(text);
+    if (statsRecords.length) {
+      type = "spielstatistik";
+      $("import3kArt").value = "spielstatistik";
+      records = statsRecords;
+    }
+  }
+
+  // Umgekehrt ebenfalls tolerant sein.
+  if (!records.length && type === "spielstatistik") {
+    const bestRecords = parseBestleistungenImport(text);
+    if (bestRecords.length) {
+      type = "bestleistungen";
+      $("import3kArt").value = "bestleistungen";
+      records = bestRecords;
+    }
+  }
+
   if (!records.length) {
     import3kPreviewData = null;
     $("save3kImportButton").disabled = true;
     $("import3kPreview").hidden = true;
-    msg.textContent = "Ich konnte aus dem eingefügten Text noch keine passenden 3K-Zeilen erkennen. Bitte die komplette Tabelle inklusive Namen und Zahlen kopieren.";
+    msg.textContent = "Keine 3K-Daten erkannt. Kopiere den Bereich ab dem ersten Spielernamen bis zum letzten Spieler vollständig.";
     msg.className = "profil-message error"; msg.hidden = false;
     return;
   }
+
   const preview = aggregateImportPreview(type, records);
-  import3kPreviewData = { type, league: $("import3kLiga").value, preview };
+  import3kPreviewData = { type, league: $("import3kLiga").value, records, preview };
   renderImportPreview(preview, type);
   $("save3kImportButton").disabled = preview.matched.length === 0;
-  msg.textContent = `${records.length} Tabellenzeilen erkannt. Bitte Vorschau prüfen und erst dann speichern.`;
+  const artName = type === "spielstatistik" ? "Spielstatistik" : "Bestleistungen";
+  msg.textContent = `${records.length} Spieler/Einträge als ${artName} erkannt. Bitte Vorschau prüfen und erst dann speichern.`;
   msg.className = "profil-message success"; msg.hidden = false;
 }
 
@@ -578,6 +664,63 @@ function open3kImport() {
 }
 function close3kImport() { $("import3kPanel").hidden = true; import3kPreviewData = null; }
 
+async function reset3kData() {
+  const canEdit = BESTLEISTUNGEN_EDIT_ROLES.includes(String(login?.rolle || "").toLowerCase());
+  if (!canEdit) return;
+  const confirmed = window.confirm(
+    "Wirklich alle importierten 3K-Daten zurücksetzen?\n\n" +
+    "Gelöscht werden Bestleistungen und Spielstatistiken aus Ruhrpott + Herne. " +
+    "Spielerprofile und gespeicherte 3K-Zuordnungen bleiben erhalten."
+  );
+  if (!confirmed) return;
+
+  const button = $("reset3kButton");
+  const msg = $("sync3kMeldung");
+  button.disabled = true;
+  msg.hidden = false;
+  msg.className = "profil-message";
+  msg.textContent = "3K-Daten werden zurückgesetzt …";
+
+  try {
+    for (const member of members) {
+      await updateDoc(doc(db, "mitglieder", member.id), {
+        dreiKImport: deleteField(),
+        bestleistungen3k: deleteField(),
+        spielstatistik3k: deleteField(),
+        statistik3k: deleteField(),
+        bestleistungenGeaendertAm: serverTimestamp(),
+        bestleistungenGeaendertVon: String(login?.benutzername || "3k-reset"),
+        spielstatistikGeaendertAm: serverTimestamp(),
+        spielstatistikGeaendertVon: String(login?.benutzername || "3k-reset")
+      });
+      delete member.dreiKImport;
+      delete member.bestleistungen3k;
+      delete member.spielstatistik3k;
+      delete member.statistik3k;
+    }
+
+    const refreshed = members.find(item => item.id === selectedMember?.id);
+    if (refreshed) {
+      selectedMember = refreshed;
+      renderBestleistungen(refreshed);
+      renderSpielstatistik(refreshed);
+      fillBestleistungenForm(refreshed);
+    }
+    $("import3kText").value = "";
+    $("import3kPreview").hidden = true;
+    $("save3kImportButton").disabled = true;
+    import3kPreviewData = null;
+    msg.className = "profil-message success";
+    msg.textContent = "3K-Daten wurden zurückgesetzt. Du kannst Ruhrpott und Herne jetzt neu importieren.";
+  } catch (error) {
+    console.error(error);
+    msg.className = "profil-message error";
+    msg.textContent = "Die 3K-Daten konnten nicht vollständig zurückgesetzt werden.";
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function showMessage(text, success=false){ const box=$("profilMeldung"); box.textContent=text; box.className=`profil-message ${success?"success":"error"}`; box.hidden=false; }
 function clearMessage(){ $("profilMeldung").hidden=true; }
 
@@ -604,7 +747,7 @@ function openProfile(memberId){
   const isOwn=Boolean(login?.benutzername)&&String(login.benutzername).toLowerCase()===String(selectedMember.benutzername||selectedMember.id).toLowerCase();
   $("eigenesProfilTools").hidden=!isOwn; if(isOwn) $("nicknameInput").value=nickname(selectedMember);
   const canEdit=BESTLEISTUNGEN_EDIT_ROLES.includes(String(login?.rolle||"").toLowerCase());
-  $("bestleistungenAdmin").hidden=!canEdit; $("open3kImportButton").hidden=!canEdit; $("bestleistungenMeldung").hidden=true; $("sync3kMeldung").hidden=true; $("import3kPanel").hidden=true; if(canEdit) fillBestleistungenForm(selectedMember);
+  $("bestleistungenAdmin").hidden=!canEdit; $("threeKAdminActions").hidden=!canEdit; $("bestleistungenMeldung").hidden=true; $("sync3kMeldung").hidden=true; $("import3kPanel").hidden=true; if(canEdit) fillBestleistungenForm(selectedMember);
   $("kaderListeBereich").hidden=true; $("profilBereich").hidden=false; window.scrollTo({top:0,behavior:"smooth"});
 }
 function backToRoster(){ selectedMember=null; $("profilBereich").hidden=true; $("kaderListeBereich").hidden=false; window.scrollTo({top:0,behavior:"smooth"}); }
@@ -630,6 +773,7 @@ $("nicknameButton").addEventListener("click",saveNickname);
 $("passwortButton").addEventListener("click",changePassword);
 $("bestleistungenSpeichern").addEventListener("click",saveBestleistungen);
 $("open3kImportButton").addEventListener("click",open3kImport);
+$("reset3kButton").addEventListener("click",reset3kData);
 $("close3kImportButton").addEventListener("click",close3kImport);
 $("preview3kImportButton").addEventListener("click",preview3kImport);
 $("save3kImportButton").addEventListener("click",save3kImport);
