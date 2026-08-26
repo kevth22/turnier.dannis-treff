@@ -340,43 +340,38 @@ function findHeaderIndex(headers, patterns) {
 }
 
 function parseSpielstatistikImport(text) {
-  const lines = splitImportLines(text);
+  const raw = String(text || "")
+    .replace(/\r/g, "")
+    .replace(/\u00a0/g, " ");
   const records = [];
 
-  // 3K kopiert die Spielerstatistik auf iPhone/Safari mehrzeilig:
-  // Spieler + Mannschaft, danach jeweils
-  // Spiele Einzel, Legs Einzel, Spiele Doppel, Legs Doppel,
-  // Spiele Gesamt, Legs Gesamt. Dazwischen stehen die Differenzen (+/-).
-  // Für Dart11en interessieren ausschließlich die beiden Gesamt-Paare.
-  const playerStarts = [];
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (/^Pl\.?\s*\t?/i.test(line) || /^Spieler\b/i.test(line)) continue;
-
-    // Rang ist bei 3K manchmal vorhanden ("7. Kevin ..."), manchmal fehlt er.
-    // Mannschaft kann mit Tabs/mehreren Leerzeichen angehängt sein.
-    const match = line.match(/^(?:\d+\.\s*)?(.+?\([^()]+\))\s+(?:Dart11en\b|[^\t]+?)(?:\s{2,}|\t|$)/i)
-      || line.match(/^(?:\d+\.\s*)?(.+?\([^()]+\))\s+Dart11en\b/i);
-    if (match) playerStarts.push({ index: i, player: match[1].trim() });
+  // 3K liefert beim Kopieren je nach Gerät Tabs und Zeilenumbrüche an
+  // unterschiedlichen Stellen. Darum suchen wir zuerst direkt im gesamten
+  // Rohtext nach Spielerankern: "Vorname Nachname (Spitzname)  Dart11en".
+  // Alles bis zum nächsten Spieler gehört zu diesem Spielerblock.
+  const playerRegex = /(?:^|\n|\t|\s)(?:\d+\.\s*)?([A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß .'-]*?\([^()\n\t]+\))\s*[\t ]+Dart11en\b/gi;
+  const players = [];
+  let match;
+  while ((match = playerRegex.exec(raw)) !== null) {
+    players.push({
+      player: match[1].replace(/\s+/g, " ").trim(),
+      start: match.index,
+      dataStart: playerRegex.lastIndex
+    });
   }
 
-  for (let p = 0; p < playerStarts.length; p++) {
-    const current = playerStarts[p];
-    const end = p + 1 < playerStarts.length ? playerStarts[p + 1].index : lines.length;
-    const block = lines.slice(current.index, end).join("\n");
+  for (let i = 0; i < players.length; i++) {
+    const current = players[i];
+    const end = i + 1 < players.length ? players[i + 1].start : raw.length;
+    const block = raw.slice(current.dataStart, end);
 
-    // Alle W-L-Paare im Spielerblock einsammeln. Differenzzeilen wie +8/-4
-    // werden bewusst ignoriert.
-    const pairs = [];
-    const pairRegex = /(\d+)\s*-\s*(\d+)/g;
-    let pairMatch;
-    while ((pairMatch = pairRegex.exec(block)) !== null) {
-      pairs.push([Number(pairMatch[1]), Number(pairMatch[2])]);
-    }
+    // Differenzen (+8, -3, 0) interessieren uns nicht. Gesucht werden nur
+    // echte Ergebnispaare wie "24 - 14". Der 3K-Aufbau enthält sechs Paare:
+    // Spiele Einzel, Legs Einzel, Spiele Doppel, Legs Doppel,
+    // Spiele Gesamt, Legs Gesamt. Deshalb nehmen wir die letzten zwei Paare.
+    const pairs = [...block.matchAll(/(\d+)\s*-\s*(\d+)/g)]
+      .map(result => [Number(result[1]), Number(result[2])]);
 
-    // Normaler 3K-Aufbau = 6 Paare. Wir nehmen Paar 5 und 6 (= Gesamt).
-    // Falls sich später zusätzliche Spalten davor einschieben, bleiben die
-    // letzten beiden Paare weiterhin Gesamt-Spiele und Gesamt-Legs.
     if (pairs.length >= 6) {
       const games = pairs[pairs.length - 2];
       const legs = pairs[pairs.length - 1];
@@ -390,16 +385,26 @@ function parseSpielstatistikImport(text) {
     }
   }
 
-  // Zweiter Fallback für Desktop-Kopien, bei denen eine komplette Zeile mit
-  // allen sechs W-L-Paaren erhalten bleibt.
+  // Fallback: Falls ein Browser "Dart11en" auf eine eigene Zeile legt,
+  // erkennen wir den Spieler über die Zeile mit Name + (Spitzname) und
+  // sammeln bis zum nächsten solchen Namen alle Ergebnispaare ein.
   if (!records.length) {
-    for (const raw of String(text || "").replace(/\r/g, "").split("\n")) {
-      const nameMatch = raw.match(/^(?:\d+\.\s*)?(.+?\([^()]+\))\s+Dart11en\b/i);
-      if (!nameMatch) continue;
-      const pairs = [...raw.matchAll(/(\d+)\s*-\s*(\d+)/g)].map(m => [Number(m[1]), Number(m[2])]);
+    const lines = splitImportLines(raw);
+    const starts = [];
+    for (let i = 0; i < lines.length; i++) {
+      const nameMatch = lines[i].match(/^(?:\d+\.\s*)?([A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß .'-]*?\([^()]+\))(?:\s+Dart11en)?$/i)
+        || lines[i].match(/^(?:\d+\.\s*)?(.+?\([^()]+\))\s+Dart11en\b/i);
+      if (nameMatch) starts.push({ index: i, player: nameMatch[1].replace(/\s+/g, " ").trim() });
+    }
+    for (let i = 0; i < starts.length; i++) {
+      const current = starts[i];
+      const end = i + 1 < starts.length ? starts[i + 1].index : lines.length;
+      const block = lines.slice(current.index + 1, end).join("\n");
+      const pairs = [...block.matchAll(/(\d+)\s*-\s*(\d+)/g)].map(result => [Number(result[1]), Number(result[2])]);
       if (pairs.length >= 6) {
-        const games = pairs[pairs.length - 2], legs = pairs[pairs.length - 1];
-        records.push({ player:nameMatch[1].trim(), wonGames:games[0], lostGames:games[1], wonLegs:legs[0], lostLegs:legs[1] });
+        const games = pairs[pairs.length - 2];
+        const legs = pairs[pairs.length - 1];
+        records.push({ player: current.player, wonGames: games[0], lostGames: games[1], wonLegs: legs[0], lostLegs: legs[1] });
       }
     }
   }

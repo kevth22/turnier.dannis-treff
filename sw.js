@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v41-3k-import-parser";
+const VERSION = "dart11en-v42-3k-import-parser-rawtext";
 
 const CORE_FILES = [
   "./",
