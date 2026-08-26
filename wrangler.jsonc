@@ -1,0 +1,5 @@
+{
+  "name": "dart11en-push",
+  "main": "cloudflare-worker-turnier-push.js",
+  "compatibility_date": "2026-08-26"
+}
