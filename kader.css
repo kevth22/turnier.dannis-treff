@@ -62,3 +62,33 @@
   background:rgba(255,255,255,.1);
   color:#fff;
 }
+
+
+/* Kader v25 – eine Überschrift + weiches Aufklappen der Bestleistungsdetails */
+.best-section-title{
+  margin:0 0 4px !important;
+  font-size:1.12rem;
+  line-height:1.2;
+}
+.best-detail-panel:not([hidden]){
+  transform-origin:top center;
+  animation:bestDetailOpen .28s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes bestDetailOpen{
+  0%{
+    opacity:0;
+    transform:translateY(-6px) scaleY(.94);
+  }
+  60%{
+    opacity:1;
+  }
+  100%{
+    opacity:1;
+    transform:translateY(0) scaleY(1);
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .best-detail-panel:not([hidden]){
+    animation:none;
+  }
+}
