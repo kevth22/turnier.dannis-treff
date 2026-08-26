@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = "dart11en-v38-abstimmungen-mit-spielernamen";
+const VERSION = "dart11en-v40-turnier-settings";
 
 const CORE_FILES = [
   "./",
@@ -59,6 +59,9 @@ const CORE_FILES = [
   "./pwa.js",
   "./auth-utils.js",
   "./account-ui.js",
+  "./turniere.html",
+  "./turnier-config.js",
+  "./script.js",
   "./kasse.html",
   "./kasse.js",
   "./kasse.css",

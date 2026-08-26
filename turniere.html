@@ -36,6 +36,10 @@
   </nav>
 </header>
 
+<div class="turnier-admin-actions">
+  <button id="turnierSettingsButton" class="turnier-settings-button" type="button" hidden>⚙️ Turnier bearbeiten</button>
+</div>
+
 <main class="app-container">
 
   <div class="hero">
@@ -43,40 +47,40 @@
     <section class="info">
       <p class="red">Dart Turnier</p>
 
-      <h1>DANNIS TREFF<br>Turnier 2026</h1>
-      <h2>Melde dich an und sei dabei!</h2>
+      <h1 id="turnierTitel">DANNIS TREFF Turnier 2026</h1>
+      <h2 id="turnierUntertitel">Melde dich an und sei dabei!</h2>
 
       <div class="event-details">
 
         <div class="event-line">
           <span class="event-icon">📅</span>
-          <span>01.08.2026: 19:30 Uhr</span>
+          <span id="turnierDatumAnwurf">01.08.2026: 19:30 Uhr</span>
         </div>
 
         <div class="event-line">
           <span class="event-icon">⏰</span>
-          <span>Anmeldeschluss: 18:30 Uhr</span>
+          <span id="turnierAnmeldeschluss">Anmeldeschluss: 18:30 Uhr</span>
         </div>
 
         <div class="event-line">
           <span class="event-icon">📍</span>
-          <span>Dannis Treff, Emil-Zimmermann-Allee 10, 45897 Gelsenkirchen</span>
+          <span id="turnierOrt">Dannis Treff, Emil-Zimmermann-Allee 10, 45897 Gelsenkirchen</span>
         </div>
 
         <div class="event-line">
   <span class="event-icon">👥</span>
-  <span>Maximal 32 Teilnehmer</span>
+  <span id="turnierMaxTeilnehmer">Maximal 32 Teilnehmer</span>
 </div>
 
         <div class="event-line">
           <span class="event-icon">💶</span>
-          <span>Startgeld: 10,00 €</span>
+          <span id="turnierStartgeld">Startgeld: 10,00 €</span>
         </div>
 
       </div>
 
       <div class="auszahlung-box">
-        <h3>🏆 100 % Ausschüttung</h3>
+        <h3 id="auszahlungTitel">🏆 100 % Ausschüttung</h3>
         <p class="auszahlung-info">Das gesamte Startgeld wird als Preisgeld ausgeschüttet.</p>
 
         <div class="preise-grid">
@@ -84,29 +88,27 @@
           <div class="preis-card gold">
             <div class="medaille">🥇</div>
             <strong>1. Platz</strong>
-            <span>50 %</span>
+            <span id="platz1Wert">50 %</span>
             <small>des Preisgeldes</small>
           </div>
 
           <div class="preis-card silber">
             <div class="medaille">🥈</div>
             <strong>2. Platz</strong>
-            <span>30 %</span>
+            <span id="platz2Wert">30 %</span>
             <small>des Preisgeldes</small>
           </div>
 
           <div class="preis-card bronze">
             <div class="medaille">🥉</div>
             <strong>3. Platz</strong>
-            <span>20 %</span>
+            <span id="platz3Wert">20 %</span>
             <small>des Preisgeldes</small>
           </div>
 
         </div>
 
-        <div class="best-lady">
-          🍾 Best Lady erhält eine Flasche Sekt
-        </div>
+        <div class="best-lady" id="bestLadyText">🍾 Best Lady erhält eine Flasche Sekt</div>
       </div>
 
       <div id="countdownBox">
@@ -116,6 +118,7 @@
     </section>
 
     <section class="anmeldung">
+      <div id="turnierAnmeldungStatus" class="turnier-anmeldung-status" hidden></div>
       <h2>👥 Jetzt anmelden</h2>
       <p class="konto-anmeldung-hinweis">Mit Konto werden Spitzname, Vorname und Nachname automatisch übernommen.</p>
 
@@ -156,9 +159,9 @@
       <p class="hinweis">Dein Platz wird live in der Warteschlange angezeigt.</p>
 
       <div class="quick-info">
-        <div>🎯 <strong>501 Master Out</strong></div>
-        <div>🔁 <strong>Doppel K.O.</strong></div>
-        <div>⚡ <strong>Best of 3</strong></div>
+        <div>🎯 <strong id="spielmodusText">501 Master Out</strong></div>
+        <div>🔁 <strong id="turnierformText">Doppel K.O.</strong></div>
+        <div>⚡ <strong id="bestOfText">Best of 3</strong></div>
       </div>
 
       <div class="anmeldung-logo">
@@ -192,7 +195,7 @@
 
   <div class="box">
     <div class="icon">€</div>
-    <div>10,00 €</div>
+    <div id="statusStartgeld">10,00 €</div>
     <small>Startgeld</small>
   </div>
 
@@ -257,8 +260,8 @@
   <div class="zahlung-box">
     <h2>💳 Zahlung per PayPal</h2>
 
-    <p>Bei PayPal beträgt der Zahlbetrag <strong>10,62 €</strong>.</p>
-    <p><strong>10,00 €</strong> davon fließen vollständig in das Preisgeld; <strong>0,62 €</strong> decken die PayPal-Gebühr.</p>
+    <p>Bei PayPal beträgt der Zahlbetrag <strong id="paypalGesamt">10,62 €</strong>.</p>
+    <p><strong id="paypalStartgeld">10,00 €</strong> davon fließen vollständig in das Preisgeld; <strong id="paypalGebuehr">0,62 €</strong> decken die PayPal-Gebühr.</p>
 
     <a
   href="https://paypal.me/DanielaRoth222/10.62EUR"
@@ -266,15 +269,15 @@
   class="paypal-btn"
   target="_blank"
 >
-  👉 @DanielaRoth222
+  <span id="paypalHandleText">👉 @DanielaRoth222</span>
 </a>
 
     <div class="hinweis-zahlung">
       <p><strong>Wichtig:</strong></p>
       <ul>
         <li>Bitte den exakt angemeldeten Spitznamen + Turniertag als Verwendungszweck angeben</li>
-        <li>Barzahlung: 10,00 €</li>
-        <li>PayPal-Zahlung: 10,62 € inklusive Gebührenausgleich</li>
+        <li>Barzahlung: <span id="barzahlungWert">10,00 €</span></li>
+        <li>PayPal-Zahlung: <span id="paypalzahlungWert">10,62 €</span> inklusive Gebührenausgleich</li>
         <li>Beide Zahlungsarten gelten gleichwertig als bezahlt</li>
         <li>Anmeldung erst nach Zahlung gültig</li>
         <li>Keine Rückerstattung bei Nichterscheinen</li>
@@ -285,17 +288,38 @@
 </section>
 
 <footer>
-  Dannis Treff Dart Turnier 2026<br>
+  <span id="footerTurnierTitel">DANNIS TREFF Turnier 2026</span><br>
   <a href="impressum.html">Impressum</a> |
   <a href="datenschutz.html">Datenschutz</a>
 </footer>
 
-<button onclick="adminLogin()">🔒 Admin</button>
-
-<div id="adminBereich" style="display:none; margin-top:20px;">
-  <h2>Admin Bereich</h2>
-  <button onclick="spielerFreigeben()">Spieler freigeben</button>
-  <button onclick="listeLeeren()">Liste leeren</button>
+<div id="turnierSettingsOverlay" class="turnier-settings-overlay" hidden>
+  <section class="turnier-settings-modal" role="dialog" aria-modal="true" aria-labelledby="turnierSettingsTitle">
+    <div class="turnier-settings-head">
+      <div><small>TURNIER-VERWALTUNG</small><h2 id="turnierSettingsTitle">Turnier bearbeiten</h2></div>
+      <button id="turnierSettingsClose" class="turnier-settings-close" type="button" aria-label="Schließen">×</button>
+    </div>
+    <form id="turnierSettingsForm" class="turnier-settings-form">
+      <label>Turniername<input id="cfgTitel" type="text" maxlength="80" required></label>
+      <label>Untertitel<input id="cfgUntertitel" type="text" maxlength="100"></label>
+      <div class="turnier-settings-grid"><label>Datum<input id="cfgDatum" type="date" required></label><label>Anwurf<input id="cfgAnwurf" type="time" required></label></div>
+      <label>Anmeldeschluss<input id="cfgAnmeldeschluss" type="time" required></label>
+      <label>Ort<input id="cfgOrt" type="text" maxlength="180" required></label>
+      <div class="turnier-settings-grid"><label>Max. Teilnehmer<input id="cfgMaxTeilnehmer" type="number" min="1" max="256" step="1" required></label><label>Startgeld (€)<input id="cfgStartgeld" type="number" min="0" step="0.01" required></label></div>
+      <h3>Spielmodus</h3>
+      <label>Spielmodus<input id="cfgSpielmodus" type="text" maxlength="60" placeholder="501 Master Out"></label>
+      <div class="turnier-settings-grid"><label>Turnierform<input id="cfgTurnierform" type="text" maxlength="60" placeholder="Doppel K.O."></label><label>Legs / Modus<input id="cfgBestOf" type="text" maxlength="40" placeholder="Best of 3"></label></div>
+      <h3>Preisgeld</h3>
+      <label>Überschrift<input id="cfgAuszahlungTitel" type="text" maxlength="60"></label>
+      <div class="turnier-settings-grid turnier-settings-grid-3"><label>1. Platz %<input id="cfgPlatz1" type="number" min="0" max="100" step="1"></label><label>2. Platz %<input id="cfgPlatz2" type="number" min="0" max="100" step="1"></label><label>3. Platz %<input id="cfgPlatz3" type="number" min="0" max="100" step="1"></label></div>
+      <label>Best Lady / Zusatzpreis<input id="cfgBestLady" type="text" maxlength="120"></label>
+      <h3>Zahlung</h3>
+      <div class="turnier-settings-grid"><label>PayPal-Zahlbetrag (€)<input id="cfgPaypalBetrag" type="number" min="0" step="0.01"></label><label>PayPal-Name<input id="cfgPaypalHandle" type="text" maxlength="60"></label></div>
+      <label class="turnier-settings-switch"><input id="cfgAnmeldungAktiv" type="checkbox"><span>Anmeldung geöffnet</span></label>
+      <button id="turnierSettingsSave" class="main-button" type="submit">Änderungen speichern</button>
+      <p class="turnier-settings-note">Die Angaben werden in Firestore gespeichert und auch auf der Startseite verwendet.</p>
+    </form>
+  </section>
 </div>
 
 <div id="successMessage" class="success-box" style="display:none;">
@@ -314,7 +338,8 @@
   <a href="kader.html">👥<br>Kader</a>
 </nav>
 
-<script type="module" src="script.js?v=29"></script>
+<script type="module" src="turnier-config.js?v=1"></script>
+<script type="module" src="script.js?v=30"></script>
 
 <script>
 const checkboxDatenschutz = document.getElementById("datenschutzCheck");
@@ -333,7 +358,8 @@ window.checkForm = function checkForm() {
   const datenschutzOk = checkboxDatenschutz.checked;
   const regelOk = checkboxRegel.checked;
 
-  button.disabled = !(nicknameOk && vornameOk && nachnameOk && datenschutzOk && regelOk);
+  const anmeldungAktiv = window.dart11enTurnierConfig?.anmeldungAktiv !== false;
+  button.disabled = !(anmeldungAktiv && nicknameOk && vornameOk && nachnameOk && datenschutzOk && regelOk);
 }
 
 checkboxDatenschutz.addEventListener("change", checkForm);
@@ -342,6 +368,7 @@ nicknameInput.addEventListener("input", checkForm);
 vornameInput.addEventListener("input", checkForm);
 nachnameInput.addEventListener("input", checkForm);
 document.addEventListener("kontoDatenUebernommen", checkForm);
+document.addEventListener("turnierConfigLoaded", checkForm);
 </script>
 
 <script type="module" src="push-foreground.js?v=10.0.1"></script>

@@ -2838,3 +2838,135 @@ body.spieltag-page {
   .index-page .index-quick-card { min-height: 116px; }
   .index-page .index-quick-card h3 { font-size: 14px; }
 }
+
+/* === Turnier-Verwaltung: dynamische Anmeldung === */
+.turnier-admin-actions {
+  max-width: 1100px;
+  margin: 28px auto 120px;
+  padding: 0 16px;
+}
+
+.turnier-settings-button {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 18px;
+  background: #171717;
+  color: #fff;
+  padding: 16px 18px;
+  font: inherit;
+  font-weight: 800;
+}
+
+.turnier-settings-overlay[hidden] { display: none !important; }
+.turnier-settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  background: rgba(0,0,0,.82);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 18px;
+}
+
+.turnier-settings-modal {
+  width: min(720px, 100%);
+  max-height: 88%;
+  overflow-y: auto;
+  background: #111;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 24px 24px 18px 18px;
+  padding: 22px;
+  color: #fff;
+  box-shadow: 0 -14px 50px rgba(0,0,0,.45);
+}
+
+.turnier-settings-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.turnier-settings-head small {
+  color: #ff4260;
+  font-weight: 900;
+  letter-spacing: .13em;
+}
+
+.turnier-settings-head h2 { margin: 5px 0 0; }
+.turnier-settings-close {
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.18);
+  background: #202020;
+  color: #fff;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.turnier-settings-form { display: grid; gap: 15px; }
+.turnier-settings-form h3 {
+  margin: 10px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,.1);
+  font-size: 18px;
+}
+.turnier-settings-form label {
+  display: grid;
+  gap: 7px;
+  color: #bdbdbd;
+  font-size: 14px;
+  font-weight: 700;
+}
+.turnier-settings-form input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 50px;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 14px;
+  background: #202020;
+  color: #fff;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 16px;
+}
+.turnier-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.turnier-settings-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.turnier-settings-switch {
+  display: flex !important;
+  align-items: center;
+  gap: 12px !important;
+  min-height: 54px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #1b1b1b;
+  color: #fff !important;
+}
+.turnier-settings-switch input { width: 24px; min-height: 24px; height: 24px; }
+.turnier-settings-note { color: #8d8d8d; font-size: 13px; text-align: center; margin: 0; }
+.turnier-anmeldung-status {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(230,0,42,.14);
+  border: 1px solid rgba(230,0,42,.45);
+  color: #ff7287;
+  font-weight: 800;
+}
+.anmeldung-geschlossen #anmeldeButton { opacity: .45; pointer-events: none; }
+body.modal-open { overflow: hidden; }
+
+@media (max-width: 560px) {
+  .turnier-settings-overlay { padding: 0; align-items: flex-end; }
+  .turnier-settings-modal { border-radius: 24px 24px 0 0; padding: 20px 16px 30px; }
+  .turnier-settings-grid, .turnier-settings-grid-3 { grid-template-columns: 1fr; }
+}

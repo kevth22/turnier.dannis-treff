@@ -13,12 +13,26 @@ import {
 const warteschlangeRef = collection(db, "warteschlange");
 const aktuellerLogin = getLogin();  
   
- let istAdmin = sessionStorage.getItem("admin") === "true"; 
+let istAdmin = String(aktuellerLogin?.rolle || "").toLowerCase() === "admin" || sessionStorage.getItem("admin") === "true";
   
 let letzteAnmeldung = 0;  
-const cooldownSekunden = 25;  
+const cooldownSekunden = 25;
+
+function aktuelleTurnierConfig() {
+  return window.dart11enTurnierConfig || {
+    maxTeilnehmer: 32,
+    startgeld: 10,
+    paypalBetrag: 10.62,
+    paypalHandle: "DanielaRoth222",
+    datum: "2026-08-01",
+    anmeldeschluss: "18:30",
+    anmeldungAktiv: true
+  };
+}
   
-window.anmelden = async function () {  
+window.anmelden = async function () {
+  const cfg = aktuelleTurnierConfig();
+  if (cfg.anmeldungAktiv === false) { alert("Die Anmeldung ist derzeit geschlossen."); return; }
   const nicknameFeld = document.getElementById("nickname");
 const vornameFeld = document.getElementById("vorname");
 const nachnameFeld = document.getElementById("nachname");
@@ -99,10 +113,10 @@ setTimeout(() => {
 letzteAnmeldung = Date.now();  
   
 const paypalLink = document.getElementById("paypalLink");
-paypalLink.href = "https://paypal.me/DanielaRoth222/10.62EUR";
+paypalLink.href = `https://paypal.me/${encodeURIComponent(cfg.paypalHandle || "DanielaRoth222")}/${Number(cfg.paypalBetrag || 0).toFixed(2)}EUR`;
 paypalLink.classList.remove("disabled");
 
-alert("Anmeldung gespeichert. Bar: 10,00 € oder PayPal: 10,62 €. Davon fließen 10,00 € vollständig ins Preisgeld.");  
+alert(`Anmeldung gespeichert. Bar: ${Number(cfg.startgeld || 0).toLocaleString("de-DE", {minimumFractionDigits:2})} € oder PayPal: ${Number(cfg.paypalBetrag || 0).toLocaleString("de-DE", {minimumFractionDigits:2})} €.`);  
   
 if (aktuellerLogin) {
   kontoDatenUebernehmen();
@@ -142,10 +156,10 @@ const wartend = wartendeSpieler.length;
 
 const belegtAnzeige = document.getElementById("belegt");
 const wartendAnzeige = document.getElementById("wartend");
-if (belegtAnzeige) belegtAnzeige.textContent = belegte + " / 32";
+const maxPlaetze = Math.max(1, Number(aktuelleTurnierConfig().maxTeilnehmer) || 32);
+if (belegtAnzeige) belegtAnzeige.textContent = belegte + " / " + maxPlaetze;
 if (wartendAnzeige) wartendAnzeige.textContent = wartend;
 
-const maxPlaetze = 32;
 
 const prozentBelegt = (belegte / maxPlaetze) * 100;
 const prozentWartend = Math.min((wartend / maxPlaetze) * 100, 100);
@@ -256,28 +270,33 @@ function listeLeeren() {
   location.reload();
 }
 function starteCountdown() {
-  const zielDatum = new Date("2026-08-01T18:30:00"); // dein Turnierstart
+  let intervalId = null;
 
-  function updateCountdown() {
-    const jetzt = new Date();
-    const diff = zielDatum - jetzt;
+  function startMitConfig() {
+    if (intervalId) clearInterval(intervalId);
+    const cfg = aktuelleTurnierConfig();
+    const datum = cfg.datum || "2026-08-01";
+    const zeit = cfg.anmeldeschluss || "18:30";
+    const zielDatum = new Date(`${datum}T${zeit}:00`);
 
-    if (diff <= 0) {
-      document.getElementById("timer").innerHTML = "🚀 Turnier läuft!";
-      return;
+    function updateCountdown() {
+      const timer = document.getElementById("timer");
+      if (!timer) return;
+      if (cfg.anmeldungAktiv === false) { timer.innerHTML = "🔒 Anmeldung geschlossen"; return; }
+      const diff = zielDatum - new Date();
+      if (diff <= 0) { timer.innerHTML = "🚀 Turnier läuft!"; return; }
+      const tage = Math.floor(diff / 86400000);
+      const stunden = Math.floor((diff / 3600000) % 24);
+      const minuten = Math.floor((diff / 60000) % 60);
+      const sekunden = Math.floor((diff / 1000) % 60);
+      timer.innerHTML = `${tage} : ${stunden.toString().padStart(2,"0")} : ${minuten.toString().padStart(2,"0")} : ${sekunden.toString().padStart(2,"0")}`;
     }
-
-    const tage = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const stunden = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const minuten = Math.floor((diff / (1000 * 60)) % 60);
-    const sekunden = Math.floor((diff / 1000) % 60);
-
-document.getElementById("timer").innerHTML =
-  `${tage} : ${stunden.toString().padStart(2,"0")} : ${minuten.toString().padStart(2,"0")} : ${sekunden.toString().padStart(2,"0")}`;
+    updateCountdown();
+    intervalId = setInterval(updateCountdown, 1000);
   }
 
-  updateCountdown();
-  setInterval(updateCountdown, 1000);
+  document.addEventListener("turnierConfigLoaded", startMitConfig);
+  startMitConfig();
 }
 
 starteCountdown();
@@ -302,3 +321,18 @@ function kontoDatenUebernehmen() {
 }
 
 document.addEventListener("DOMContentLoaded", kontoDatenUebernehmen);
+
+
+document.addEventListener("turnierConfigLoaded", () => {
+  const cfg = aktuelleTurnierConfig();
+  const belegtAnzeige = document.getElementById("belegt");
+  if (belegtAnzeige) {
+    const current = Number(String(belegtAnzeige.textContent || "0").split("/")[0].trim()) || 0;
+    const max = Math.max(1, Number(cfg.maxTeilnehmer) || 32);
+    belegtAnzeige.textContent = `${current} / ${max}`;
+    const bar = document.getElementById("barBelegt");
+    if (bar) bar.style.width = Math.min((current / max) * 100, 100) + "%";
+  }
+  const btn = document.getElementById("anmeldeButton");
+  if (btn && cfg.anmeldungAktiv === false) btn.disabled = true;
+});
