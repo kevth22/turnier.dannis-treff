@@ -26,85 +26,112 @@
   <meta name="apple-mobile-web-app-title" content="Dart11en">
   <link rel="apple-touch-icon" href="icon-192.png">
 </head>
-<body>
-<header class="app-header">
+<body class="index-page">
+<header class="app-header index-header">
   <img src="dart11enlogo.png" class="logo" alt="Dart11en Logo">
-  <h1>Dart11en</h1>
-  <p>Vereins-App für Turniere, Liga & mehr</p>
+  <div class="index-brand-copy">
+    <h1>Dart11en</h1>
+    <p>Vereins-App für Turniere, Liga & mehr</p>
+  </div>
 </header>
 
-<div id="accountControls" class="account-controls"></div>
+<div id="accountControls" class="account-controls index-account-controls"></div>
 
-<main class="app-container">
-  <section class="quick-grid">
-    <a href="turniere.html" class="quick-card">
-      🎯
-      <h3>Turniere</h3>
-      <p>Anmeldung & Warteschlange</p>
-    </a>
-
-    <a href="turnier-live.html" class="quick-card">
-      🏆
-      <h3>Turnier-Center</h3>
-      <p>Livebaum, TV & Turnierverwaltung</p>
-    </a>
-
-    <a href="liga.html" class="quick-card">
-      🏆
-      <h3>Liga</h3>
-      <p>Tabellen & Ergebnisse</p>
-    </a>
-
-    <a href="kalender.html" class="quick-card">
-      📅
-      <h3>Kalender</h3>
-      <p>Spieltage eintragen</p>
-    </a>
-
-    <a href="spieltag-center.html" class="quick-card">
-      🚌
-      <h3>Spieltag-Center</h3>
-      <p>Matchday & Rückmeldungen</p>
-    </a>
-
-    <a href="captain-center.html" class="quick-card">
-      <div class="menu-icon">📋</div>
-      <h2>Captain-Center</h2>
-      <p>Aufstellungen & Planung</p>
-    </a>
-
-    <a href="kader.html" class="quick-card">
-      👥
-      <h3>Kader</h3>
-      <p>Mitglieder & Teams</p>
-    </a>
-
-    <a href="benachrichtigungen.html" class="quick-card">
-      🔔
-      <h3>Benachrichtigungen</h3>
-      <p>Push-Mitteilungen aktivieren</p>
-    </a>
-
-    <a href="kasse.html" class="quick-card" id="kasseCard" hidden>
-      💰
-      <h3>Kasse</h3>
-      <p>Beiträge, Einnahmen & Ausgaben</p>
-    </a>
+<main class="app-container index-dashboard">
+  <section class="info-card index-event-card">
+    <div class="index-event-topline">
+      <span class="index-section-kicker">Als Nächstes</span>
+      <span class="index-event-icon">🔥</span>
+    </div>
+    <h2>DANNIS TREFF Turnier 2026</h2>
+    <div class="index-event-meta">📅 01.08.2026</div>
+    <a href="turniere.html" class="main-button index-event-button">Jetzt anmelden</a>
   </section>
 
-  <section class="info-card">
-    <h2>🔥 Nächstes Event</h2>
-    <p><strong>DANNIS TREFF Turnier 2026</strong></p>
-    <p>📅 01.08.2026</p>
-    <a href="turniere.html" class="main-button">Jetzt anmelden</a>
+  <section class="index-section" aria-labelledby="hauptbereicheTitel">
+    <div class="index-section-heading">
+      <h2 id="hauptbereicheTitel">Verein</h2>
+    </div>
+    <div class="quick-grid index-primary-grid">
+      <a href="spieltag-center.html" class="quick-card index-quick-card">
+        <span class="index-card-icon">🚌</span>
+        <h3>Spieltag</h3>
+        <p>Matchday & Rückmeldungen</p>
+      </a>
+
+      <a href="kalender.html" class="quick-card index-quick-card">
+        <span class="index-card-icon">📅</span>
+        <h3>Kalender</h3>
+        <p>Termine & Spieltage</p>
+      </a>
+
+      <a href="liga.html" class="quick-card index-quick-card">
+        <span class="index-card-icon">🏆</span>
+        <h3>Liga</h3>
+        <p>Tabellen & Ergebnisse</p>
+      </a>
+
+      <a href="kader.html" class="quick-card index-quick-card">
+        <span class="index-card-icon">👥</span>
+        <h3>Kader</h3>
+        <p>Mitglieder & Profile</p>
+      </a>
+    </div>
   </section>
+
+  <section class="index-section" aria-labelledby="turniereTitel">
+    <div class="index-section-heading">
+      <h2 id="turniereTitel">Turniere</h2>
+    </div>
+    <div class="quick-grid index-secondary-grid">
+      <a href="turniere.html" class="quick-card index-quick-card">
+        <span class="index-card-icon">🎯</span>
+        <h3>Anmeldung</h3>
+        <p>Turniere & Warteschlange</p>
+      </a>
+
+      <a href="turnier-live.html" class="quick-card index-quick-card">
+        <span class="index-card-icon">🏆</span>
+        <h3>Turnier-Center</h3>
+        <p>Livebaum, TV & Verwaltung</p>
+      </a>
+    </div>
+  </section>
+
+  <section id="verwaltungSection" class="index-section" hidden aria-labelledby="verwaltungTitel">
+    <div class="index-section-heading">
+      <h2 id="verwaltungTitel">Verwaltung</h2>
+    </div>
+    <div class="quick-grid index-admin-grid">
+      <a href="captain-center.html" class="quick-card index-quick-card" id="captainCard" hidden>
+        <span class="index-card-icon">📋</span>
+        <h3>Captain-Center</h3>
+        <p>Aufstellungen & Planung</p>
+      </a>
+
+      <a href="kasse.html" class="quick-card index-quick-card" id="kasseCard" hidden>
+        <span class="index-card-icon">💰</span>
+        <h3>Kasse</h3>
+        <p>Beiträge, Einnahmen & Ausgaben</p>
+      </a>
+    </div>
+  </section>
+
+  <a href="benachrichtigungen.html" class="index-notification-row">
+    <span class="index-notification-icon">🔔</span>
+    <span>
+      <strong>Benachrichtigungen</strong>
+      <small>Push-Mitteilungen verwalten</small>
+    </span>
+    <span class="index-row-arrow">›</span>
+  </a>
 </main>
 
 <nav class="bottom-nav">
+  <a href="index.html" class="active">🏠<br>Home</a>
   <a href="spieltag-center.html">🚌<br>Spieltag</a>
   <a href="kalender.html">📅<br>Kalender</a>
   <a href="liga.html">🏆<br>Liga</a>
-  <a href="turniere.html">🎯<br>Turniere</a>
   <a href="kader.html">👥<br>Kader</a>
 </nav>
 
@@ -122,7 +149,7 @@
 </button>
 
 <script type="module" src="account-ui.js"></script>
-<script type="module" src="index.js?v=28"></script>
+<script type="module" src="index.js?v=29"></script>
 <script src="pwa.js?v=3" defer></script>
 <script type="module" src="push-foreground.js?v=10.0.1"></script>
 </body>

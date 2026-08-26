@@ -2571,3 +2571,270 @@ body.spieltag-page {
     padding-right: 8px;
   }
 }
+
+
+/* =========================
+   INDEX DASHBOARD V29
+========================= */
+.index-page {
+  background:
+    radial-gradient(circle at 50% -120px, rgba(224, 0, 34, .12), transparent 360px),
+    #050505;
+}
+
+.index-page .index-header {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 20px 20px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: left;
+}
+
+.index-page .index-header .logo {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.index-page .index-header h1 {
+  margin: 0;
+  font-size: clamp(30px, 7vw, 42px);
+  line-height: 1;
+}
+
+.index-page .index-header p {
+  margin: 7px 0 0;
+  font-size: 14px;
+  color: #989898;
+}
+
+.index-page .index-account-controls {
+  max-width: 760px;
+  margin: 4px auto 12px;
+  padding: 0 16px;
+}
+
+.index-account-card {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px 9px 12px;
+  border: 1px solid #2c2c2c;
+  border-radius: 18px;
+  background: rgba(18, 18, 18, .92);
+}
+
+.index-account-main {
+  min-width: 0;
+  display: flex !important;
+  align-items: center;
+  gap: 11px;
+  padding: 0 !important;
+  border: 0 !important;
+  text-align: left !important;
+}
+
+.index-account-avatar {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #202020;
+  font-size: 20px;
+}
+
+.index-account-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.index-account-copy strong {
+  max-width: 46vw;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 16px;
+}
+
+.index-account-copy small {
+  color: #8f8f8f;
+  font-size: 12px;
+}
+
+.index-account-actions {
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.index-account-action {
+  width: 42px;
+  height: 42px;
+  display: grid !important;
+  place-items: center;
+  padding: 0 !important;
+  border: 1px solid #303030 !important;
+  border-radius: 13px !important;
+  background: #191919 !important;
+  color: #fff !important;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.index-page .index-dashboard {
+  max-width: 760px;
+  padding: 4px 16px 26px;
+}
+
+.index-event-card {
+  margin: 0 0 20px !important;
+  padding: 18px !important;
+  gap: 10px !important;
+  border-color: #343434 !important;
+  background: linear-gradient(145deg, rgba(224, 0, 34, .12), rgba(255,255,255,.055) 56%) !important;
+}
+
+.index-event-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.index-section-kicker {
+  color: #ff7d91;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+}
+
+.index-event-icon { font-size: 20px; }
+.index-event-card h2 { font-size: 22px; line-height: 1.2; }
+.index-event-meta { color: #bbb; font-size: 14px; }
+
+.index-event-button {
+  width: fit-content;
+  min-width: 150px;
+  margin-top: 2px !important;
+  padding: 11px 16px !important;
+  border-radius: 12px !important;
+  font-size: 12px !important;
+}
+
+.index-section { margin-top: 20px; }
+.index-section[hidden] { display: none !important; }
+.index-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 2px 10px;
+}
+.index-section-heading h2 {
+  font-size: 15px;
+  color: #d7d7d7;
+  letter-spacing: .3px;
+}
+
+.index-page .quick-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.index-page .index-quick-card {
+  min-height: 126px;
+  padding: 16px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border-radius: 18px;
+  background: #111;
+  border-color: #272727;
+}
+
+.index-page .index-quick-card:hover,
+.index-page .index-quick-card:active {
+  transform: none;
+  border-color: #4a4a4a;
+  background: #151515;
+}
+
+.index-card-icon { font-size: 25px; line-height: 1; margin-bottom: 3px; }
+.index-page .index-quick-card h3 { margin: 3px 0 0; font-size: 16px; line-height: 1.15; }
+.index-page .index-quick-card p { margin: 0; color: #969696; font-size: 11px; line-height: 1.25; }
+
+.index-secondary-grid .index-quick-card { min-height: 118px; }
+.index-admin-grid .index-quick-card { min-height: 112px; }
+
+.index-notification-row {
+  margin-top: 20px;
+  min-height: 66px;
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #292929;
+  border-radius: 16px;
+  background: #101010;
+}
+.index-notification-icon { font-size: 21px; }
+.index-notification-row strong { display: block; font-size: 14px; }
+.index-notification-row small { display: block; margin-top: 3px; color: #8f8f8f; font-size: 11px; }
+.index-row-arrow { color: #777; font-size: 27px; line-height: 1; }
+
+.index-login-button {
+  border-radius: 16px !important;
+  background: #111;
+}
+
+.index-page .pwa-install-button {
+  right: 14px;
+  bottom: 96px;
+  padding: 10px 14px;
+  font-size: 11px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.45);
+}
+
+.index-page .bottom-nav a.active { color: #fff; }
+.index-page .bottom-nav a.active::after {
+  content: "";
+  display: block;
+  width: 22px;
+  height: 2px;
+  margin: 5px auto 0;
+  border-radius: 99px;
+  background: #e00022;
+}
+
+@media (max-width: 600px) {
+  .index-page .index-header {
+    padding-top: 14px;
+    justify-content: flex-start;
+  }
+  .index-page .index-header .logo { width: 58px; height: 58px; }
+  .index-page .index-header h1 { font-size: 30px; }
+  .index-page .index-header p { font-size: 12px; }
+  .index-page .index-dashboard { padding-left: 14px; padding-right: 14px; }
+  .index-page .index-account-controls { padding-left: 14px; padding-right: 14px; }
+  .index-page .quick-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .index-page .index-quick-card { min-height: 122px; padding: 14px 8px; }
+  .index-page .index-quick-card h3 { font-size: 15px; }
+  .index-page .index-quick-card p { font-size: 10.5px; }
+}
+
+@media (max-width: 370px) {
+  .index-page .index-header p { display: none; }
+  .index-page .index-quick-card { min-height: 116px; }
+  .index-page .index-quick-card h3 { font-size: 14px; }
+}
