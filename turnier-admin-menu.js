@@ -5,6 +5,7 @@
     teilnehmer: ["teilnehmerBereich"],
     konfiguration: ["auslosungBereich"],
     ergebnisse: ["ergebnisBereich"],
+    legs: ["legUebersichtBereich"],
     turnierbaum: ["turnierBaumBereich", "gruppenBereich"],
     tv: ["tvBereich"],
     einstellungen: ["einstellungenBereich"]
@@ -65,7 +66,7 @@
     };
 
     const showPage = (page, updateHash = true) => {
-      const publicPages = new Set(["dashboard", "turnierbaum"]);
+      const publicPages = new Set(["dashboard", "legs", "turnierbaum"]);
       if (!pageSections[page] || (!isAdmin && !publicPages.has(page))) page = "dashboard";
       document.querySelectorAll("[data-admin-section]").forEach((section) => {
         section.classList.toggle("admin-page-hidden", section.dataset.adminSection !== page);

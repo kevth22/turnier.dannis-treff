@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = 'dart11en-app-v38-camera-control';
+const VERSION = 'dart11en-app-v39-leg-menu-fix';
 
 const CORE_FILES = [
   "./",
