@@ -1287,3 +1287,31 @@ body.is-admin .admin-dashboard {
   border-color: rgba(46, 204, 113, .8);
   box-shadow: 0 0 0 1px rgba(46, 204, 113, .18) inset;
 }
+
+/* Leg-Übersicht / Vormünzen */
+.leg-overview-card{max-width:980px}
+.leg-overview-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.leg-overview-head h2{margin-bottom:6px}
+.leg-search-wrap{display:grid;gap:8px;margin:22px 0 18px;font-weight:800;color:#f5f5f5}
+.leg-search-wrap input{width:100%;min-height:50px;border:1px solid #3a3a3a;border-radius:14px;background:#181818;color:#fff;padding:0 16px;font-size:16px;outline:none}
+.leg-search-wrap input:focus{border-color:#ff163e;box-shadow:0 0 0 3px rgba(255,22,62,.12)}
+.leg-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:22px}
+.leg-summary-item{background:#191919;border:1px solid #333;border-radius:16px;padding:16px 12px;text-align:center}
+.leg-summary-item strong{display:block;font-size:clamp(22px,5vw,32px);line-height:1;color:#fff;margin-bottom:7px}
+.leg-summary-item span{display:block;color:#aaa;font-size:13px;font-weight:700}
+.leg-list-head,.leg-player-row{display:grid;grid-template-columns:minmax(0,1fr) 82px 105px;gap:10px;align-items:center}
+.leg-list-head{padding:0 13px 8px;color:#888;text-transform:uppercase;font-size:11px;font-weight:900;letter-spacing:.06em}
+.leg-list-head span:nth-child(n+2){text-align:right}
+.leg-player-list{display:grid;gap:8px}
+.leg-player-row{background:#191919;border:1px solid #303030;border-radius:14px;padding:14px 13px}
+.leg-player-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;font-size:16px}
+.leg-player-legs,.leg-player-money{text-align:right;color:#ddd;white-space:nowrap}
+.leg-player-legs b{font-size:18px;color:#fff}.leg-player-legs small{font-size:11px;color:#8f8f8f}
+.leg-player-money{font-weight:900;color:#fff}
+.leg-empty{text-align:center;padding:20px 8px}
+@media(max-width:480px){
+ .leg-summary-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+ .leg-summary-item{padding:13px 6px}.leg-summary-item span{font-size:11px}
+ .leg-list-head,.leg-player-row{grid-template-columns:minmax(0,1fr) 65px 90px;gap:6px}
+ .leg-player-row{padding:13px 10px}.leg-player-name{font-size:15px}.leg-player-money{font-size:14px}
+}

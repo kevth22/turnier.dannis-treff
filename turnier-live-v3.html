@@ -7,7 +7,7 @@
   <title>Dart11en | Turnier-Center</title>
 
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="turnier-live-v3.css?v=507">
+  <link rel="stylesheet" href="turnier-live-v3.css?v=534">
   <link rel="stylesheet" href="turnier-tv-fit.css?v=10">
   <link rel="stylesheet" href="gruppen-turnier-v3.css?v=507">
   <link rel="stylesheet" href="turnier-admin-menu.css?v=110">
@@ -46,6 +46,7 @@
     <button class="drawer-link admin-menu-only" data-admin-page="konfiguration" type="button">🎲 <span>Turnier konfigurieren</span></button>
     <button class="drawer-link admin-menu-only" data-admin-page="ergebnisse" type="button">🎯 <span>Ergebnisse verwalten</span></button>
     <button class="drawer-link" data-admin-page="turnierbaum" type="button">🌳 <span>Turnierbaum</span></button>
+    <button class="drawer-link" data-admin-page="legs" type="button">🪙 <span>Leg-Übersicht</span></button>
     <button class="drawer-link admin-menu-only" data-admin-page="tv" type="button">📺 <span>TV-Modus</span></button>
     <button class="drawer-link admin-menu-only" data-admin-page="einstellungen" type="button">⚙️ <span>Einstellungen</span></button>
   </nav>
@@ -191,6 +192,30 @@
 
     <div id="spielerInfos"></div>
 
+  </section>
+
+  <section id="legUebersichtBereich" class="content-card leg-overview-card" data-admin-section="legs">
+    <div class="leg-overview-head">
+      <div>
+        <h2>🪙 Leg-Übersicht</h2>
+        <p class="section-text">Jedes gespielte Leg kostet 0,50 €. Die Werte werden automatisch aus den abgeschlossenen Partien berechnet.</p>
+      </div>
+    </div>
+
+    <label class="leg-search-wrap" for="legSpielerSuche">
+      <span>Spieler suchen</span>
+      <input id="legSpielerSuche" type="search" placeholder="z. B. Red Dart" autocomplete="off">
+    </label>
+
+    <div class="leg-summary-grid" aria-label="Zusammenfassung">
+      <div class="leg-summary-item"><strong id="legSpielerAnzahl">0</strong><span>Spieler</span></div>
+      <div class="leg-summary-item"><strong id="legGesamtAnzahl">0</strong><span>Spieler-Legs</span></div>
+      <div class="leg-summary-item"><strong id="legGesamtBetrag">0,00 €</strong><span>Münzbedarf</span></div>
+    </div>
+
+    <div class="leg-list-head" aria-hidden="true"><span>Spieler</span><span>Legs</span><span>Vormünzen</span></div>
+    <div id="legSpielerListe" class="leg-player-list"></div>
+    <p id="legKeineTreffer" class="section-text leg-empty" hidden>Kein Spieler gefunden.</p>
   </section>
 
   <section id="turnierBaumBereich" class="content-card" data-admin-section="turnierbaum">
@@ -607,7 +632,8 @@
 <script type="module" src="gruppen-turnier-v3.js?v=509"></script>
 <script src="turnier-tv-fit.js?v=400" defer></script>
 <script type="module" src="turnier-v4-live.js?v=401"></script>
-<script src="turnier-admin-menu.js?v=110" defer></script>
+<script src="turnier-admin-menu.js?v=111" defer></script>
+<script src="turnier-leg-uebersicht.js?v=1" defer></script>
 <script type="module" src="turnier-theme.js?v=507"></script>
 <script type="module" src="push-foreground.js?v=10.0.1"></script>
 <script src="pwa.js" defer></script>
