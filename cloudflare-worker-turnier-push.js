@@ -22,7 +22,7 @@ export default {
     try {
       // Statusseite des Workers
       if (request.method === "GET" && url.pathname === "/") {
-        return corsResponse({ ok: true, status: "online", service: "dart11en-turnier-push", version: "10.0-basis" });
+        return corsResponse({ ok: true, status: "online", service: "dart11en-turnier-push", version: "10.1-3k-sync" });
       }
 
       // Manueller Test-Push, z. B. /test-push?nickname=Red%20Dart
@@ -46,11 +46,40 @@ export default {
         return corsResponse({ ok: true, ...result });
       }
 
+      // 3K Bestleistungen: Events 7019 + 8683 zusammenführen und in Mitgliederprofile schreiben.
+      if (request.method === "POST" && url.pathname === "/3k-sync") {
+        validateSecrets(env);
+        const accessToken = await getGoogleAccessToken(env);
+        const result = await sync3kPerformances(env, accessToken);
+        return corsResponse({ ok: true, ...result });
+      }
+
+      // Diagnose ohne Firestore-Schreibzugriff: zeigt nur, welcher 3K-Endpunkt antwortet.
+      if (request.method === "GET" && url.pathname === "/3k-debug") {
+        const eventId = Number(url.searchParams.get("event") || 7019);
+        if (![7019, 8683].includes(eventId)) return corsResponse({ ok: false, error: "EVENT_NICHT_ERLAUBT" }, 400);
+        const debug = await fetch3kPerformancePayload(eventId, true);
+        return corsResponse({ ok: true, eventId, ...debug });
+      }
+
       return corsResponse({ ok: false, error: "NOT_FOUND" }, 404);
     } catch (error) {
       console.error(error);
       return corsResponse({ ok: false, error: String(error?.message || error) }, 500);
     }
+  },
+
+  // Optionaler Cloudflare-Cron-Trigger: z. B. alle 6 Stunden.
+  async scheduled(controller, env, ctx) {
+    ctx.waitUntil((async () => {
+      try {
+        validateSecrets(env);
+        const accessToken = await getGoogleAccessToken(env);
+        await sync3kPerformances(env, accessToken);
+      } catch (error) {
+        console.error("3K Cron-Sync fehlgeschlagen:", error);
+      }
+    })());
   }
 };
 
@@ -275,7 +304,7 @@ async function syncTournamentPushes(env, accessToken) {
   return {
     syncId,
     status: "synchronisiert",
-    version: "10.0-basis",
+    version: "10.1-3k-sync",
     runId,
     turnierTyp: active.type,
     partienGeprueft: actionable.length,
@@ -569,7 +598,294 @@ function toFirestoreValue(value) {
   if (value === null || value === undefined) return { nullValue: null };
   if (typeof value === "boolean") return { booleanValue: value };
   if (typeof value === "number") return Number.isInteger(value) ? { integerValue: String(value) } : { doubleValue: value };
+  if (Array.isArray(value)) return { arrayValue: { values: value.map(toFirestoreValue) } };
+  if (typeof value === "object") return { mapValue: { fields: objectToFirestoreFields(value) } };
   return { stringValue: String(value) };
+}
+
+
+// ---------------- 3K BESTLEISTUNGEN ----------------
+const THREE_K_EVENTS = [7019, 8683];
+const THREE_K_BASE = "https://backend6.3k-darts.com/2k-backend6/api/v1/frontend";
+
+async function sync3kPerformances(env, accessToken) {
+  const eventResults = [];
+  const allRecords = [];
+  for (const eventId of THREE_K_EVENTS) {
+    const result = await fetch3kPerformancePayload(eventId, false);
+    eventResults.push({ eventId, endpoint: result.endpoint, records: result.records.length });
+    allRecords.push(...result.records.map(record => ({ ...record, eventId })));
+  }
+
+  if (!allRecords.length) {
+    throw new Error("3K_KEINE_BESTLEISTUNGEN_GEFUNDEN: Bitte /3k-debug?event=7019 prüfen.");
+  }
+
+  const members = await listMembersFor3k(env, accessToken);
+  const byMember = new Map();
+  const unmatched = new Set();
+
+  for (const record of allRecords) {
+    const member = match3kPlayerToMember(record.player, members);
+    if (!member) {
+      if (record.player) unmatched.add(record.player);
+      continue;
+    }
+    if (!byMember.has(member.id)) byMember.set(member.id, empty3kStats());
+    merge3kRecord(byMember.get(member.id), record);
+  }
+
+  let updated = 0;
+  for (const [memberId, stats] of byMember.entries()) {
+    finalize3kStats(stats);
+    await patchMember3kStats(env, accessToken, memberId, {
+      ...stats,
+      quelle: "3k",
+      events: THREE_K_EVENTS,
+      synchronisiertAm: new Date().toISOString()
+    });
+    updated += 1;
+  }
+
+  return {
+    events: eventResults,
+    aktualisiert: updated,
+    nichtZugeordnet: [...unmatched].sort((a, b) => a.localeCompare(b, "de"))
+  };
+}
+
+async function fetch3kPerformancePayload(eventId, debugOnly = false) {
+  // 3K nutzt für events/11 backend6. Die Web-App hat je nach Version unterschiedliche
+  // Pfade verwendet; deshalb werden die bekannten/naheliegenden öffentlichen Varianten
+  // nacheinander geprüft. Nur JSON-Antworten werden akzeptiert.
+  const candidates = [
+    `${THREE_K_BASE}/event/${eventId}/performances`,
+    `${THREE_K_BASE}/event/${eventId}/performance`,
+    `${THREE_K_BASE}/performances/${eventId}`,
+    `${THREE_K_BASE}/performance/${eventId}`,
+    `${THREE_K_BASE}/event/${eventId}`
+  ];
+  const attempts = [];
+
+  for (const endpoint of candidates) {
+    try {
+      const response = await fetch(endpoint, {
+        headers: { Accept: "application/json, text/plain, */*", "User-Agent": "Dart11en-3K-Sync/1.0" }
+      });
+      const text = await response.text();
+      attempts.push({ endpoint, status: response.status, contentType: response.headers.get("content-type") || "", bytes: text.length });
+      if (!response.ok || !text) continue;
+      let json;
+      try { json = JSON.parse(text); } catch { continue; }
+      const records = extract3kRecords(json);
+      if (records.length) return { endpoint, records, attempts };
+      if (debugOnly) {
+        // Für die Diagnose nur Struktur, niemals eine riesige Rohantwort zurückgeben.
+        attempts[attempts.length - 1].topLevelKeys = json && typeof json === "object" ? Object.keys(json).slice(0, 40) : [];
+      }
+    } catch (error) {
+      attempts.push({ endpoint, status: 0, error: String(error?.message || error) });
+    }
+  }
+
+  if (debugOnly) return { endpoint: null, records: [], attempts };
+  throw new Error(`3K_ENDPOINT_NICHT_ERKANNT_EVENT_${eventId}`);
+}
+
+function extract3kRecords(root) {
+  const records = [];
+  const seen = new Set();
+
+  function walk(node, context = {}, depth = 0) {
+    if (depth > 14 || node === null || node === undefined) return;
+    if (Array.isArray(node)) {
+      for (const item of node) walk(item, context, depth + 1);
+      return;
+    }
+    if (typeof node !== "object") return;
+
+    const categoryText = firstText(node, ["performanceType", "performanceName", "category", "type", "title", "label", "description", "name"]);
+    const category = normalize3kCategory(categoryText) || context.category;
+    const player = extract3kPlayer(node) || context.player;
+    const ownValue = firstNumber(node, ["value", "score", "result", "points", "numberOfDarts", "darts", "legDarts", "performanceValue"]);
+    const ownCount = firstNumber(node, ["count", "amount", "quantity", "number", "times", "anzahl"]);
+
+    if (category && player) {
+      let value = ownValue;
+      let count = ownCount;
+      if (category === "180") {
+        if (!count && value && value !== 180) count = value;
+        value = 180;
+        count = Math.max(1, Number(count) || 1);
+      } else if (Number.isFinite(value)) {
+        count = Math.max(1, Number(count) || 1);
+      }
+      if (category === "180" || Number.isFinite(value)) {
+        const record = { category, player: String(player).trim(), value: Number(value), count: Number(count) || 1 };
+        if (isPlausible3kRecord(record)) {
+          const key = `${record.category}|${normalize3kName(record.player)}|${record.value}|${record.count}|${depth}`;
+          if (!seen.has(key)) { seen.add(key); records.push(record); }
+        }
+      }
+    }
+
+    const nextContext = { category: category || context.category, player: player || context.player };
+    for (const [key, value] of Object.entries(node)) {
+      if (value && typeof value === "object") {
+        const keyCategory = normalize3kCategory(key);
+        walk(value, { ...nextContext, category: keyCategory || nextContext.category }, depth + 1);
+      }
+    }
+  }
+
+  walk(root);
+  // Manche APIs enthalten dieselben Datensätze in mehreren Darstellungen. Gleiche
+  // Spieler/Kategorie/Wert-Paare werden deshalb auf die größte gefundene Anzahl reduziert.
+  const merged = new Map();
+  for (const record of records) {
+    const key = `${record.category}|${normalize3kName(record.player)}|${record.value}`;
+    const old = merged.get(key);
+    if (!old || record.count > old.count) merged.set(key, record);
+  }
+  return [...merged.values()];
+}
+
+function normalize3kCategory(value) {
+  const text = String(value || "").toLowerCase().replace(/[\s_-]+/g, " ").trim();
+  if (!text) return null;
+  if (/\b180\b/.test(text) && !/171/.test(text)) return "180";
+  if (text.includes("highscore") || text.includes("high score")) return "highscore";
+  if (text.includes("highfinish") || text.includes("high finish")) return "highfinish";
+  if (text.includes("shortgame") || text.includes("short game") || text.includes("shortleg") || text.includes("short leg")) return "shortgame";
+  return null;
+}
+
+function extract3kPlayer(node) {
+  for (const key of ["playerName", "participantName", "displayName", "fullName", "spielerName"]) {
+    if (typeof node[key] === "string" && node[key].trim()) return node[key].trim();
+  }
+  for (const key of ["player", "participant", "spieler", "person"]) {
+    const obj = node[key];
+    if (!obj) continue;
+    if (typeof obj === "string" && obj.trim()) return obj.trim();
+    if (typeof obj === "object") {
+      const direct = firstText(obj, ["displayName", "fullName", "name", "nickname", "nickName"]);
+      if (direct) return direct;
+      const full = [obj.firstName || obj.vorname, obj.lastName || obj.nachname].filter(Boolean).join(" ").trim();
+      if (full) return full;
+    }
+  }
+  return null;
+}
+
+function firstText(obj, keys) {
+  for (const key of keys) if (typeof obj?.[key] === "string" && obj[key].trim()) return obj[key].trim();
+  return "";
+}
+function firstNumber(obj, keys) {
+  for (const key of keys) {
+    const value = Number(obj?.[key]);
+    if (Number.isFinite(value)) return value;
+  }
+  return NaN;
+}
+function isPlausible3kRecord(record) {
+  if (!record.player || !record.category || !Number.isFinite(record.count) || record.count < 1) return false;
+  if (record.category === "180") return true;
+  if (!Number.isFinite(record.value) || record.value < 1) return false;
+  if (record.category === "highscore") return record.value >= 150 && record.value <= 180;
+  if (record.category === "highfinish") return record.value >= 100 && record.value <= 180;
+  if (record.category === "shortgame") return record.value >= 1 && record.value <= 60;
+  return false;
+}
+
+function empty3kStats() { return { count180: 0, highscores: [], highfinishes: [], shortgames: [] }; }
+function merge3kRecord(stats, record) {
+  if (record.category === "180") { stats.count180 += record.count; return; }
+  const key = record.category === "highscore" ? "highscores" : record.category === "highfinish" ? "highfinishes" : "shortgames";
+  const existing = stats[key].find(item => item.value === record.value);
+  if (existing) existing.count += record.count;
+  else stats[key].push({ value: record.value, count: record.count });
+}
+function finalize3kStats(stats) {
+  stats.highscores.sort((a, b) => b.value - a.value);
+  stats.highfinishes.sort((a, b) => b.value - a.value);
+  stats.shortgames.sort((a, b) => a.value - b.value);
+}
+
+async function listMembersFor3k(env, accessToken) {
+  const members = [];
+  let pageToken = "";
+  do {
+    const url = new URL(`${FIRESTORE_BASE(env.FIREBASE_PROJECT_ID)}/mitglieder`);
+    url.searchParams.set("pageSize", "1000");
+    if (pageToken) url.searchParams.set("pageToken", pageToken);
+    const response = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+    if (!response.ok) throw new Error(`MITGLIEDER_LESEN_${response.status}:${await response.text()}`);
+    const json = await response.json();
+    for (const document of json.documents || []) {
+      const id = decodeURIComponent(String(document.name || "").split("/").pop() || "");
+      const data = firestoreFieldsToObject(document.fields || {});
+      if (data.aktiv !== false && ["mitglied", "captain", "admin", "kassenwart"].includes(String(data.rolle || "").toLowerCase())) members.push({ id, ...data });
+    }
+    pageToken = json.nextPageToken || "";
+  } while (pageToken);
+  return members;
+}
+
+function match3kPlayerToMember(playerName, members) {
+  const source = normalize3kName(playerName);
+  if (!source) return null;
+  const parenthetical = String(playerName || "").match(/\(([^)]+)\)/)?.[1] || "";
+  const candidates = [source, normalize3kName(parenthetical)].filter(Boolean);
+  let best = null;
+  let bestScore = 0;
+  for (const member of members) {
+    const memberNames = [
+      member.nickname,
+      member.benutzername,
+      [member.vorname, member.nachname].filter(Boolean).join(" "),
+      `${[member.vorname, member.nachname].filter(Boolean).join(" ")} ${member.nickname || ""}`
+    ].map(normalize3kName).filter(Boolean);
+    let score = 0;
+    for (const candidate of candidates) {
+      for (const name of memberNames) {
+        if (candidate === name) score = Math.max(score, 100);
+        else if (candidate.includes(name) || name.includes(candidate)) score = Math.max(score, 80);
+      }
+    }
+    if (score > bestScore) { bestScore = score; best = member; }
+  }
+  return bestScore >= 80 ? best : null;
+}
+
+function normalize3kName(value) {
+  return String(value || "")
+    .toLocaleLowerCase("de")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9äöüß]+/gi, " ")
+    .replace(/\s+/g, " ").trim();
+}
+
+async function patchMember3kStats(env, accessToken, memberId, stats) {
+  const base = `${FIRESTORE_BASE(env.FIREBASE_PROJECT_ID)}/mitglieder/${encodeURIComponent(memberId)}`;
+  const url = new URL(base);
+  url.searchParams.append("updateMask.fieldPaths", "bestleistungen3k");
+  url.searchParams.append("updateMask.fieldPaths", "bestleistungenGeaendertAm");
+  url.searchParams.append("updateMask.fieldPaths", "bestleistungenGeaendertVon");
+  const fields = objectToFirestoreFields({
+    bestleistungen3k: stats,
+    bestleistungenGeaendertAm: new Date().toISOString(),
+    bestleistungenGeaendertVon: "3k-sync"
+  });
+  // Datumsfeld als echter Firestore Timestamp statt String.
+  fields.bestleistungenGeaendertAm = { timestampValue: new Date().toISOString() };
+  const response = await fetch(url, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ fields })
+  });
+  if (!response.ok) throw new Error(`MITGLIED_3K_SPEICHERN_${response.status}:${await response.text()}`);
 }
 
 async function getGoogleAccessToken(env) {

@@ -3,155 +3,118 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dart11en Kader</title>
+  <title>Dart11en | Kader</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="kader.css?v=2">
   <link rel="manifest" href="manifest.json">
-
-<meta name="theme-color" content="#c40030">
-
-<meta name="apple-mobile-web-app-capable" content="yes">
-
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-<link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="theme-color" content="#c40030">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icon-192.png">
 </head>
-
 <body class="kader-seite">
-
 <header class="app-header">
   <img src="dart11enlogo.png" class="logo" alt="Dart11en Logo">
   <h1>Kader</h1>
-  <p>Unsere Teams & Spieler</p>
+  <p>Unsere Mitglieder</p>
 </header>
 
-<main class="app-container">
+<main class="app-container kader-container">
+  <section id="kaderListeBereich">
+    <div class="kader-headline">
+      <div>
+        <h2>🎯 Dart11en Kader</h2>
+        <p>Tippe auf einen Spieler, um sein Profil und seine Bestleistungen anzusehen.</p>
+      </div>
+      <span id="mitgliedAnzahl" class="kader-count">0 Mitglieder</span>
+    </div>
 
-  <section>
-    <h2>🏆 Rhein Ruhr</h2>
+    <div id="kaderMeldung" class="kader-message" hidden></div>
+    <div id="kaderGrid" class="kader-grid neu-kader-grid"></div>
+  </section>
 
-    <div class="kader-grid">
-      <div class="spieler-card">
-        <img src="images/red dart.jpeg" class="spieler-bild" alt="Kevin Red Dart">
-        <h3>Kevin „Red Dart“</h3>
-        <p class="rolle captain">👑 Captain</p>
+  <section id="profilBereich" class="profil-bereich" hidden>
+    <button id="zurueckButton" class="profil-back" type="button">← Zurück zum Kader</button>
+
+    <div class="profil-card">
+      <div class="profil-header">
+        <div class="profil-avatar-wrap">
+          <img id="profilBild" class="profil-avatar" src="dart11enlogo.png" alt="Profilbild">
+        </div>
+        <div class="profil-title">
+          <span id="profilRolle" class="profil-role">Mitglied</span>
+          <h2 id="profilNickname">Spieler</h2>
+          <p id="profilName"></p>
+        </div>
       </div>
 
-      <div class="spieler-card">
-        <img src="images/lena.jpeg" class="spieler-bild" alt="Lena">
-        <h3>Lena „Lena“</h3>
-        <p class="rolle cocaptain">⭐ Co-Captain</p>
+      <div class="profil-section">
+        <div class="section-title-row">
+          <div>
+            <span class="section-kicker">LIGA-BESTLEISTUNGEN</span>
+            <h3>🏆 Bestleistungen</h3>
+            <p class="best-source-hint">Zusammengeführt aus beiden 3K-Ligen.</p>
+          </div>
+          <button id="sync3kButton" class="sync-3k-button" type="button" hidden>🔄 3K synchronisieren</button>
+        </div>
+
+        <div id="bestleistungenGrid" class="bestleistungen-grid"></div>
+        <p id="keineBestleistungen" class="empty-hint" hidden>Noch keine Bestleistungen hinterlegt.</p>
+        <p id="sync3kMeldung" class="profil-message" hidden></p>
+
+        <div id="bestleistungenAdmin" class="best-admin" hidden>
+          <div class="best-admin-head">
+            <div>
+              <strong>Manuelle Korrektur</strong>
+              <small>Nur als Fallback, falls ein 3K-Eintrag fehlt oder nicht zugeordnet werden kann.</small>
+            </div>
+          </div>
+          <div class="best-manual-note">Für Listenwerte bitte je Zeile <strong>Wert = Anzahl</strong> eintragen, z. B. <code>160 = 2</code>.</div>
+          <div class="best-edit-grid best-edit-grid-detailed">
+            <label>180er gesamt<input id="best180" type="number" min="0" inputmode="numeric" placeholder="0"></label>
+            <label>Highscore<textarea id="bestHighscore" rows="4" placeholder="160 = 2&#10;156 = 1"></textarea></label>
+            <label>Highfinish<textarea id="bestHighfinish" rows="4" placeholder="120 = 1&#10;104 = 2"></textarea></label>
+            <label>Short Game<textarea id="bestShortgame" rows="4" placeholder="15 = 1&#10;18 = 2"></textarea></label>
+          </div>
+          <button id="bestleistungenSpeichern" class="profil-action best-save" type="button">🏆 Manuelle Werte speichern</button>
+          <p id="bestleistungenMeldung" class="profil-message" hidden></p>
+        </div>
       </div>
 
-      <div class="spieler-card">
-        <img src="images/axel.jpeg" class="spieler-bild" alt="Axel">
-        <h3>Axel „Axel“</h3>
-        <p class="rolle spieler">🎯 Spieler</p>
-      </div>
+      <div id="eigenesProfilTools" class="profil-section own-profile" hidden>
+        <span class="section-kicker">NUR FÜR DICH SICHTBAR</span>
+        <h3>⚙️ Mein Profil bearbeiten</h3>
 
-      <div class="spieler-card">
-        <img src="images/bandit.jpeg" class="spieler-bild" alt="Daniel Bandit">
-        <h3>Daniel „Bandit“</h3>
-        <p class="rolle spieler">🎯 Spieler</p>
+        <div class="profil-edit-block">
+          <div>
+            <strong>Profilfoto</strong>
+            <small>JPG, PNG oder WEBP. Das Bild wird vor dem Speichern verkleinert.</small>
+          </div>
+          <input id="fotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+          <button id="fotoButton" class="profil-action" type="button">📷 Foto ändern</button>
+        </div>
+
+        <div class="profil-edit-block stacked">
+          <label for="nicknameInput"><strong>Spitzname</strong></label>
+          <div class="inline-form">
+            <input id="nicknameInput" type="text" maxlength="30" autocomplete="nickname" placeholder="Dein Spitzname">
+            <button id="nicknameButton" class="profil-action" type="button">Speichern</button>
+          </div>
+          <small>Dein Benutzername zum Einloggen bleibt dabei unverändert.</small>
+        </div>
+
+        <div class="profil-edit-block stacked password-block">
+          <strong>Passwort ändern</strong>
+          <input id="aktuellesPasswort" type="password" autocomplete="current-password" placeholder="Aktuelles Passwort">
+          <input id="neuesPasswort" type="password" autocomplete="new-password" placeholder="Neues Passwort (mind. 8 Zeichen)">
+          <input id="neuesPasswort2" type="password" autocomplete="new-password" placeholder="Neues Passwort wiederholen">
+          <button id="passwortButton" class="profil-action danger-soft" type="button">🔐 Passwort ändern</button>
+        </div>
+
+        <p id="profilMeldung" class="profil-message" hidden></p>
       </div>
     </div>
   </section>
-
-  <section>
-    <h2>🏆 Ruhrpott</h2>
-
-    <div class="kader-grid">
-      <div class="spieler-card">
-        <img src="images/pinki.jpeg" class="spieler-bild" alt="Frank Pinki">
-        <h3>Frank „Pinki“</h3>
-        <p class="rolle captain">👑 Captain</p>
-      </div>
-
-      <div class="spieler-card">
-        <img src="images/buddha.jpeg" class="spieler-bild" alt="Daniel Buddha">
-        <h3>Daniel „Buddha“</h3>
-        <p class="rolle cocaptain">⭐ Co-Captain</p>
-      </div>
-
-      <div class="spieler-card">
-        <img src="images/de mötz.jpeg" class="spieler-bild" alt="Marcel De Mötz">
-        <h3>Marcel „De Mötz“</h3>
-        <p class="rolle spieler">🎯 Spieler</p>
-      </div>
-
-      <div class="spieler-card">
-        <img src="images/kraudi.jpeg" class="spieler-bild" alt="Frank Kraudi">
-        <h3>Frank „Kraudi“</h3>
-        <p class="rolle spieler">🎯 Spieler</p>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <h2>🏆 Herner</h2>
-
-    <div class="kader-grid">
-      <div class="spieler-card">
-        <img src="images/matthes.jpeg" class="spieler-bild" alt="Matthias Matthes">
-        <h3>Matthias „Matthes“</h3>
-        <p class="rolle captain">👑 Captain</p>
-      </div>
-
-      <div class="spieler-card">
-        <img src="images/czek.jpeg" class="spieler-bild" alt="Florian Czek">
-        <h3>Florian „Czek“</h3>
-        <p class="rolle cocaptain">⭐ Co-Captain</p>
-      </div>
-
-      <div class="spieler-card">
-        <img src="images/päule.jpeg" class="spieler-bild" alt="Martin Päule">
-        <h3>Martin „Päule“</h3>
-        <p class="rolle spieler">🎯 Spieler</p>
-      </div>
-
-      <div class="spieler-card">
-        <img src="images/siggi.jpeg" class="spieler-bild" alt="Sigfried Siggi">
-        <h3>Sigfried „Siggi“</h3>
-        <p class="rolle spieler">🎯 Spieler</p>
-      </div>
-
-      <div class="spieler-card">
-        <img src="images/sasi.jpeg" class="spieler-bild" alt="Sandra Sasi">
-        <h3>Sandra „Sasi“</h3>
-        <p class="rolle spieler">🎯 Spieler</p>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <h2>🔁 Springer</h2>
-
-    <div class="kader-grid">
-      <div class="spieler-card">
-        <img src="images/shadow.jpeg" class="spieler-bild" alt="Jens Shadow">
-        <h3>Jens „Shadow“</h3>
-        <p class="rolle spieler">🎯 Springer</p>
-      </div>
-
-      <div class="spieler-card">
-        <img src="images/rolifant.jpeg" class="spieler-bild" alt="Roland Rolifant">
-        <h3>Roland „Rolifant“</h3>
-        <p class="rolle spieler">🎯 Springer</p>
-      </div>
-
-      <div class="spieler-card">
-        <img src="images/eisprinzessin.jpeg" class="spieler-bild" alt="Tanita Eisprinzessin">
-        <h3>Tanita „Eisprinzessin“</h3>
-        <p class="rolle spieler">🎯 Springer</p>
-      </div>
-
-      <div class="spieler-card">
-        <img src="images/danni.jpeg" class="spieler-bild" alt="Daniela Danni">
-        <h3>Daniela „Danni“</h3>
-        <p class="rolle spieler">🎯 Springer</p>
-      </div>
-    </div>
-  </section>
-
 </main>
 
 <nav class="bottom-nav">
@@ -162,6 +125,8 @@
   <a href="turniere.html">🎯<br>Turniere</a>
 </nav>
 
+<script type="module" src="kader.js?v=3"></script>
 <script type="module" src="push-foreground.js?v=10.0.1"></script>
+<script src="pwa.js?v=7" defer></script>
 </body>
 </html>
