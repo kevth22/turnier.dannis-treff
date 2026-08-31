@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dart11en | Kader</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="kader.css?v=35">
+  <link rel="stylesheet" href="kader.css?v=59">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#c40030">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -110,6 +110,17 @@
           <div id="spielstatistikGrid" class="player-stats-grid"></div>
         </div>
 
+        <div class="player-stats-block dart-tv-stats-block">
+          <div class="player-stats-title">
+            <div>
+              <h3>🎥 Automatisch erkannter Average</h3>
+              <p>Aus den über die Dart11en-TV-Erkennung zugeordneten Liga-Spielen. Einzel und Doppel werden getrennt berechnet.</p>
+            </div>
+          </div>
+          <div id="dartTvStatsGrid" class="dart-tv-stats-grid"><div class="dart-tv-empty">Noch keine Spiele zugeordnet.</div></div>
+          <div id="dartTvRecentGames" class="dart-tv-recent"></div>
+        </div>
+
         <div id="bestleistungenAdmin" class="best-admin" hidden>
           <div class="best-admin-head">
             <div>
@@ -173,7 +184,7 @@
   <a href="turniere.html">🎯<br>Turniere</a>
 </nav>
 
-<script type="module" src="kader.js?v=36"></script>
+<script type="module" src="kader.js?v=59"></script>
 <script type="module" src="push-foreground.js?v=10.0.1"></script>
 <script src="pwa.js?v=7" defer></script>
 </body>

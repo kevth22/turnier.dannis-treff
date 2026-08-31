@@ -120,5 +120,12 @@ async function loadTurnierTeaser() {
     console.error("Turnier-Teaser konnte nicht geladen werden:", error);
   }
 }
-document.addEventListener("DOMContentLoaded", () => { checkVotePopup(); loadTurnierTeaser(); });
+document.addEventListener("DOMContentLoaded", () => { checkVotePopup(); loadTurnierTeaser(); showSpielarchivForMembers(); });
 
+
+function showSpielarchivForMembers() {
+  const user = getLogin();
+  const role = String(user?.rolle || "").toLowerCase();
+  const card = document.getElementById("spielarchivCard");
+  if (card) card.hidden = !["mitglied", "captain", "admin", "kassenwart"].includes(role);
+}

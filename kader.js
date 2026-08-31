@@ -104,6 +104,50 @@ function renderSpielstatistik(member) {
   `).join("");
 }
 
+async function renderDartTvStats(member) {
+  const grid = $("dartTvStatsGrid");
+  const recent = $("dartTvRecentGames");
+  if (!grid || !recent) return;
+  grid.innerHTML = `<div class="dart-tv-empty">TV-Spiele werden geladen …</div>`;
+  recent.innerHTML = "";
+  const username = String(member?.benutzername || member?.id || "").toLowerCase();
+  if (!username) { grid.innerHTML = `<div class="dart-tv-empty">Noch keine Spiele zugeordnet.</div>`; return; }
+  try {
+    const snap = await getDocs(query(collection(db, "dartTvSpiele"), where("benutzername", "==", username)));
+    const games = snap.docs.map(item => ({ id:item.id, ...item.data() })).sort((a,b)=>(Number(b.endedAt)||0)-(Number(a.endedAt)||0));
+    const group = mode => games.filter(g => g.mode === mode);
+    const summarize = list => {
+      const points=list.reduce((sum,g)=>sum+(Number(g.points)||0),0);
+      const darts=list.reduce((sum,g)=>sum+(Number(g.darts)||0),0);
+      const avg=darts>0?(points/darts*3):0;
+      const best=list.reduce((max,g)=>Math.max(max,Number(g.average)||0),0);
+      const count180=list.reduce((sum,g)=>sum+(Number(g.count180)||0),0);
+      return { games:list.length, points, darts, avg, best, count180 };
+    };
+    const cards = [{key:"single",label:"Einzel"},{key:"double",label:"Doppel"}].map(item=>({ ...item, ...summarize(group(item.key)) }));
+    grid.innerHTML = cards.map(card => `
+      <div class="dart-tv-mode-card ${card.avg>=60?"hot":""}">
+        <span>${card.label}-Average</span>
+        <strong>${card.games ? card.avg.toFixed(2) : "–"}</strong>
+        <div class="dart-tv-mode-meta">
+          <span>${card.games} Spiele</span>
+          <span>Best ${card.games ? card.best.toFixed(2) : "–"}</span>
+          <span>${card.darts} Darts</span>
+          <span>${card.count180}× 180</span>
+        </div>
+      </div>
+    `).join("");
+    if (!games.length) { recent.innerHTML = `<div class="dart-tv-empty">Ordne nach einem Spieltag im Spielarchiv deine Spielerpositionen zu.</div>`; return; }
+    recent.innerHTML = `<div class="dart-tv-game-row"><strong>Letzte Spiele</strong><span></span><span>Average</span><span>Darts</span></div>` + games.slice(0,6).map(g => {
+      const date=String(g.date||"").replace(/^(\d{4})-(\d{2})-(\d{2})$/, "$3.$2.$1");
+      return `<div class="dart-tv-game-row"><span>${g.mode==="double"?"Doppel":"Einzel"}</span><span>${escapeHtml(date)} · Board ${escapeHtml(g.board??"–")}</span><strong>${Number(g.average||0).toFixed(2)}</strong><span>${Number(g.darts)||0}</span></div>`;
+    }).join("");
+  } catch (error) {
+    console.error(error);
+    grid.innerHTML = `<div class="dart-tv-empty">TV-Statistiken konnten nicht geladen werden.</div>`;
+  }
+}
+
 function renderBestleistungen(member) {
   const best = getBestleistungen(member);
   const bestHighscore = best.highscores.length ? best.highscores[0].value : null;
@@ -641,7 +685,7 @@ async function save3kImport() {
       }
     }
     const refreshed = members.find(x => x.id === selectedMember?.id);
-    if (refreshed) { selectedMember = refreshed; renderBestleistungen(refreshed); renderSpielstatistik(refreshed); fillBestleistungenForm(refreshed); }
+    if (refreshed) { selectedMember = refreshed; renderBestleistungen(refreshed); renderSpielstatistik(refreshed); renderDartTvStats(refreshed); fillBestleistungenForm(refreshed); }
     msg.textContent = `${state.preview.matched.length} Spieler wurden aus ${state.league === "ruhrpott" ? "Ruhrpott" : "Herne"} aktualisiert.${state.preview.unmatched.length ? ` ${state.preview.unmatched.length} Namen konnten nicht zugeordnet werden.` : ""}`;
     msg.className = "profil-message success"; msg.hidden = false;
     $("import3kText").value = "";
@@ -703,7 +747,7 @@ async function reset3kData() {
     if (refreshed) {
       selectedMember = refreshed;
       renderBestleistungen(refreshed);
-      renderSpielstatistik(refreshed);
+      renderSpielstatistik(refreshed); renderDartTvStats(refreshed);
       fillBestleistungenForm(refreshed);
     }
     $("import3kText").value = "";
@@ -744,6 +788,7 @@ function openProfile(memberId){
   $("profilNickname").textContent=nickname(selectedMember); $("profilName").textContent=displayName(selectedMember); $("profilRolle").textContent=roleLabel(String(selectedMember.rolle).toLowerCase());
   renderBestleistungen(selectedMember);
   renderSpielstatistik(selectedMember);
+  renderDartTvStats(selectedMember);
   const isOwn=Boolean(login?.benutzername)&&String(login.benutzername).toLowerCase()===String(selectedMember.benutzername||selectedMember.id).toLowerCase();
   $("eigenesProfilTools").hidden=!isOwn; if(isOwn) $("nicknameInput").value=nickname(selectedMember);
   const canEdit=BESTLEISTUNGEN_EDIT_ROLES.includes(String(login?.rolle||"").toLowerCase());

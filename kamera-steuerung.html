@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kamera-Steuerung | Dart11en</title>
-  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="kamera-steuerung.css?v=3">
+  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="kamera-steuerung.css?v=59">
   <link rel="manifest" href="manifest.json"><meta name="theme-color" content="#e00022">
 </head>
 <body class="camera-page">
@@ -12,9 +12,9 @@
 <section id="cameraAccessDenied" class="info-card" hidden><h2>🔒 Kein Zugriff</h2><p>Die Kamerasteuerung ist nur für Admin und Captain freigeschaltet.</p></section>
 <div id="cameraApp" hidden>
 <section class="camera-status-card"><div><small>STREAMING-PC</small><strong>Lokale Steuerung</strong><p style="color:#888;margin:6px 0 0">Die Kamera läuft direkt über den PC in Dannis Treff.</p></div><span style="font-size:30px">🎥</span></section>
-<section class="camera-controller-card"><h2 style="margin-top:0">Kamera öffnen</h2><p style="color:#999">Aus Sicherheitsgründen öffnet die App die lokale Bridge direkt. Dadurch blockiert Safari die Verbindung nicht als HTTPS/HTTP-Mixed-Content.</p><button id="openCamera" class="main-button" type="button" style="width:100%;min-height:56px">🎯 Kamera-Steuerung starten</button><div id="cameraMessage" class="camera-message"></div></section>
+<section class="camera-controller-card"><h2 style="margin-top:0">Kamera öffnen</h2><p style="color:#999">Aus Sicherheitsgründen öffnet die App die lokale Bridge direkt. Dadurch blockiert Safari die Verbindung nicht als HTTPS/HTTP-Mixed-Content.</p><button id="openCamera" class="main-button" type="button" style="width:100%;min-height:56px">🎯 Kamera-Steuerung starten</button><button id="openTv" class="camera-calibration-button" type="button" style="width:100%;min-height:52px;margin-top:10px">📺 TV-Ansicht öffnen</button><div id="cameraMessage" class="camera-message"></div></section>
 <section class="camera-test-card"><h2>Streaming-PC</h2><label style="display:grid;gap:7px;color:#aaa">Bridge-Adresse<input id="bridgeUrl" type="url" placeholder="http://192.168.2.79:8787" style="min-height:50px;border:1px solid #333;border-radius:14px;background:#202020;color:#fff;padding:0 14px;font-size:16px"></label><button id="saveBridge" class="camera-calibration-button">Adresse speichern</button><small>Normalerweise bleibt hier <b>http://192.168.2.79:8787</b> eingetragen.</small></section>
 </div></main>
 <nav class="bottom-nav"><a href="index.html">🏠<br>Home</a><a href="spieltag-center.html">🚌<br>Spieltag</a><a href="kalender.html">📅<br>Kalender</a><a href="liga.html">🏆<br>Liga</a><a href="kader.html">👥<br>Kader</a></nav>
-<script type="module" src="kamera-steuerung.js?v=3"></script><script src="pwa.js?v=4" defer></script>
+<script type="module" src="kamera-steuerung.js?v=59"></script><script src="pwa.js?v=4" defer></script>
 </body></html>

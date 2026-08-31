@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-const VERSION = 'dart11en-app-v40-turniercenter-link-fix';
+const VERSION = 'dart11en-app-v59-tv-7segment-archiv';
 
 const CORE_FILES = [
   "./",
@@ -65,6 +65,9 @@ const CORE_FILES = [
   "./kasse.html",
   "./kasse.js",
   "./kasse.css",
+  "./spielarchiv.html",
+  "./spielarchiv.js",
+  "./spielarchiv.css",
   "./benachrichtigungen.html",
   "./benachrichtigungen.js",
   "./benachrichtigungen.css",
