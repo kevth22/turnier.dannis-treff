@@ -1345,11 +1345,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const nicknameFeld = document.getElementById("neuerSpielerNickname");
     const vornameFeld = document.getElementById("neuerSpielerVorname");
     const nachnameFeld = document.getElementById("neuerSpielerNachname");
-    const barFeld = document.getElementById("neuerSpielerBar");
-    const paypalFeld = document.getElementById("neuerSpielerPaypal");
+    const bezahltFeld = document.getElementById("neuerSpielerBezahlt");
     const anwesendFeld = document.getElementById("neuerSpielerAnwesend");
 
-    if (!nicknameFeld || !vornameFeld || !nachnameFeld || !barFeld || !paypalFeld || !anwesendFeld) {
+    if (!nicknameFeld || !vornameFeld || !nachnameFeld || !bezahltFeld || !anwesendFeld) {
       console.error("Formularfelder zum Hinzufügen eines Spielers fehlen.");
       spielerHinzufuegenMeldung.textContent = "Das Formular ist nicht vollständig geladen. Bitte die Seite neu laden.";
       return;
@@ -1358,9 +1357,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const nickname = nicknameFeld.value.trim();
     const vorname = vornameFeld.value.trim();
     const nachname = nachnameFeld.value.trim();
-    const zahlungBar = barFeld.checked;
-    const zahlungPaypal = paypalFeld.checked;
-    const bezahlt = zahlungBar || zahlungPaypal;
+    const bezahlt = bezahltFeld.checked;
     const anwesend = anwesendFeld.checked;
 
     if (nickname.length < 2) {
@@ -1383,9 +1380,11 @@ document.addEventListener("DOMContentLoaded", () => {
         vorname,
         nachname,
         bezahlt,
-        zahlungBar,
-        zahlungPaypal,
-        zahlungsart: zahlungBar ? "bar" : (zahlungPaypal ? "paypal" : null),
+        // Bei manueller Anlage gibt es im Formular bewusst nur "Bezahlt".
+        // Die konkrete Zahlungsart kann danach in der Teilnehmerverwaltung gesetzt werden.
+        zahlungBar: false,
+        zahlungPaypal: false,
+        zahlungsart: bezahlt ? "manuell" : null,
         anwesend,
         manuellHinzugefuegt: true,
         zeit: Date.now()
