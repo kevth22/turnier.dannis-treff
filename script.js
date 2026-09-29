@@ -310,10 +310,12 @@ function kontoDatenUebernehmen() {
   if (nickname) nickname.value = aktuellerLogin.nickname || aktuellerLogin.benutzername || "";
   if (vorname) vorname.value = aktuellerLogin.vorname || "";
   if (nachname) nachname.value = aktuellerLogin.nachname || "";
+  // Kontodaten dienen nur als Vorausfuellung.
+  // Alle Felder bleiben editierbar, damit auch Gaeste bzw. abweichende Daten eingetragen werden koennen.
   [nickname, vorname, nachname].forEach(feld => {
     if (feld) {
-      feld.readOnly = true;
-      feld.classList.add("konto-uebernommen");
+      feld.readOnly = false;
+      feld.classList.remove("konto-uebernommen");
     }
   });
   document.dispatchEvent(new Event("kontoDatenUebernommen"));
