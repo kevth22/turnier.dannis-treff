@@ -2970,3 +2970,34 @@ body.modal-open { overflow: hidden; }
   .turnier-settings-modal { border-radius: 24px 24px 0 0; padding: 20px 16px 30px; }
   .turnier-settings-grid, .turnier-settings-grid-3 { grid-template-columns: 1fr; }
 }
+
+/* Spieltag-Center: aktive Mitglieder ohne Rückmeldung */
+.nicht-abgestimmt {
+  margin-top: 18px;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.05);
+  overflow: hidden;
+}
+.nicht-abgestimmt summary {
+  cursor: pointer;
+  padding: 14px;
+  font-weight: bold;
+  overflow-wrap: anywhere;
+}
+.nicht-abgestimmt summary strong {
+  display: inline-block;
+  min-width: 30px;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.12);
+  text-align: center;
+}
+.nicht-abgestimmt summary:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -4px;
+}
+.nicht-abgestimmt-namen { padding: 0 14px 14px; }
+.nicht-abgestimmt-namen .spieler-name { overflow-wrap: anywhere; }
+.nicht-abgestimmt-hinweis { margin-top: 18px; padding: 14px; }

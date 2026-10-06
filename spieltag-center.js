@@ -58,6 +58,9 @@ const zusagenRef = collection(db, "zusagen");
 
 let spieltage = [];
 let zusagen = [];
+let mitglieder = [];
+let mitgliederStatus = "laden";
+let zusagenStatus = "laden";
 let aktuellerIndex = 0;
 let offeneStatusListe = "";
 window.aktuellerStatus = "";
@@ -98,9 +101,73 @@ onSnapshot(zusagenRef, (snapshot) => {
     });
   });
 
+  zusagenStatus = "bereit";
   rueckmeldungenAnzeigenCenter();
 
+}, () => {
+  zusagenStatus = "fehler";
+  nichtAbgestimmtAnzeigen();
 });
+
+// Dieselben aktiven Vereinsrollen wie im Kader; Gäste zählen nicht mit.
+onSnapshot(collection(db, "mitglieder"), (snapshot) => {
+  mitglieder = snapshot.docs
+    .map(docSnap => ({ ...docSnap.data(), id: docSnap.id }))
+    .filter(person => person.aktiv !== false &&
+      erlaubteRollen.includes(String(person.rolle || "").toLowerCase().trim()));
+  mitgliederStatus = "bereit";
+  nichtAbgestimmtAnzeigen();
+}, () => {
+  mitgliederStatus = "fehler";
+  nichtAbgestimmtAnzeigen();
+});
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, character => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[character]));
+}
+
+function mitgliedSchluessel(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function nichtAbgestimmtAnzeigen() {
+  const box = document.getElementById("nichtAbgestimmtListe");
+  if (!box) return;
+  const spieltag = spieltage[aktuellerIndex];
+  if (!spieltag) {
+    box.innerHTML = "";
+    return;
+  }
+  if (mitgliederStatus === "fehler" || zusagenStatus === "fehler") {
+    box.innerHTML = '<p class="nicht-abgestimmt-hinweis">Die offenen Abstimmungen konnten nicht geladen werden. Bitte lade die Seite erneut.</p>';
+    return;
+  }
+  if (mitgliederStatus !== "bereit" || zusagenStatus !== "bereit") {
+    box.innerHTML = '<p class="nicht-abgestimmt-hinweis">Offene Abstimmungen werden geladen …</p>';
+    return;
+  }
+
+  const abgestimmt = new Set(zusagen
+    .filter(z => z.spieltagId === spieltag.id &&
+      ["Dabei", "Fahrer", "Komme direkt", "Nein"].includes(z.status))
+    .map(z => mitgliedSchluessel(z.benutzername)));
+  const offeneMitglieder = mitglieder.filter(person =>
+    !abgestimmt.has(mitgliedSchluessel(person.benutzername || person.id)));
+  const warOffen = box.querySelector("details")?.open || false;
+
+  box.innerHTML = `
+    <details class="nicht-abgestimmt" ${warOffen ? "open" : ""}>
+      <summary>Noch nicht abgestimmt <strong>${offeneMitglieder.length}</strong></summary>
+      <div class="nicht-abgestimmt-namen">
+        ${offeneMitglieder.length ? offeneMitglieder.map(person => `
+          <div class="spieler-name">${escapeHtml(person.nickname || person.benutzername || person.id)}</div>
+        `).join("") : '<p>Alle aktiven Mitglieder haben abgestimmt.</p>'}
+      </div>
+    </details>
+  `;
+}
 
 function formatSpieltagDatum(datum) {
   if (!datum) return "-";
@@ -136,6 +203,9 @@ function spieltagAnzeigen() {
   if (spieltage.length === 0) {
     box.innerHTML = "<h2>Keine Spieltage vorhanden</h2>";
     counter.textContent = "Spieltag 0 / 0";
+    document.getElementById("spieltagRueckmeldungen").innerHTML = "";
+    document.getElementById("rueckmeldungNamenListe").innerHTML = "";
+    nichtAbgestimmtAnzeigen();
     return;
   }
 
@@ -328,6 +398,7 @@ window.abstimmenAktuell = async function (status) {
 ========================= */
 
 function rueckmeldungenAnzeigenCenter() {
+  nichtAbgestimmtAnzeigen();
   const box =
     document.getElementById("spieltagRueckmeldungen");
 
