@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dart11en | Kader</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="kader.css?v=59">
+  <link rel="stylesheet" href="kader.css?v=64">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#c40030">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -30,6 +30,29 @@
     </div>
 
     <div id="kaderMeldung" class="kader-message" hidden></div>
+    <section id="adminSpieluebersicht" class="admin-spieluebersicht" hidden aria-labelledby="spieluebersichtTitel">
+      <div class="kader-headline">
+        <div>
+          <span class="section-kicker">NUR FÜR ADMINS</span>
+          <h2 id="spieluebersichtTitel">📊 Gespielte Liga-Spiele</h2>
+          <p>Spiele gesamt = Siege + Niederlagen aus der importierten 3K-Spielstatistik. Absteigend nach Spielanzahl.</p>
+        </div>
+        <label for="spieluebersichtLiga">Liga
+          <select id="spieluebersichtLiga">
+            <option value="gesamt">Ruhrpott + Herne</option>
+            <option value="ruhrpott">Ruhrpott</option>
+            <option value="herne">Herne</option>
+          </select>
+        </label>
+      </div>
+      <p id="spieluebersichtHinweis" class="best-source-hint" aria-live="polite"></p>
+      <div class="spieluebersicht-scroll" role="region" aria-label="Spielanzahl je Mitglied" tabindex="0">
+        <table class="spieluebersicht-table">
+          <thead><tr><th scope="col">Spieler</th><th scope="col">Spiele gesamt</th><th scope="col">Siege</th><th scope="col">Niederlagen</th></tr></thead>
+          <tbody id="spieluebersichtZeilen"></tbody>
+        </table>
+      </div>
+    </section>
     <div id="kaderGrid" class="kader-grid neu-kader-grid"></div>
   </section>
 
@@ -184,7 +207,7 @@
   <a href="turniere.html">🎯<br>Turniere</a>
 </nav>
 
-<script type="module" src="kader.js?v=59"></script>
+<script type="module" src="kader.js?v=64"></script>
 <script type="module" src="push-foreground.js?v=10.0.1"></script>
 <script src="pwa.js?v=7" defer></script>
 </body>

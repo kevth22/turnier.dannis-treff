@@ -104,6 +104,32 @@ function renderSpielstatistik(member) {
   `).join("");
 }
 
+function renderAdminSpieluebersicht() {
+  const section = $("adminSpieluebersicht");
+  const isAdmin = String(login?.rolle || "").toLowerCase() === "admin";
+  section.hidden = !isAdmin;
+  if (!isAdmin) {
+    $("spieluebersichtZeilen").innerHTML = "";
+    return;
+  }
+  const league = $("spieluebersichtLiga").value;
+  const rows = members.map(member => {
+    const raw = league === "gesamt"
+      ? member.spielstatistik3k || member.statistik3k
+      : member.dreiKImport?.spielstatistik?.[league];
+    const stats = getSpielstatistik({ spielstatistik3k: raw });
+    return { member, hasStats: Boolean(raw), ...stats, total: stats.wonGames + stats.lostGames };
+  }).sort((a, b) => Number(b.hasStats) - Number(a.hasStats) || b.total - a.total || nickname(a.member).localeCompare(nickname(b.member), "de", { sensitivity: "base" }));
+  const imported = rows.filter(row => row.hasStats).length;
+  $("spieluebersichtHinweis").textContent = `${imported} von ${rows.length} Mitgliedern mit Spielstatistik. Fehlende Importe sind mit „Noch kein Import“ markiert. Die Gesamtauswahl enthält auch ältere zusammengeführte Statistiken ohne Liga-Zuordnung.`;
+  $("spieluebersichtZeilen").innerHTML = rows.map(row => `<tr>
+    <th scope="row">${escapeHtml(nickname(row.member))}${displayName(row.member) ? `<small>${escapeHtml(displayName(row.member))}</small>` : ""}${!row.hasStats ? `<small>Noch kein Import</small>` : ""}</th>
+    <td><strong>${row.hasStats ? escapeHtml(row.total) : "–"}</strong></td>
+    <td>${row.hasStats ? escapeHtml(row.wonGames) : "–"}</td>
+    <td>${row.hasStats ? escapeHtml(row.lostGames) : "–"}</td>
+  </tr>`).join("") || `<tr><td colspan="4">Keine Mitglieder vorhanden.</td></tr>`;
+}
+
 async function renderDartTvStats(member) {
   const grid = $("dartTvStatsGrid");
   const recent = $("dartTvRecentGames");
@@ -778,6 +804,7 @@ async function loadMembers(render=true){
   }catch(error){ console.error(error); const box=$("kaderMeldung"); box.textContent="Der Kader konnte gerade nicht geladen werden."; box.className="kader-message error"; box.hidden=false; }
 }
 function renderMembers(){
+  renderAdminSpieluebersicht();
   $("mitgliedAnzahl").textContent=`${members.length} ${members.length===1?"Mitglied":"Mitglieder"}`;
   $("kaderGrid").innerHTML=members.map(member=>`<button class="member-card" type="button" data-member-id="${escapeHtml(member.id)}"><img class="member-avatar" src="${escapeHtml(profileImage(member))}" alt="Profilbild von ${escapeHtml(nickname(member))}" onerror="this.src='${DEFAULT_IMAGE}'"><span class="member-nickname">${escapeHtml(nickname(member))}</span>${displayName(member)?`<span class="member-name">${escapeHtml(displayName(member))}</span>`:""}<span class="member-role">${escapeHtml(roleLabel(String(member.rolle).toLowerCase()))}</span></button>`).join("");
   document.querySelectorAll("[data-member-id]").forEach(button=>button.addEventListener("click",()=>openProfile(button.dataset.memberId)));
@@ -795,7 +822,7 @@ function openProfile(memberId){
   $("bestleistungenAdmin").hidden=!canEdit; $("threeKAdminActions").hidden=!canEdit; $("bestleistungenMeldung").hidden=true; $("sync3kMeldung").hidden=true; $("import3kPanel").hidden=true; if(canEdit) fillBestleistungenForm(selectedMember);
   $("kaderListeBereich").hidden=true; $("profilBereich").hidden=false; window.scrollTo({top:0,behavior:"smooth"});
 }
-function backToRoster(){ selectedMember=null; $("profilBereich").hidden=true; $("kaderListeBereich").hidden=false; window.scrollTo({top:0,behavior:"smooth"}); }
+function backToRoster(){ renderAdminSpieluebersicht(); selectedMember=null; $("profilBereich").hidden=true; $("kaderListeBereich").hidden=false; window.scrollTo({top:0,behavior:"smooth"}); }
 
 async function saveNickname(){
   if(!selectedMember||!login?.benutzername)return; clearMessage(); const value=$("nicknameInput").value.trim();
@@ -825,4 +852,5 @@ $("save3kImportButton").addEventListener("click",save3kImport);
 $("import3kText").addEventListener("input",()=>{ import3kPreviewData=null; $("save3kImportButton").disabled=true; });
 $("import3kLiga").addEventListener("change",()=>{ import3kPreviewData=null; $("save3kImportButton").disabled=true; });
 $("import3kArt").addEventListener("change",()=>{ import3kPreviewData=null; $("save3kImportButton").disabled=true; $("import3kPreview").hidden=true; });
+$("spieluebersichtLiga").addEventListener("change", renderAdminSpieluebersicht);
 loadMembers();
